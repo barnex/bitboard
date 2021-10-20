@@ -3,7 +3,7 @@ mod internal;
 mod bitboard;
 mod arrayboard;
 mod piece;
-mod pos4;
+mod pos;
 
 pub use bitboard::*;
 pub use piece::*;

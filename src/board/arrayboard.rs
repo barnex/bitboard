@@ -1,5 +1,3 @@
-use std::{fmt::Debug, sync::Arc};
-
 use super::internal::*;
 
 /// A straightforward board implementation used solely for testing BitBoard.
@@ -50,7 +48,7 @@ impl ToString for ArrayBoard {
     }
 }
 
-impl Debug for ArrayBoard {
+impl fmt::Debug for ArrayBoard {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.to_string())
     }
