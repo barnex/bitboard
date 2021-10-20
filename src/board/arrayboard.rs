@@ -9,26 +9,62 @@ pub struct ArrayBoard {
 impl ArrayBoard {
     /// Empty board.
     pub fn new() -> Self {
-        Self { board: [Empty; 64] }
+        Self {
+            board: [Piece::Empty; 64],
+        }
     }
 
     /// Piece at position `pos`. E.g:
     /// 	board.at(Pos(1,2));
     /// 	board.at((1,2));
-    pub fn at<P>(&self, pos: P) -> Piece
-    where
-        P: Into<Pos>,
-    {
-        let pos: Pos = pos.into();
+    pub fn at(&self, pos: Pos) -> Piece {
         self.board[pos.index()]
     }
 
-    pub fn set<P>(&mut self, pos: P, piece: Piece)
-    where
-        P: Into<Pos>,
-    {
-        let pos: Pos = pos.into();
+    pub fn set(&mut self, pos: Pos, piece: Piece) {
         self.board[pos.index()] = piece;
+    }
+
+    pub fn moves_for(&self, pos: Pos) -> Moves {
+        let mut moves = SmallVec::new();
+
+        match self.at(pos) {
+            Piece::Empty => (),
+            Piece::WPawn => self.wpawn_moves(&mut moves, pos),
+            _ => (),
+        }
+
+        moves.into_iter().map(|dest| Move::new(pos, dest)).collect()
+    }
+
+    fn wpawn_moves(&self, dest: &mut SmallVec<Pos>, from: Pos) {
+        // one row forward
+        if let Some(dst) = from + (1, 0) {
+            if self.at(dst).is_empty() {
+                dest.push(dst)
+            }
+        }
+
+        // two rows forward
+        if let Some(dst) = from + (2, 0) {
+            if dst.row() == 3 && self.at(dst).is_empty() {
+                dest.push(dst)
+            }
+        }
+
+        // capture left
+        if let Some(dst) = from + (1, -1) {
+            if self.at(dst).color() == Some(Color::Black) {
+                dest.push(dst)
+            }
+        }
+
+        // capture right
+        if let Some(dst) = from + (1, 1) {
+            if self.at(dst).color() == Some(Color::Black) {
+                dest.push(dst)
+            }
+        }
     }
 }
 
@@ -39,7 +75,7 @@ impl ToString for ArrayBoard {
             str += &format!("{}", r + 1);
             for c in 0..8 {
                 str.push(' ');
-                str.push(Piece::ascii(self.at((r, c))));
+                str.push(Piece::ascii(self.at(pos(r, c))));
             }
             str.push('\n')
         }
@@ -57,11 +93,12 @@ impl fmt::Debug for ArrayBoard {
 #[cfg(test)]
 mod test {
     use super::*;
+    use Piece::*;
 
     #[test]
     fn set() {
         let mut b = ArrayBoard::new();
-        b.set((1, 2), WPawn);
+        b.set(pos(1, 2), WPawn);
 
         assert_eq!(
             b.to_string(),

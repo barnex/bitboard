@@ -17,6 +17,8 @@ pub enum Piece {
     BKing = 12,
 }
 
+use Piece::*;
+
 impl Piece {
     pub const ALL: [Piece; 12] = [
         WPawn, WRook, WKnight, WBisshop, WQueen, WKing, BPawn, BRook, BKnight, BBisshop, BQueen,
@@ -37,6 +39,19 @@ impl Piece {
 
     pub fn index(self) -> usize {
         self as usize
+    }
+
+    pub fn is_empty(self) -> bool {
+        self == Piece::Empty
+    }
+
+    pub fn color(self) -> Option<Color> {
+        match self as usize {
+            0 => None,
+            1..=6 => Some(Color::White),
+            7..=12 => Some(Color::Black),
+            _ => unreachable!(),
+        }
     }
 }
 

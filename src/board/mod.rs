@@ -1,10 +1,9 @@
 mod internal;
 
-mod bitboard;
 mod arrayboard;
+mod bitboard;
+mod mod_move;
 mod piece;
 mod pos;
+mod color;
 
-pub use bitboard::*;
-pub use piece::*;
-pub use arrayboard::*;
