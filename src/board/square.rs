@@ -57,9 +57,9 @@ impl Square {
 		(self as u8) & mask != 0
 	}
 
-	pub fn is_empty(self) -> bool {
-		(self as u8 & OCC) == 0
-	}
+	// pub fn is_empty(self) -> bool {
+	// 	(self as u8 & OCC) == 0
+	// }
 
 	pub fn is_valid(self) -> bool {
 		self != Square::OffBoard
@@ -67,15 +67,6 @@ impl Square {
 
 	pub fn opt_color(self) -> u8 {
 		(self as u8) & COLOR_MASK
-	}
-
-	pub fn color(self) -> Option<Color> {
-		match self.opt_color() {
-			WHITE => Some(Color::White),
-			BLACK => Some(Color::Black),
-			0x00 => None,
-			_ => unreachable!(),
-		}
 	}
 
 	pub fn is_white(self) -> bool {

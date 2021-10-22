@@ -3,7 +3,6 @@ use std::convert::TryFrom;
 use std::ops::Index;
 use std::ops::IndexMut;
 use std::str::FromStr;
-use Color::*;
 use Square::*;
 
 /// A straightforward board implementation used for testing BitBoard.
@@ -94,34 +93,34 @@ impl Mailbox {
 	}
 
 	fn w_pawn_moves(&self, dests: &mut SmVec<Pos>, pos: Pos) {
-		self.pawn_captures(dests, White, pos, delta(1, -1), delta(1, 1));
+		self.pawn_captures(dests, BLACK, pos, delta(1, -1), delta(1, 1));
 		self.pawn_pushes(dests, pos, delta(1, 0), 2);
 	}
 
 	fn b_pawn_moves(&self, dests: &mut SmVec<Pos>, pos: Pos) {
-		self.pawn_captures(dests, Black, pos, delta(-1, -1), delta(-1, 1));
+		self.pawn_captures(dests, WHITE, pos, delta(-1, -1), delta(-1, 1));
 		self.pawn_pushes(dests, pos, delta(-1, 0), 5);
 	}
 
 	fn pawn_pushes(&self, dests: &mut SmVec<Pos>, pos: Pos, delta: u8, first_row: u8) {
 		// one forward
 		let pos = pos + delta;
-		if self[pos].is_empty() {
+		if self[pos].is(EMPTY) {
 			dests.push(pos);
 			// another one forward
 			if pos.row() == first_row {
 				let pos = pos + delta;
-				if self[pos].is_empty() {
+				if self[pos].is(EMPTY) {
 					dests.push(pos)
 				}
 			}
 		}
 	}
 
-	fn pawn_captures(&self, dests: &mut SmVec<Pos>, my_color: Color, pos: Pos, left: u8, right: u8) {
+	fn pawn_captures(&self, dests: &mut SmVec<Pos>, allowed: u8, pos: Pos, left: u8, right: u8) {
 		for delta in [left, right] {
 			let pos = pos + delta;
-			if self[pos].color() == Some(my_color.opposite()) {
+			if self[pos].opt_color() == allowed {
 				dests.push(pos)
 			}
 		}
