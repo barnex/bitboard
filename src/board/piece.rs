@@ -17,6 +17,7 @@ pub enum Piece {
     BBisshop = 10,
     BQueen = 11,
     BKing = 12,
+    OffBoard = 13,
 }
 
 use Piece::*;
@@ -26,15 +27,15 @@ impl Piece {
         WPawn, WRook, WKnight, WBisshop, WQueen, WKing, BPawn, BRook, BKnight, BBisshop, BQueen,
         BKing,
     ];
-    const ASCII: [char; 13] = [
-        '.', 'P', 'R', 'N', 'B', 'Q', 'K', 'p', 'r', 'n', 'b', 'q', 'k',
+    const ASCII: [char; 14] = [
+        '.', 'P', 'R', 'N', 'B', 'Q', 'K', 'p', 'r', 'n', 'b', 'q', 'k', '?',
     ];
-    const UNICODE: [char; 13] = [
-        '.', '♙', '♖', '♘', '♗', '♕', '♔', '♟', '♜', '♞', '♝', '♛', '♚',
+    const UNICODE: [char; 14] = [
+        '.', '♙', '♖', '♘', '♗', '♕', '♔', '♟', '♜', '♞', '♝', '♛', '♚', '?',
     ];
 
     /// Piece representation following https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation.
-    /// `None` is represented as '.'.
+    /// `None` is represented as '.', `OffBoard` as `?`.
     pub fn to_char(self) -> char {
         self.into()
     }
@@ -47,13 +48,26 @@ impl Piece {
         self == Piece::Empty
     }
 
+    pub fn is_valid(self) -> bool {
+        self != Piece::OffBoard
+    }
+
     pub fn color(self) -> Option<Color> {
         match self as usize {
             0 => None,
             1..=6 => Some(Color::White),
             7..=12 => Some(Color::Black),
+            13 => None,
             _ => unreachable!(),
         }
+    }
+
+    pub fn is_white(self) -> bool {
+        self.color() == Some(Color::White)
+    }
+
+    pub fn is_black(self) -> bool {
+        self.color() == Some(Color::Black)
     }
 }
 
@@ -88,6 +102,7 @@ impl TryFrom<char> for Piece {
             'b' => BBisshop,
             'q' => BQueen,
             'k' => BKing,
+            '?' => OffBoard,
             invalid => return Err(format_err!("invalid piece: {}", invalid)),
         })
     }

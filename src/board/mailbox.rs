@@ -1,6 +1,5 @@
 use super::internal::*;
 use std::convert::TryFrom;
-use std::convert::TryInto;
 use std::ops::Index;
 use std::ops::IndexMut;
 use std::str::FromStr;
@@ -9,16 +8,19 @@ use Piece::*;
 /// A straightforward board implementation used for testing BitBoard.
 #[derive(Eq, PartialEq)]
 pub struct Mailbox {
-    // Layout using 0x88 indexing (https://en.wikipedia.org/wiki/0x88)
-    board: [Piece; 128],
+    // Layout using 0x88 indexing (https://en.wikipedia.org/wiki/0x88),
+    // and fully surrounded by `Offboard` Pieces.
+    board: [Piece; 256],
 }
 
 impl Mailbox {
     /// Empty board.
     pub fn new() -> Self {
-        Self {
-            board: [Empty; 128],
+        let mut board = [OffBoard; 256];
+        for i in 0..64 {
+            board[Pos::from_index64(i).unwrap().index256()] = Empty;
         }
+        Self { board }
     }
 
     pub fn iter<'s>(&'s self) -> impl Iterator<Item = (Pos, Piece)> + 's {
@@ -41,36 +43,34 @@ impl Mailbox {
         dest
     }
 
-    fn wpawn_moves(&self, dest: &mut SmallVec<Pos>, from: Pos) {
-        /*
+    fn wpawn_moves(&self, dests: &mut SmallVec<Pos>, pos: Pos) {
         // one row forward
-        if let Some(dst) = from + (1, 0) {
-            if self.at(dst).is_empty() {
-                dest.push(dst)
+
+        {
+            // push forward
+            let pos = pos + delta(1, 0);
+            if self[pos].is_empty() {
+                dests.push(pos)
             }
         }
 
-        // two rows forward
-        if let Some(dst) = from + (2, 0) {
-            if dst.row() == 3 && self.at(dst).is_empty() {
-                dest.push(dst)
+        {
+            // push 2 squares forward
+            let pos = pos + delta(2, 0);
+            if pos.row() == 3 && self[pos].is_empty() {
+                dests.push(pos)
             }
         }
 
-        // capture left
-        if let Some(dst) = from + (1, -1) {
-            if self.at(dst).color() == Some(Color::Black) {
-                dest.push(dst)
+        {
+            // capture
+            for i in [-1, 1] {
+                let pos = pos + delta(1, i);
+                if self[pos].is_black() {
+                    dests.push(pos)
+                }
             }
         }
-
-        // capture right
-        if let Some(dst) = from + (1, 1) {
-            if self.at(dst).color() == Some(Color::Black) {
-                dest.push(dst)
-            }
-        }
-        */
     }
 }
 
@@ -132,17 +132,8 @@ mod test {
 
     use super::*;
 
-    fn mark_moves(board: &Mailbox, dests: Set<Pos>) -> String {
-        let marks = board.iter().map(|(pos, piece)| {
-            if dests.contains(&pos) {
-                'x'
-            } else {
-                piece.to_char()
-            }
-        });
-        format_board(marks)
-    }
-
+    // check the moves for piece at `pos`,
+    // by comparing to a stringified board where destinations are marked with `x`.
     fn check_moves(pos: Pos, board: &str, want: &str) {
         let board: Mailbox = board.parse().unwrap();
         let have: Set<Pos> = board.moves_for(pos).iter().copied().collect();
@@ -164,6 +155,18 @@ mod test {
             );
             panic!("test failed")
         }
+    }
+
+    // render `board` as text, but mark destinations as `x`.
+    fn mark_moves(board: &Mailbox, dests: Set<Pos>) -> String {
+        let marks = board.iter().map(|(pos, piece)| {
+            if dests.contains(&pos) {
+                'x'
+            } else {
+                piece.to_char()
+            }
+        });
+        format_board(marks)
     }
 
     #[test]
