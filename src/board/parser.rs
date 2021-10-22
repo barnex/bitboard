@@ -20,15 +20,12 @@ pub fn parse_charboard(s: &str) -> Result<[char; 64]> {
         .filter(|v| !v.is_empty())
         .enumerate()
     {
-        if line.len() != 8 {
-            return Err(format_err!("wrong line length: {}", line));
-        }
         if i >= 8 {
             return Err(format_err!("too many lines: {}", line));
         }
         max_line = i;
         let i = i as u8;
-        for (j, chr) in line.chars().enumerate() {
+        for (j, chr) in line.chars().filter(|chr| !chr.is_whitespace()).enumerate() {
             if j >= 8 {
                 return Err(format_err!("col out of range"));
             }

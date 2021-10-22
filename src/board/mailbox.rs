@@ -49,25 +49,21 @@ impl Mailbox {
     }
 
     fn wpawn_pushes(&self, dests: &mut SmallVec<Pos>, pos: Pos) {
-        {
-            // push forward
-            let pos = pos + delta(1, 0);
-            if self[pos].is_empty() {
-                dests.push(pos)
-            }
-        }
-
-        {
-            // push 2 forward
-            let pos = pos + delta(2, 0);
-            if pos.row() == 3 && self[pos].is_empty() {
-                dests.push(pos)
+        // one forward
+        let pos = pos + delta(1, 0);
+        if self[pos].is_empty() {
+            dests.push(pos); 
+            // another one forward
+            if pos.row() == 2 {
+                let pos = pos + delta(1, 0);
+                if self[pos].is_empty() {
+                    dests.push(pos)
+                }
             }
         }
     }
 
     fn wpawn_captures(&self, dests: &mut SmallVec<Pos>, pos: Pos) {
-        // capture
         for i in [-1, 1] {
             let pos = pos + delta(1, i);
             if self[pos].is_black() {
@@ -97,15 +93,17 @@ impl FromStr for Mailbox {
     type Err = anyhow::Error;
 
     /// Parse a chess board from the following notation:
+    /// (whitespace optional)
     ///
-    /// rnbqkbnr
-    /// pppppppp
-    /// ........
-    /// ........
-    /// ........
-    /// ........
-    /// PPPPPPPP
-    /// RNBQKBNR
+    /// r n b q k b n r
+    /// p p p p p p p p
+    /// . . . . . . . .
+    /// . . . . . . . .
+    /// . . . . . . . .
+    /// . . . . . . . .
+    /// P P P P P P P P
+    /// R N B Q K B N R
+    ///
     fn from_str(s: &str) -> Result<Self> {
         let mut board = Mailbox::new();
         let chars = parse_charboard(s)?;
@@ -135,11 +133,30 @@ mod test {
 
     use super::*;
 
+    // check the moves for all pieces of given type,
+    // by comparing to a stringified board where destinations are marked with `x`.
+    fn check_all_moves(piece: Piece, board: &str, want: &str) {
+        let board: Mailbox = board.parse().unwrap();
+        let mut have = Set::default();
+        for (pos, p) in board.iter() {
+            if p == piece {
+                have.extend(board.moves_for(pos))
+            }
+        }
+        let who = piece.to_string();
+        check_moves_(&who, &board, have, want)
+    }
+
     // check the moves for piece at `pos`,
     // by comparing to a stringified board where destinations are marked with `x`.
     fn check_moves(pos: Pos, board: &str, want: &str) {
         let board: Mailbox = board.parse().unwrap();
         let have: Set<Pos> = board.moves_for(pos).iter().copied().collect();
+        let who = format!("{} @ {}", board[pos], pos);
+        check_moves_(&who, &board, have, want)
+    }
+
+    fn check_moves_(who: &str, board: &Mailbox, have: Set<Pos>, want: &str) {
         let want: Set<Pos> = parse_charboard(want)
             .unwrap()
             .iter()
@@ -150,9 +167,8 @@ mod test {
 
         if have != want {
             println!(
-                "moves for {} @ {}\ngot: {}\nwant:{}",
-                board[pos],
-                pos,
+                "moves for {}\ngot: {}\nwant:{}",
+                who,
                 mark_moves(&board, have),
                 mark_moves(&board, want)
             );
@@ -177,24 +193,47 @@ mod test {
         check_moves(
             pos(1, 2),
             r"
-........
-........
-........
-........
-........
-...r....
-..P.....
-........
+. . . . . . . .
+. . . . . . . .
+. . . . . . . .
+. . . . . . . .
+. . . . . . . .
+. . . r . . . .
+. . P . . . . .
+. . . . . . . .
 ",
             r"
-........
-........
-........
-........
-..x.....
-..xx....
-..P.....
-........
+. . . . . . . .
+. . . . . . . .
+. . . . . . . .
+. . . . . . . .
+. . x . . . . .
+. . x x . . . .
+. . P . . . . .
+. . . . . . . .
+",
+        );
+        check_all_moves(
+            WPawn,
+            r"
+. . . . . . . P
+. . . . . . . .
+. . . R . . . .
+. . . P r . . .
+r . . . . P . .
+P . r . . . . .
+. . P . . . . P
+. . . . . . . .
+",
+            r"
+. . . . . . . P
+. . . . . . . .
+. . . R . . . .
+. . . P x x . .
+r . . . . P . x
+P . r . . . . x
+. . P . . . . P
+. . . . . . . .
 ",
         );
     }
