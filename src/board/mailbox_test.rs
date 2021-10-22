@@ -20,6 +20,108 @@ use Piece::*;
 */
 
 #[test]
+fn king_moves() {
+	check_all_moves(
+		BKing,
+		r"
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . k
+		",
+		r"
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . x x
+		. . . . . . x k
+		",
+	);
+	check_all_moves(
+		WKing,
+		r"
+		K . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		",
+		r"
+		K x . . . . . .
+		x x . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		",
+	);
+	check_all_moves(
+		WKing,
+		r"
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . K . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		",
+		r"
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. x x x . . . .
+		. x K x . . . .
+		. x x x . . . .
+		. . . . . . . .
+		. . . . . . . .
+		",
+	);
+}
+
+#[test]
+fn knight_moves() {
+	/*
+	check_all_moves(
+		WKnight,
+		r"
+		. . p . . . . .
+		. . . . . . . .
+		. N . . . . . .
+		. . . p . . . .
+		. . . . . . . .
+		. . . . . N . .
+		. . . . . . . .
+		. . . . P . . .
+		",
+		r"
+		x . x . . . . .
+		. . . x . . . .
+		. N . . . . . .
+		. . . x x . x .
+		x . x x . . . x
+		. . . . . N . .
+		. . . x . . . x
+		. . . . P . x .
+		",
+	);
+	*/
+}
+
+#[test]
 fn queen_moves() {
 	check_all_moves(
 		WQueen,
@@ -255,6 +357,9 @@ fn check_moves(pos: Pos, board: &str, want: &str) {
 }
 
 fn check_moves_(who: &str, board: &Mailbox, have: Set<Pos>, want: &str) {
+	for pos in &have {
+		assert!(pos.is_valid())
+	}
 	let want: Set<Pos> = parse_charboard(want)
 		.unwrap()
 		.iter()
@@ -264,13 +369,13 @@ fn check_moves_(who: &str, board: &Mailbox, have: Set<Pos>, want: &str) {
 		.collect();
 
 	if have != want {
-		println!("moves for {}\ngot: {}\nwant:{}", who, mark_moves(&board, have), mark_moves(&board, want));
+		println!("moves for {}\ngot: {:?}\n{}\nwant:{:?}\n{}", who, &have, mark_moves(&board, &have), &want, mark_moves(&board, &want));
 		panic!("test failed")
 	}
 }
 
 // render `board` as text, but mark destinations as `x`.
-fn mark_moves(board: &Mailbox, dests: Set<Pos>) -> String {
+fn mark_moves(board: &Mailbox, dests: &Set<Pos>) -> String {
 	let marks = board.iter().map(|(pos, piece)| if dests.contains(&pos) { 'x' } else { piece.to_char() });
 	format_board(marks)
 }

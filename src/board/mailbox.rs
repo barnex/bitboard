@@ -44,10 +44,80 @@ impl Mailbox {
 			BBisshop => self.bisshop_moves(dst, Black, pos),
 			WQueen => self.queen_moves(dst, White, pos),
 			BQueen => self.queen_moves(dst, Black, pos),
+			WKnight => self.wknight_moves(dst, pos),
+			BKnight => self.bknight_moves(dst, pos),
+			WKing => self.wking_moves(dst, pos),
+			BKing => self.bking_moves(dst, pos),
 			_ => (),
 		}
 
 		dest
+	}
+
+	fn wking_moves(&self, dests: &mut SmVec<Pos>, pos: Pos) {
+		self.wjump(dests, pos, Self::KING_JUMPS)
+	}
+
+	fn bking_moves(&self, dests: &mut SmVec<Pos>, pos: Pos) {
+		self.bjump(dests, pos, Self::KING_JUMPS)
+	}
+
+	fn wknight_moves(&self, dests: &mut SmVec<Pos>, pos: Pos) {
+		self.wjump(dests, pos, Self::KNIGHT_JUMPS)
+	}
+
+	fn bknight_moves(&self, dests: &mut SmVec<Pos>, pos: Pos) {
+		self.bjump(dests, pos, Self::KNIGHT_JUMPS)
+	}
+
+	const KING_JUMPS: [u8; 8] = [
+		delta(-1, -1), //
+		delta(-1, 0),
+		delta(-1, 1),
+		delta(0, -1),
+		delta(0, 1),
+		delta(1, -1),
+		delta(1, 0),
+		delta(1, 1),
+	];
+
+	const KNIGHT_JUMPS: [u8; 8] = [
+		delta(-2, -1), //
+		delta(-2, 1),
+		delta(-1, -2),
+		delta(-1, 2),
+		delta(2, -1),
+		delta(2, 1),
+		delta(1, -2),
+		delta(1, 2),
+	];
+
+	fn wjump<const N: usize>(&self, dests: &mut SmVec<Pos>, pos: Pos, delta: [u8; N]) {
+		for delta in delta {
+			let pos = pos + delta;
+			match self[pos].color() {
+				None | Some(Black) => {
+					if pos.is_valid() {
+						dests.push(pos)
+					}
+				}
+				Some(White) => (),
+			}
+		}
+	}
+
+	fn bjump<const N: usize>(&self, dests: &mut SmVec<Pos>, pos: Pos, delta: [u8; N]) {
+		for delta in delta {
+			let pos = pos + delta;
+			match self[pos].color() {
+				None | Some(White) => {
+					if pos.is_valid() {
+						dests.push(pos)
+					}
+				}
+				Some(Black) => (),
+			}
+		}
 	}
 
 	fn queen_moves(&self, dests: &mut SmVec<Pos>, color: Color, pos: Pos) {
