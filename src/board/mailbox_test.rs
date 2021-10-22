@@ -1,5 +1,5 @@
 use super::internal::*;
-use Piece::*;
+use Square::*;
 
 /* COPY-PASTE ZONE
 	check_all_moves(
@@ -335,7 +335,7 @@ RNBQKBNR
 
 // check the moves for all pieces of given type,
 // by comparing to a stringified board where destinations are marked with `x`.
-fn check_all_moves(piece: Piece, board: &str, want: &str) {
+fn check_all_moves(piece: Square, board: &str, want: &str) {
 	let board: Mailbox = board.parse().unwrap();
 	let mut have = Set::default();
 	for (pos, p) in board.iter() {
@@ -369,7 +369,14 @@ fn check_moves_(who: &str, board: &Mailbox, have: Set<Pos>, want: &str) {
 		.collect();
 
 	if have != want {
-		println!("moves for {}\ngot: {:?}\n{}\nwant:{:?}\n{}", who, &have, mark_moves(&board, &have), &want, mark_moves(&board, &want));
+		println!(
+			"moves for {}\ngot: {:?}\n{}\nwant:{:?}\n{}",
+			who,
+			&have,
+			mark_moves(&board, &have),
+			&want,
+			mark_moves(&board, &want)
+		);
 		panic!("test failed")
 	}
 }

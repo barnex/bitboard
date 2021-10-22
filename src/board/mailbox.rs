@@ -4,14 +4,14 @@ use std::ops::Index;
 use std::ops::IndexMut;
 use std::str::FromStr;
 use Color::*;
-use Piece::*;
+use Square::*;
 
 /// A straightforward board implementation used for testing BitBoard.
 #[derive(Eq, PartialEq)]
 pub struct Mailbox {
 	// Layout using 0x88 indexing (https://en.wikipedia.org/wiki/0x88),
-	// and fully surrounded by `Offboard` Pieces.
-	board: [Piece; 256],
+	// and fully surrounded by `Offboard` Squares.
+	board: [Square; 256],
 }
 
 impl Mailbox {
@@ -24,8 +24,12 @@ impl Mailbox {
 		Self { board }
 	}
 
-	pub fn iter<'s>(&'s self) -> impl Iterator<Item = (Pos, Piece)> + 's {
-		self.board.iter().enumerate().map(|(i, piece)| (Pos::from(i), *piece)).filter(|(pos, _)| pos.is_valid())
+	pub fn iter<'s>(&'s self) -> impl Iterator<Item = (Pos, Square)> + 's {
+		self.board
+			.iter()
+			.enumerate()
+			.map(|(i, piece)| (Pos::from(i), *piece))
+			.filter(|(pos, _)| pos.is_valid())
 	}
 
 	pub fn moves_for(&self, pos: Pos) -> SmVec<Pos> {
@@ -192,7 +196,7 @@ impl Mailbox {
 }
 
 impl Index<Pos> for Mailbox {
-	type Output = Piece;
+	type Output = Square;
 
 	#[inline]
 	fn index(&self, pos: Pos) -> &Self::Output {
@@ -226,7 +230,7 @@ impl FromStr for Mailbox {
 		let mut board = Mailbox::new();
 		let chars = parse_charboard(s)?;
 		for (i, &chr) in chars.iter().enumerate() {
-			let piece = Piece::try_from(chr)?;
+			let piece = Square::try_from(chr)?;
 			let pos = Pos::from_index64(i)?;
 			board[pos] = piece;
 		}
