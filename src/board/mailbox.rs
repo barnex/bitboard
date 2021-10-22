@@ -9,7 +9,7 @@ use Square::*;
 #[derive(Eq, PartialEq)]
 pub struct Mailbox {
 	// Layout using 0x88 indexing (https://en.wikipedia.org/wiki/0x88),
-	// and fully surrounded by `Offboard` Squares.
+	// and fully surrounded by `Offboard` Squares so that indexing can never go out of bounds.
 	board: [Square; 256],
 }
 

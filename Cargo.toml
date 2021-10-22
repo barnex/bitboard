@@ -3,6 +3,15 @@ name = "nnc"
 version = "1.0.0"
 edition = "2021"
 
+[lib]
+name = "bitboard"
+path = "src/lib.rs"
+
+[[bin]]
+name = "cli"
+path = "bin/main.rs"
+
+
 [dependencies]
 anyhow = "1.0"
 smallvec = "1.6"
