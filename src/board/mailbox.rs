@@ -28,30 +28,75 @@ impl Mailbox {
 		self.board.iter().enumerate().map(|(i, piece)| (Pos::from(i), *piece)).filter(|(pos, _)| pos.is_valid())
 	}
 
-	pub fn moves_for(&self, pos: Pos) -> SmallVec<Pos> {
-		let mut dest = SmallVec::new();
+	pub fn moves_for(&self, pos: Pos) -> SmVec<Pos> {
+		debug_assert!(pos.is_valid());
+
+		let mut dest = SmVec::new();
+		let dst = &mut dest;
 
 		match self[pos] {
-			Piece::Empty => (),
-			Piece::WPawn => self.wpawn_moves(&mut dest, pos),
-			Piece::BPawn => self.bpawn_moves(&mut dest, pos),
+			Empty => (),
+			WPawn => self.wpawn_moves(dst, pos),
+			BPawn => self.bpawn_moves(dst, pos),
+			WRook => self.rook_moves(dst, White, pos),
+			BRook => self.rook_moves(dst, Black, pos),
+			WBisshop => self.bisshop_moves(dst, White, pos),
+			BBisshop => self.bisshop_moves(dst, Black, pos),
+			WQueen => self.queen_moves(dst, White, pos),
+			BQueen => self.queen_moves(dst, Black, pos),
 			_ => (),
 		}
 
 		dest
 	}
 
-	fn wpawn_moves(&self, dests: &mut SmallVec<Pos>, pos: Pos) {
+	fn queen_moves(&self, dests: &mut SmVec<Pos>, color: Color, pos: Pos) {
+		self.rook_moves(dests, color, pos);
+		self.bisshop_moves(dests, color, pos);
+	}
+
+	fn bisshop_moves(&self, dests: &mut SmVec<Pos>, color: Color, pos: Pos) {
+		self.march(dests, color, pos, NorthEast);
+		self.march(dests, color, pos, NorthWest);
+		self.march(dests, color, pos, SouthEast);
+		self.march(dests, color, pos, SouthWest);
+	}
+
+	fn rook_moves(&self, dests: &mut SmVec<Pos>, color: Color, pos: Pos) {
+		self.march(dests, color, pos, North);
+		self.march(dests, color, pos, East);
+		self.march(dests, color, pos, South);
+		self.march(dests, color, pos, West);
+	}
+
+	fn march(&self, dests: &mut SmVec<Pos>, my_color: Color, pos: Pos, dir: u8) {
+		let mut pos = pos;
+
+		for _ in 0..8 {
+			pos = pos + dir;
+			match self[pos] {
+				Empty => dests.push(pos),
+				piece => {
+					if piece.color() == Some(my_color.opposite()) {
+						dests.push(pos);
+					}
+					return;
+				}
+			}
+		}
+	}
+
+	fn wpawn_moves(&self, dests: &mut SmVec<Pos>, pos: Pos) {
 		self.pawn_captures(dests, White, pos, delta(1, -1), delta(1, 1));
 		self.pawn_pushes(dests, pos, delta(1, 0), 2);
 	}
 
-	fn bpawn_moves(&self, dests: &mut SmallVec<Pos>, pos: Pos) {
+	fn bpawn_moves(&self, dests: &mut SmVec<Pos>, pos: Pos) {
 		self.pawn_captures(dests, Black, pos, delta(-1, -1), delta(-1, 1));
 		self.pawn_pushes(dests, pos, delta(-1, 0), 5);
 	}
 
-	fn pawn_pushes(&self, dests: &mut SmallVec<Pos>, pos: Pos, delta: u8, first_row: u8) {
+	fn pawn_pushes(&self, dests: &mut SmVec<Pos>, pos: Pos, delta: u8, first_row: u8) {
 		// one forward
 		let pos = pos + delta;
 		if self[pos].is_empty() {
@@ -66,7 +111,7 @@ impl Mailbox {
 		}
 	}
 
-	fn pawn_captures(&self, dests: &mut SmallVec<Pos>, my_color: Color, pos: Pos, left: u8, right: u8) {
+	fn pawn_captures(&self, dests: &mut SmVec<Pos>, my_color: Color, pos: Pos, left: u8, right: u8) {
 		for delta in [left, right] {
 			let pos = pos + delta;
 			if self[pos].color() == Some(my_color.opposite()) {

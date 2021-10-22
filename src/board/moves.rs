@@ -21,7 +21,7 @@ impl From<(Pos, Pos)> for Move {
 }
 
 pub struct Moves {
-	inner: SmallVec<Move>,
+	inner: SmVec<Move>,
 }
 
 impl Moves {
