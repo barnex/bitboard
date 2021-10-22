@@ -40,132 +40,65 @@ impl Mailbox {
 
 		match self[pos] {
 			Empty => (),
-			WPawn => self.wpawn_moves(dst, pos),
-			BPawn => self.bpawn_moves(dst, pos),
-			WRook => self.rook_moves(dst, White, pos),
-			BRook => self.rook_moves(dst, Black, pos),
-			WBisshop => self.bisshop_moves(dst, White, pos),
-			BBisshop => self.bisshop_moves(dst, Black, pos),
-			WQueen => self.queen_moves(dst, White, pos),
-			BQueen => self.queen_moves(dst, Black, pos),
-			WKnight => self.wknight_moves(dst, pos),
-			BKnight => self.bknight_moves(dst, pos),
-			WKing => self.wking_moves(dst, pos),
-			BKing => self.bking_moves(dst, pos),
+			WPawn => self.w_pawn_moves(dst, pos),
+			BPawn => self.b_pawn_moves(dst, pos),
+			WRook => self.rook_moves(dst, BLACK, pos),
+			BRook => self.rook_moves(dst, WHITE, pos),
+			WBisshop => self.bisshop_moves(dst, BLACK, pos),
+			BBisshop => self.bisshop_moves(dst, WHITE, pos),
+			WQueen => self.queen_moves(dst, BLACK, pos),
+			BQueen => self.queen_moves(dst, WHITE, pos),
+			WKnight => self.w_knight_moves(dst, pos),
+			BKnight => self.b_knight_moves(dst, pos),
+			WKing => self.w_king_moves(dst, pos),
+			BKing => self.b_king_moves(dst, pos),
 			_ => (),
 		}
 
 		dest
 	}
 
-	fn wking_moves(&self, dests: &mut SmVec<Pos>, pos: Pos) {
-		self.wjump(dests, pos, Self::KING_JUMPS)
+	fn w_king_moves(&self, dests: &mut SmVec<Pos>, pos: Pos) {
+		self.jump(dests, pos, Self::KING_JUMPS, EMPTY | BLACK)
 	}
 
-	fn bking_moves(&self, dests: &mut SmVec<Pos>, pos: Pos) {
-		self.bjump(dests, pos, Self::KING_JUMPS)
+	fn b_king_moves(&self, dests: &mut SmVec<Pos>, pos: Pos) {
+		self.jump(dests, pos, Self::KING_JUMPS, EMPTY | WHITE)
 	}
 
-	fn wknight_moves(&self, dests: &mut SmVec<Pos>, pos: Pos) {
-		self.wjump(dests, pos, Self::KNIGHT_JUMPS)
+	fn w_knight_moves(&self, dests: &mut SmVec<Pos>, pos: Pos) {
+		self.jump(dests, pos, Self::KNIGHT_JUMPS, EMPTY | BLACK)
 	}
 
-	fn bknight_moves(&self, dests: &mut SmVec<Pos>, pos: Pos) {
-		self.bjump(dests, pos, Self::KNIGHT_JUMPS)
+	fn b_knight_moves(&self, dests: &mut SmVec<Pos>, pos: Pos) {
+		self.jump(dests, pos, Self::KNIGHT_JUMPS, EMPTY | WHITE)
 	}
 
-	const KING_JUMPS: [u8; 8] = [
-		delta(-1, -1), //
-		delta(-1, 0),
-		delta(-1, 1),
-		delta(0, -1),
-		delta(0, 1),
-		delta(1, -1),
-		delta(1, 0),
-		delta(1, 1),
-	];
-
-	const KNIGHT_JUMPS: [u8; 8] = [
-		delta(-2, -1), //
-		delta(-2, 1),
-		delta(-1, -2),
-		delta(-1, 2),
-		delta(2, -1),
-		delta(2, 1),
-		delta(1, -2),
-		delta(1, 2),
-	];
-
-	fn wjump<const N: usize>(&self, dests: &mut SmVec<Pos>, pos: Pos, delta: [u8; N]) {
-		for delta in delta {
-			let pos = pos + delta;
-			match self[pos].color() {
-				None | Some(Black) => {
-					if pos.is_valid() {
-						dests.push(pos)
-					}
-				}
-				Some(White) => (),
-			}
-		}
+	fn queen_moves(&self, dests: &mut SmVec<Pos>, allowed: u8, pos: Pos) {
+		self.rook_moves(dests, allowed, pos);
+		self.bisshop_moves(dests, allowed, pos);
 	}
 
-	fn bjump<const N: usize>(&self, dests: &mut SmVec<Pos>, pos: Pos, delta: [u8; N]) {
-		for delta in delta {
-			let pos = pos + delta;
-			match self[pos].color() {
-				None | Some(White) => {
-					if pos.is_valid() {
-						dests.push(pos)
-					}
-				}
-				Some(Black) => (),
-			}
-		}
+	fn bisshop_moves(&self, dests: &mut SmVec<Pos>, allowed: u8, pos: Pos) {
+		self.march(dests, allowed, pos, NorthEast);
+		self.march(dests, allowed, pos, NorthWest);
+		self.march(dests, allowed, pos, SouthEast);
+		self.march(dests, allowed, pos, SouthWest);
 	}
 
-	fn queen_moves(&self, dests: &mut SmVec<Pos>, color: Color, pos: Pos) {
-		self.rook_moves(dests, color, pos);
-		self.bisshop_moves(dests, color, pos);
+	fn rook_moves(&self, dests: &mut SmVec<Pos>, allowed: u8, pos: Pos) {
+		self.march(dests, allowed, pos, North);
+		self.march(dests, allowed, pos, East);
+		self.march(dests, allowed, pos, South);
+		self.march(dests, allowed, pos, West);
 	}
 
-	fn bisshop_moves(&self, dests: &mut SmVec<Pos>, color: Color, pos: Pos) {
-		self.march(dests, color, pos, NorthEast);
-		self.march(dests, color, pos, NorthWest);
-		self.march(dests, color, pos, SouthEast);
-		self.march(dests, color, pos, SouthWest);
-	}
-
-	fn rook_moves(&self, dests: &mut SmVec<Pos>, color: Color, pos: Pos) {
-		self.march(dests, color, pos, North);
-		self.march(dests, color, pos, East);
-		self.march(dests, color, pos, South);
-		self.march(dests, color, pos, West);
-	}
-
-	fn march(&self, dests: &mut SmVec<Pos>, my_color: Color, pos: Pos, dir: u8) {
-		let mut pos = pos;
-
-		for _ in 0..8 {
-			pos = pos + dir;
-			match self[pos] {
-				Empty => dests.push(pos),
-				piece => {
-					if piece.color() == Some(my_color.opposite()) {
-						dests.push(pos);
-					}
-					return;
-				}
-			}
-		}
-	}
-
-	fn wpawn_moves(&self, dests: &mut SmVec<Pos>, pos: Pos) {
+	fn w_pawn_moves(&self, dests: &mut SmVec<Pos>, pos: Pos) {
 		self.pawn_captures(dests, White, pos, delta(1, -1), delta(1, 1));
 		self.pawn_pushes(dests, pos, delta(1, 0), 2);
 	}
 
-	fn bpawn_moves(&self, dests: &mut SmVec<Pos>, pos: Pos) {
+	fn b_pawn_moves(&self, dests: &mut SmVec<Pos>, pos: Pos) {
 		self.pawn_captures(dests, Black, pos, delta(-1, -1), delta(-1, 1));
 		self.pawn_pushes(dests, pos, delta(-1, 0), 5);
 	}
@@ -193,6 +126,56 @@ impl Mailbox {
 			}
 		}
 	}
+
+	#[inline]
+	fn march(&self, dests: &mut SmVec<Pos>, capture_color: u8, pos: Pos, dir: u8) {
+		let mut pos = pos;
+
+		for _ in 0..8 {
+			pos = pos + dir;
+			match self[pos] {
+				Empty => dests.push(pos),
+				square => {
+					if square.opt_color() == capture_color {
+						dests.push(pos);
+					}
+					return;
+				}
+			}
+		}
+	}
+
+	#[inline]
+	fn jump<const N: usize>(&self, dests: &mut SmVec<Pos>, pos: Pos, delta: [u8; N], allowed: u8) {
+		for delta in delta {
+			let pos = pos + delta;
+			if self[pos].is(allowed) {
+				dests.push(pos)
+			}
+		}
+	}
+
+	const KING_JUMPS: [u8; 8] = [
+		delta(-1, -1), //
+		delta(-1, 0),
+		delta(-1, 1),
+		delta(0, -1),
+		delta(0, 1),
+		delta(1, -1),
+		delta(1, 0),
+		delta(1, 1),
+	];
+
+	const KNIGHT_JUMPS: [u8; 8] = [
+		delta(-2, -1), //
+		delta(-2, 1),
+		delta(-1, -2),
+		delta(-1, 2),
+		delta(2, -1),
+		delta(2, 1),
+		delta(1, -2),
+		delta(1, 2),
+	];
 }
 
 impl Index<Pos> for Mailbox {

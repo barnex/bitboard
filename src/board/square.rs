@@ -23,11 +23,11 @@ pub enum Square {
 	BKing = OCC | BLACK | KING,
 }
 
-const EMPTY: u8 = 0b_10_00_000;
+pub const EMPTY: u8 = 0b_10_00_000;
 const OCC: u8 = 0b_01_00_000;
 
-const WHITE: u8 = 0b_00_10_000;
-const BLACK: u8 = 0b_00_01_000;
+pub const WHITE: u8 = 0b_00_10_000;
+pub const BLACK: u8 = 0b_00_01_000;
 const COLOR_MASK: u8 = 0b_00_11_000;
 
 const PAWN: u8 = 0;
@@ -51,6 +51,10 @@ impl Square {
 	/// `None` is represented as '.', `OffBoard` as `?`.
 	pub fn to_char(self) -> char {
 		self.into()
+	}
+
+	pub fn is(self, mask: u8) -> bool {
+		(self as u8) & mask != 0
 	}
 
 	pub fn is_empty(self) -> bool {
