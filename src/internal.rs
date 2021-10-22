@@ -1,4 +1,5 @@
 pub use std::fmt;
+pub use std::str::FromStr;
 
 #[allow(unused)]
 pub type Result<T> = anyhow::Result<T>;

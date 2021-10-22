@@ -1,10 +1,12 @@
 mod internal;
 
-mod mailbox;
-mod parser;
 mod bitboard;
+mod color;
+mod mailbox;
 mod moves;
+mod parser;
 mod piece;
 mod pos;
-mod color;
 
+#[cfg(test)]
+mod mailbox_test;
