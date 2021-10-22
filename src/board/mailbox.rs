@@ -44,8 +44,11 @@ impl Mailbox {
     }
 
     fn wpawn_moves(&self, dests: &mut SmallVec<Pos>, pos: Pos) {
-        // one row forward
+        self.wpawn_captures(dests, pos);
+        self.wpawn_pushes(dests, pos);
+    }
 
+    fn wpawn_pushes(&self, dests: &mut SmallVec<Pos>, pos: Pos) {
         {
             // push forward
             let pos = pos + delta(1, 0);
@@ -55,20 +58,20 @@ impl Mailbox {
         }
 
         {
-            // push 2 squares forward
+            // push 2 forward
             let pos = pos + delta(2, 0);
             if pos.row() == 3 && self[pos].is_empty() {
                 dests.push(pos)
             }
         }
+    }
 
-        {
-            // capture
-            for i in [-1, 1] {
-                let pos = pos + delta(1, i);
-                if self[pos].is_black() {
-                    dests.push(pos)
-                }
+    fn wpawn_captures(&self, dests: &mut SmallVec<Pos>, pos: Pos) {
+        // capture
+        for i in [-1, 1] {
+            let pos = pos + delta(1, i);
+            if self[pos].is_black() {
+                dests.push(pos)
             }
         }
     }
