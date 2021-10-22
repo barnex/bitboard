@@ -1,6 +1,8 @@
+use std::{convert::TryFrom, fmt::Write};
+
 use super::internal::*;
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Piece {
     Empty = 0,
     WPawn = 1,
@@ -33,8 +35,8 @@ impl Piece {
 
     /// Piece representation following https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation.
     /// `None` is represented as '.'.
-    pub fn ascii(self) -> char {
-        Self::ASCII[self.index()]
+    pub fn to_char(self) -> char {
+        self.into()
     }
 
     pub fn index(self) -> usize {
@@ -52,6 +54,42 @@ impl Piece {
             7..=12 => Some(Color::Black),
             _ => unreachable!(),
         }
+    }
+}
+
+impl fmt::Display for Piece {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.write_char(self.to_char())
+    }
+}
+
+impl Into<char> for Piece {
+    fn into(self) -> char {
+        Piece::ASCII[self as usize]
+    }
+}
+
+impl TryFrom<char> for Piece {
+    type Error = anyhow::Error;
+
+    fn try_from(value: char) -> Result<Self> {
+        use Piece::*;
+        Ok(match value {
+            '.' => Empty,
+            'P' => WPawn,
+            'R' => WRook,
+            'N' => WKnight,
+            'B' => WBisshop,
+            'Q' => WQueen,
+            'K' => WKing,
+            'p' => BPawn,
+            'r' => BRook,
+            'n' => BKnight,
+            'b' => BBisshop,
+            'q' => BQueen,
+            'k' => BKing,
+            invalid => return Err(format_err!("invalid piece: {}", invalid)),
+        })
     }
 }
 

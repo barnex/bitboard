@@ -1,8 +1,9 @@
 mod internal;
 
-mod arrayboard;
+mod mailbox;
+mod parser;
 mod bitboard;
-mod mod_move;
+mod moves;
 mod piece;
 mod pos;
 mod color;

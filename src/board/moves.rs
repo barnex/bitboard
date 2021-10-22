@@ -1,12 +1,10 @@
 use super::internal::*;
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Move {
     from: Pos,
     to: Pos,
 }
-
-pub type Moves = SmallVec<Move>;
 
 impl Move {
     #[inline]
@@ -19,5 +17,19 @@ impl Move {
 impl From<(Pos, Pos)> for Move {
     fn from((from, to): (Pos, Pos)) -> Self {
         Self::new(from, to)
+    }
+}
+
+pub struct Moves {
+    inner: SmallVec<Move>,
+}
+
+impl Moves {
+    pub fn push(&mut self, mv: Move) {
+        self.inner.push(mv)
+    }
+
+    pub fn to_set(self) -> Set<Move> {
+        self.inner.into_iter().collect()
     }
 }
