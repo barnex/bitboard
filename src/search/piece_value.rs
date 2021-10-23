@@ -1,7 +1,7 @@
 use super::internal::*;
 use std::ops::Add;
 
-pub fn material_value(board: &Mailbox) -> i32 {
+pub fn material_value_white(board: &Mailbox) -> i32 {
 	board
 		.iter()
 		.map(|(_, sq)| piece_value(sq))

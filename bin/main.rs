@@ -25,9 +25,14 @@ RNBQKBNR
 	}
 }
 
+const DEPTH: u32 = 0;
+
 fn play(board: Mailbox, player: Color) -> Mailbox {
-	print_options(&board, player);
-	let mv = search(&board, player, 1);
+	let mv_value = evaluate_moves(&board, player, DEPTH);
+	print_options(&board, player, &mv_value);
+
+	let mv = mv_value.get(0).expect("at least one possible move").0;
+
 	println!("{:?} plays {}", player, board.annotate_move(mv));
 	let board = board.with_move(mv);
 	let mark = [mv.from, mv.to].iter().copied().collect();
@@ -36,15 +41,7 @@ fn play(board: Mailbox, player: Color) -> Mailbox {
 	board
 }
 
-fn print_options(board: &Mailbox, player: Color) {
-	println!(
-		"{:?} has options {}",
-		player,
-		board
-			.all_moves(player.mask())
-			.iter()
-			.map(|&mv| board.annotate_move(mv))
-			.collect::<Vec::<_>>()
-			.join(", ")
-	);
+fn print_options(board: &Mailbox, player: Color, mv_value: &[(Move, i32)]) {
+	let options = mv_value.iter().map(|(mv, value)| format!("{} ({})", board.annotate_move(*mv), value)).collect::<Vec::<_>>().join(", ");
+	println!("{:?} has options {}", player, options);
 }

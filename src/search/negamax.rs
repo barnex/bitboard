@@ -1,7 +1,11 @@
 use super::internal::*;
 
 pub fn negamax(board: &Mailbox, depth: u32, c: Color, mv: Move) -> i32 {
-	0
+	let board = board.with_move(mv);
+	if depth == 0{
+		return material_value_white(&board);
+	}
+	todo!()
 }
 
 /*
