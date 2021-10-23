@@ -1,8 +1,8 @@
 use super::internal::*;
-use std::{fmt::Write, fs::OpenOptions, ops::Add};
+use std::{fmt::Write, ops::Add};
 
 /// Board position in 2x4bit format (https://en.wikipedia.org/wiki/0x88).
-#[derive(Clone, Copy, Eq, PartialEq, Hash)]
+#[derive(Clone, Copy, Eq, PartialEq, Hash, PartialOrd, Ord)]
 pub struct Pos(u8);
 
 /// Construct a (valid) position.

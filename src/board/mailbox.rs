@@ -6,7 +6,7 @@ use std::str::FromStr;
 use Square::*;
 
 /// A straightforward board implementation used for testing BitBoard.
-#[derive(Eq, PartialEq)]
+#[derive(Eq, PartialEq, Clone)]
 pub struct Mailbox {
 	// Layout using 0x88 indexing (https://en.wikipedia.org/wiki/0x88),
 	// and fully surrounded by `Offboard` Squares so that indexing can never go out of bounds.
@@ -23,6 +23,16 @@ impl Mailbox {
 		Self { board }
 	}
 
+	#[must_use]
+	pub fn with_move(&self, mv: Move) -> Self {
+		debug_assert!(mv.is_valid());
+		let mut b = self.clone();
+		b[mv.to] = b[mv.from];
+		b[mv.from] = Empty;
+		b
+	}
+
+	/// TODO: don't iter over offboard squares.
 	pub fn iter<'s>(&'s self) -> impl Iterator<Item = (Pos, Square)> + 's {
 		self.board
 			.iter()
@@ -31,7 +41,26 @@ impl Mailbox {
 			.filter(|(pos, _)| pos.is_valid())
 	}
 
-	pub fn moves_for(&self, pos: Pos) -> SmVec<Pos> {
+	pub fn all_moves(&self, mask: u8) -> SmVec<Move> {
+		debug_assert!(mask == WHITE || mask == BLACK);
+
+		let mut moves = SmVec::new();
+		for r in 0..8 {
+			for c in 0..8 {
+				let pos = pos(r, c);
+				if self[pos].is(mask) {
+					moves.extend(self.dests_for(pos).iter().map(|&dst| Move::new(pos, dst)))
+				}
+			}
+		}
+		moves
+	}
+
+	pub fn moves_for(&self, pos: Pos) -> SmVec<Move> {
+		self.dests_for(pos).into_iter().map(|dst| Move::new(pos, dst)).collect()
+	}
+
+	pub fn dests_for(&self, pos: Pos) -> SmVec<Pos> {
 		debug_assert!(pos.is_valid());
 
 		let mut dest = SmVec::new();

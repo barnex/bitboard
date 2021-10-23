@@ -340,7 +340,7 @@ fn check_all_moves(piece: Square, board: &str, want: &str) {
 	let mut have = Set::default();
 	for (pos, p) in board.iter() {
 		if p == piece {
-			have.extend(board.moves_for(pos))
+			have.extend(board.dests_for(pos))
 		}
 	}
 	let who = piece.to_string();
@@ -351,7 +351,7 @@ fn check_all_moves(piece: Square, board: &str, want: &str) {
 // by comparing to a stringified board where destinations are marked with `x`.
 fn check_moves(pos: Pos, board: &str, want: &str) {
 	let board: Mailbox = board.parse().unwrap();
-	let have: Set<Pos> = board.moves_for(pos).iter().copied().collect();
+	let have: Set<Pos> = board.dests_for(pos).iter().copied().collect();
 	let who = format!("{} @ {}", board[pos], pos);
 	check_moves_(&who, &board, have, want)
 }
