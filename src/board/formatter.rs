@@ -19,8 +19,14 @@ where
 	str + "  a b c d e f g h"
 }
 
-pub fn print_ansi(board: &Mailbox) {
-	let color_of = |p: Pos| if (p.row() + p.col()) % 2 == 0 { DARK } else { LIGHT };
+pub fn print_ansi(board: &Mailbox, mark: &Set<Pos>) {
+	let is_light = |p: Pos| (p.row() + p.col()) % 2 == 0;
+	let color_of = |p: Pos| match (is_light(p), mark.contains(&p)) {
+		(false, false) => DARK,
+		(false, true) => MARK_DARK,
+		(true, false) => LIGHT,
+		(true, true) => MARK_LIGHT,
+	};
 
 	for r in (0..8).rev() {
 		// row number
@@ -64,8 +70,8 @@ const HALF_R: &str = "\u{2590}";
 const BG_LIGHT: &str = "\x1b[48;5;255m";
 const BG_DARK: &str = "\x1b[48;5;250m";
 const FG_LIGHT: &str = "\x1b[38;5;255m";
-const FG_DARK: &str = "\x1b[38;5;250m";
 const FG_BLACK: &str = "\x1b[38;5;232m";
+const FG_DARK: &str = "\x1b[38;5;250m";
 const BG: &str = "\x1b[48;5;";
 const FG: &str = "\x1b[38;5;";
 const DARK: &str = "252m";

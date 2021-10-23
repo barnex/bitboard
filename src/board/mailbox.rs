@@ -41,6 +41,23 @@ impl Mailbox {
 			.filter(|(pos, _)| pos.is_valid())
 	}
 
+	/// Full chess notation of move `mv`. E.g.:
+	///   p b2c3 xn +
+	pub fn annotate_move(&self, mv: Move) -> String {
+		let mut str = self[mv.from].to_string().to_ascii_uppercase();
+		str += &mv.to_string();
+		if !self[mv.to].has_bit(EMPTY) {
+			str += "x";
+			str += &self[mv.to].to_string().to_ascii_uppercase();
+		}
+		if let Some(player) = self[mv.from].color() {
+			if self.with_move(mv).is_check(player.opposite()) {
+				str += "+";
+			}
+		}
+		str
+	}
+
 	pub fn all_moves(&self, mask: u8) -> SmVec<Move> {
 		debug_assert!(mask == WHITE || mask == BLACK);
 
@@ -48,12 +65,23 @@ impl Mailbox {
 		for r in 0..8 {
 			for c in 0..8 {
 				let pos = pos(r, c);
-				if self[pos].is(mask) {
+				if self[pos].has_bit(mask) {
 					moves.extend(self.dests_for(pos).iter().map(|&dst| Move::new(pos, dst)))
 				}
 			}
 		}
 		moves
+	}
+
+	pub fn is_check(&self, victim: Color) -> bool {
+		let attacter = victim.opposite();
+		let victim = victim.mask();
+		for mv in self.all_moves(attacter.mask()) {
+			if self[mv.to].mask(KIND_MASK) == KING {
+				return true;
+			}
+		}
+		false
 	}
 
 	pub fn moves_for(&self, pos: Pos) -> SmVec<Move> {
@@ -134,12 +162,12 @@ impl Mailbox {
 	fn pawn_pushes(&self, dests: &mut SmVec<Pos>, pos: Pos, delta: u8, first_row: u8) {
 		// one forward
 		let pos = pos + delta;
-		if self[pos].is(EMPTY) {
+		if self[pos].has_bit(EMPTY) {
 			dests.push(pos);
 			// another one forward
 			if pos.row() == first_row {
 				let pos = pos + delta;
-				if self[pos].is(EMPTY) {
+				if self[pos].has_bit(EMPTY) {
 					dests.push(pos)
 				}
 			}
@@ -177,7 +205,7 @@ impl Mailbox {
 	fn jump<const N: usize>(&self, dests: &mut SmVec<Pos>, pos: Pos, delta: [u8; N], allowed: u8) {
 		for delta in delta {
 			let pos = pos + delta;
-			if self[pos].is(allowed) {
+			if self[pos].has_bit(allowed) {
 				dests.push(pos)
 			}
 		}

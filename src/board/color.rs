@@ -14,4 +14,11 @@ impl Color {
 			Black => BLACK,
 		}
 	}
+
+	pub fn opposite(self) -> Self {
+		match self {
+			White => Black,
+			Black => White,
+		}
+	}
 }

@@ -30,12 +30,12 @@ pub const WHITE: u8 = 0b_00_10_000;
 pub const BLACK: u8 = 0b_00_01_000;
 const COLOR_MASK: u8 = 0b_00_11_000;
 
-const PAWN: u8 = 0;
-const ROOK: u8 = 1;
-const KNIGHT: u8 = 2;
-const BISSHOP: u8 = 3;
-const QUEEN: u8 = 4;
-const KING: u8 = 5;
+pub const PAWN: u8 = 0;
+pub const ROOK: u8 = 1;
+pub const KNIGHT: u8 = 2;
+pub const BISSHOP: u8 = 3;
+pub const QUEEN: u8 = 4;
+pub const KING: u8 = 5;
 pub const KIND_MASK: u8 = 0b111;
 
 use Square::*;
@@ -53,8 +53,12 @@ impl Square {
 		self.into()
 	}
 
-	pub fn is(self, mask: u8) -> bool {
+	pub fn has_bit(self, mask: u8) -> bool {
 		(self as u8) & mask != 0
+	}
+
+	pub fn mask(self, mask: u8) -> u8 {
+		(self as u8) & mask
 	}
 
 	// pub fn is_empty(self) -> bool {
@@ -67,6 +71,15 @@ impl Square {
 
 	pub fn opt_color(self) -> u8 {
 		(self as u8) & COLOR_MASK
+	}
+
+	pub fn color(self) -> Option<Color> {
+		use Color::*;
+		match self.opt_color() {
+			WHITE => Some(White),
+			BLACK => Some(Black),
+			_ => None,
+		}
 	}
 
 	pub fn is_white(self) -> bool {

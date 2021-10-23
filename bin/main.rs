@@ -18,23 +18,33 @@ RNBQKBNR
 	)
 	.unwrap();
 
-	fn play(board: Mailbox, player: Color) -> Mailbox {
-		let mv = search(&board, player, 1);
-		let piece = board[mv.from];
-		let capture = board[mv.to];
-		let capture = if capture.is(EMPTY) { "".into() } else { format!(" x {}", capture) };
-		println!("\n{:?} plays {} {} {}", player, piece, mv, capture);
-
-		let board = board.with_move(mv);
-
-		print_ansi(&board);
-
-		board
-	}
-
 	for turn in 0..20 {
-		println!("\n=======================turn {}", turn+1);
+		println!("\n=======================turn {}", turn + 1);
 		board = play(board, White);
 		board = play(board, Black);
 	}
+}
+
+fn play(board: Mailbox, player: Color) -> Mailbox {
+	print_options(&board, player);
+	let mv = search(&board, player, 1);
+	println!("{:?} plays {}", player, board.annotate_move(mv));
+	let board = board.with_move(mv);
+	let mark = [mv.from, mv.to].iter().copied().collect();
+	print_ansi(&board, &mark);
+	println!();
+	board
+}
+
+fn print_options(board: &Mailbox, player: Color) {
+	println!(
+		"{:?} has options {}",
+		player,
+		board
+			.all_moves(player.mask())
+			.iter()
+			.map(|&mv| board.annotate_move(mv))
+			.collect::<Vec::<_>>()
+			.join(", ")
+	);
 }

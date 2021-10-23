@@ -1,4 +1,4 @@
-pub use super::super::internal::*;
+pub use super::super::types::*;
 
 pub use super::formatter::*;
 pub use super::bitboard::*;
