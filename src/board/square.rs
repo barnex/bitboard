@@ -36,7 +36,7 @@ const KNIGHT: u8 = 2;
 const BISSHOP: u8 = 3;
 const QUEEN: u8 = 4;
 const KING: u8 = 5;
-const KIND_MASK: u8 = 0b111;
+pub const KIND_MASK: u8 = 0b111;
 
 use Square::*;
 
@@ -75,6 +75,17 @@ impl Square {
 
 	pub fn is_black(self) -> bool {
 		(self as u8 & BLACK) != 0
+	}
+	pub fn unicode(self) -> char {
+		match self {
+			Empty => ' ',
+			OffBoard => '?',
+			valid => match valid.opt_color() {
+				WHITE => Self::UNICODE[(self as u8 & KIND_MASK) as usize],
+				BLACK => Self::UNICODE[(self as u8 & KIND_MASK) as usize + 6],
+				_ => unreachable!(),
+			},
+		}
 	}
 }
 

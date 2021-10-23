@@ -26,7 +26,9 @@ RNBQKBNR
 		println!("\n{:?} plays {} {} {}", player, piece, mv, capture);
 
 		let board = board.with_move(mv);
-		println!("{}", &board);
+
+		print_ansi(&board);
+
 		board
 	}
 

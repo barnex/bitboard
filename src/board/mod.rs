@@ -2,13 +2,15 @@ mod internal;
 
 mod bitboard;
 mod color;
+mod formatter;
 mod mailbox;
 mod moves;
 mod parser;
 mod pos;
-mod square;
+pub mod square;
 
 pub use color::*;
+pub use formatter::*;
 pub use mailbox::*;
 pub use moves::*;
 pub use square::*;

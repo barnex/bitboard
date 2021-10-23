@@ -33,22 +33,3 @@ pub fn parse_charboard(s: &str) -> Result<[char; 64]> {
 	}
 	Ok(board)
 }
-
-pub fn format_board<I, T>(el: I) -> String
-where
-	I: Iterator<Item = T>,
-	T: fmt::Display,
-{
-	let collect: Vec<_> = el.collect();
-
-	let mut str = String::from("\n");
-	for r in (0..8).rev() {
-		str += &format!("{}", r + 1);
-		for c in 0..8 {
-			str.push(' ');
-			str += &(collect[pos(r, c).index64().unwrap()]).to_string();
-		}
-		str.push('\n')
-	}
-	str + "  a b c d e f g h"
-}
