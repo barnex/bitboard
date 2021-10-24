@@ -21,7 +21,7 @@ use Square::*;
 */
 
 #[test]
-fn is_check() {
+fn test_check() {
 	let b1 = Mailbox::from_str(
 		r"
 		. . . k . . . .
@@ -36,10 +36,10 @@ fn is_check() {
 	)
 	.unwrap();
 
-	assert_eq!(b1.is_check(White), true);
-	assert_eq!(b1.is_check(Black), false);
-	assert_eq!(b1.is_mate(White), true);
-	assert_eq!(b1.is_mate(Black), false);
+	assert_eq!(is_check(&b1, White), true);
+	assert_eq!(is_check(&b1, Black), false);
+	assert_eq!(is_mate(&b1, White), true);
+	assert_eq!(is_mate(&b1, Black), false);
 }
 
 #[test]

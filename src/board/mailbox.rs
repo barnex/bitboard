@@ -1,10 +1,10 @@
 use super::internal::*;
 use std::convert::TryFrom;
+use std::ops::Add;
 use std::ops::Index;
 use std::ops::IndexMut;
 use std::str::FromStr;
 use Square::*;
-use std::ops::Add;
 
 /// A straightforward board implementation used for testing BitBoard.
 #[derive(Eq, PartialEq, Clone)]
@@ -75,10 +75,10 @@ RNBQKBNR
 
 		if let Some(player) = self[mv.from].color() {
 			// ... checkmate?
-			if self.with_move(mv).is_mate(player.opposite()) {
+			if is_mate(&self.with_move(mv), player.opposite()) {
 				str += "#";
 			// ...or just check?
-			} else if self.with_move(mv).is_check(player.opposite()) {
+			} else if is_check(&self.with_move(mv), player.opposite()) {
 				str += "+";
 			}
 		}
@@ -252,8 +252,7 @@ RNBQKBNR
 	];
 
 	pub fn material_value(&self) -> i32 {
-		self
-			.iter()
+		self.iter()
 			.map(|(_, sq)| sq.material_value())
 			.reduce(i32::add)
 			.unwrap_or(0)
@@ -275,16 +274,6 @@ impl Board for Mailbox {
 
 	fn material_value(&self) -> i32 {
 		self.material_value()
-	}
-
-	// argh, cannot be a defaoult impl, size of Self.
-	fn is_mate(&self, victim: Color) -> bool {
-		for mv in self.all_moves(victim) {
-			if !self.with_move(mv).is_check(victim) {
-				return false;
-			}
-		}
-		true
 	}
 }
 

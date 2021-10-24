@@ -1,7 +1,7 @@
-unstable_features=true
+#unstable_features=true
 max_width=120
 hard_tabs=true
-enum_discrim_align_threshold=20
-struct_field_align_threshold=20
-fn_args_layout="Compressed"
-overflow_delimited_expr=true
+#enum_discrim_align_threshold=20
+#struct_field_align_threshold=20
+#fn_args_layout="Compressed"
+#overflow_delimited_expr=true

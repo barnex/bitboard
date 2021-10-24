@@ -11,7 +11,7 @@ pub fn evaluate_moves(board: &impl Board, player: Color, depth: u32) -> SmVec<(M
 	let mut mv_value = board
 		.all_moves(player)
 		.iter()
-		.filter(|&mv| !board.with_move(*mv).is_check(player))
+		.filter(|&mv| !is_check(&board.with_move(*mv), player))
 		.map(|&mv| (mv, player.sign() * negamax(board, depth, player, mv)))
 		.collect::<SmVec<_>>();
 

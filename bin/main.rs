@@ -25,7 +25,7 @@ fn play_game() -> Option<Color> {
 			return Some(winner);
 		}
 
-		if board.is_check(player) {
+		if is_check(&board, player) {
 			println!("{} checked their self", player);
 			return Some(player.opposite());
 		}
@@ -67,9 +67,9 @@ fn pick_move(mv_value: &[(Move, i32)]) -> Move {
 	equal_value[rand % equal_value.len()].0
 }
 
-fn winner(board: &Mailbox) -> Option<Color> {
+fn winner(board: &impl Board) -> Option<Color> {
 	for player in [White, Black] {
-		if board.is_mate(player) {
+		if is_mate(board, player) {
 			return Some(player.opposite());
 		}
 	}
