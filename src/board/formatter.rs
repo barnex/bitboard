@@ -39,7 +39,17 @@ pub fn print_ansi(board: &Mailbox, mark: &Set<Pos>) {
 
 			print!("{}", RESET);
 			if pos.col() == 0 {
-				print!("{}{}{}{}{}{}{}{}", FG, color_of(pos), HALF_R, BG, color_of(pos), FG, BLACK, piece);
+				print!(
+					"{}{}{}{}{}{}{}{}",
+					FG,
+					color_of(pos),
+					HALF_R,
+					BG,
+					color_of(pos),
+					FG,
+					BLACK,
+					piece
+				);
 			} else {
 				print!(
 					"{}{}{}{}{}{}{}{}{}{}",

@@ -1,7 +1,7 @@
 mod internal;
 
 mod negamax;
-mod search;
 mod piece_value;
+mod search;
 
 pub use search::*;

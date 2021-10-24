@@ -3,5 +3,6 @@
 		"discrim",
 		"smallvec",
 		"struct"
-	]
+	],
+	"cSpell.enabled": false
 }

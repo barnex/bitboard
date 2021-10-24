@@ -4,6 +4,7 @@ use std::ops::Index;
 use std::ops::IndexMut;
 use std::str::FromStr;
 use Square::*;
+use std::ops::Add;
 
 /// A straightforward board implementation used for testing BitBoard.
 #[derive(Eq, PartialEq, Clone)]
@@ -23,9 +24,9 @@ impl Mailbox {
 		Self { board }
 	}
 
-	pub fn starting_position() -> Self{
-	Self::from_str(
-		r"
+	pub fn starting_position() -> Self {
+		Self::from_str(
+			r"
 rnbqkbnr
 pppppppp
 ........
@@ -35,8 +36,8 @@ pppppppp
 PPPPPPPP
 RNBQKBNR
 	",
-	)
-	.unwrap()
+		)
+		.unwrap()
 	}
 
 	#[must_use]
@@ -73,12 +74,11 @@ RNBQKBNR
 		}
 
 		if let Some(player) = self[mv.from].color() {
-
 			// ... checkmate?
 			if self.with_move(mv).is_mate(player.opposite()) {
 				str += "#";
-				// ...or just check?
-			}else if self.with_move(mv).is_check(player.opposite()) {
+			// ...or just check?
+			} else if self.with_move(mv).is_check(player.opposite()) {
 				str += "+";
 			}
 		}
@@ -100,25 +100,6 @@ RNBQKBNR
 			}
 		}
 		moves
-	}
-
-	pub fn is_check(&self, victim: Color) -> bool {
-		let attacter = victim.opposite();
-		for mv in self.all_moves(attacter) {
-			if self[mv.to].mask(KIND_MASK) == KING {
-				return true;
-			}
-		}
-		false
-	}
-
-	pub fn is_mate(&self, victim: Color) -> bool {
-		for mv in self.all_moves(victim) {
-			if !self.with_move(mv).is_check(victim){
-				return false
-			}
-		}
-		false
 	}
 
 	pub fn moves_for(&self, pos: Pos) -> SmVec<Move> {
@@ -269,6 +250,42 @@ RNBQKBNR
 		delta(1, -2),
 		delta(1, 2),
 	];
+
+	pub fn material_value(&self) -> i32 {
+		self
+			.iter()
+			.map(|(_, sq)| sq.material_value())
+			.reduce(i32::add)
+			.unwrap_or(0)
+	}
+}
+
+impl Board for Mailbox {
+	fn all_moves(&self, player: Color) -> SmVec<Move> {
+		self.all_moves(player)
+	}
+
+	fn with_move(&self, mv: Move) -> Self {
+		self.with_move(mv)
+	}
+
+	fn at(&self, pos: Pos) -> Square {
+		self[pos]
+	}
+
+	fn material_value(&self) -> i32 {
+		self.material_value()
+	}
+
+	// argh, cannot be a defaoult impl, size of Self.
+	fn is_mate(&self, victim: Color) -> bool {
+		for mv in self.all_moves(victim) {
+			if !self.with_move(mv).is_check(victim) {
+				return false;
+			}
+		}
+		true
+	}
 }
 
 impl Index<Pos> for Mailbox {

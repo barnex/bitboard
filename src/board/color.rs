@@ -28,8 +28,8 @@ impl Color {
 	}
 }
 
-impl fmt::Display for Color{
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:?}", self)
-    }
+impl fmt::Display for Color {
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+		write!(f, "{:?}", self)
+	}
 }

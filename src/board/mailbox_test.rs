@@ -1,4 +1,5 @@
 use super::internal::*;
+use Color::*;
 use Square::*;
 
 /* COPY-PASTE ZONE
@@ -18,6 +19,28 @@ use Square::*;
 		",
 	);
 */
+
+#[test]
+fn is_check() {
+	let b1 = Mailbox::from_str(
+		r"
+		. . . k . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. r . . . . . .
+		. . r . . . . K
+		",
+	)
+	.unwrap();
+
+	assert_eq!(b1.is_check(White), true);
+	assert_eq!(b1.is_check(Black), false);
+	assert_eq!(b1.is_mate(White), true);
+	assert_eq!(b1.is_mate(Black), false);
+}
 
 #[test]
 fn king_moves() {
@@ -383,6 +406,8 @@ fn check_moves_(who: &str, board: &Mailbox, have: Set<Pos>, want: &str) {
 
 // render `board` as text, but mark destinations as `x`.
 fn mark_moves(board: &Mailbox, dests: &Set<Pos>) -> String {
-	let marks = board.iter().map(|(pos, piece)| if dests.contains(&pos) { 'x' } else { piece.to_char() });
+	let marks = board
+		.iter()
+		.map(|(pos, piece)| if dests.contains(&pos) { 'x' } else { piece.to_char() });
 	format_board(marks)
 }
