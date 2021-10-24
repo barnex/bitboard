@@ -173,17 +173,17 @@ RNBQKBNR
 	}
 
 	fn bisshop_moves(&self, dests: &mut SmVec<Pos>, allowed: u8, pos: Pos) {
-		self.march(dests, allowed, pos, NorthEast);
-		self.march(dests, allowed, pos, NorthWest);
-		self.march(dests, allowed, pos, SouthEast);
-		self.march(dests, allowed, pos, SouthWest);
+		self.march(dests, allowed, pos, NORTH_EAST);
+		self.march(dests, allowed, pos, NORTH_WEST);
+		self.march(dests, allowed, pos, SOUTH_EAST);
+		self.march(dests, allowed, pos, SOUTH_WEST);
 	}
 
 	fn rook_moves(&self, dests: &mut SmVec<Pos>, allowed: u8, pos: Pos) {
-		self.march(dests, allowed, pos, North);
-		self.march(dests, allowed, pos, East);
-		self.march(dests, allowed, pos, South);
-		self.march(dests, allowed, pos, West);
+		self.march(dests, allowed, pos, NORTH);
+		self.march(dests, allowed, pos, EAST);
+		self.march(dests, allowed, pos, SOUTH);
+		self.march(dests, allowed, pos, WEST);
 	}
 
 	fn w_pawn_moves(&self, dests: &mut SmVec<Pos>, pos: Pos) {

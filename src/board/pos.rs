@@ -18,14 +18,14 @@ pub const fn delta(row: i8, col: i8) -> u8 {
 	((row as u8) << 4).wrapping_add(col as u8)
 }
 
-pub const North: u8 = delta(1, 0);
-pub const NorthEast: u8 = delta(1, 1);
-pub const East: u8 = delta(0, 1);
-pub const SouthEast: u8 = delta(-1, 1);
-pub const South: u8 = delta(-1, 0);
-pub const SouthWest: u8 = delta(-1, -1);
-pub const West: u8 = delta(0, -1);
-pub const NorthWest: u8 = delta(1, -1);
+pub const NORTH: u8 = delta(1, 0);
+pub const NORTH_EAST: u8 = delta(1, 1);
+pub const EAST: u8 = delta(0, 1);
+pub const SOUTH_EAST: u8 = delta(-1, 1);
+pub const SOUTH: u8 = delta(-1, 0);
+pub const SOUTH_WEST: u8 = delta(-1, -1);
+pub const WEST: u8 = delta(0, -1);
+pub const NORTH_WEST: u8 = delta(1, -1);
 
 impl Pos {
 	#[inline]

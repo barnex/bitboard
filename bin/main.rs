@@ -4,7 +4,7 @@ use std::time::SystemTime;
 use bitboard::*;
 use Color::*;
 
-const DEPTH: u32 = 1;
+const DEPTH: u32 = 3;
 
 fn main() {
 	match play_game(){
@@ -56,7 +56,7 @@ fn take_turn(board: Mailbox, player: Color) -> Mailbox {
 
 fn pick_move(mv_value: &[(Move, i32)])-> Move{
 	let best_value = mv_value.get(0).expect("at least one possible move").1;
-	let equal_value = mv_value.iter().filter(|(mv,v)|*v==best_value).collect::<Vec<_>>();
+	let equal_value = mv_value.iter().filter(|(_,v)|*v==best_value).collect::<Vec<_>>();
 	let rand = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_nanos() as usize;
 	equal_value[rand % equal_value.len()].0
 }

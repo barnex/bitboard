@@ -16,3 +16,7 @@ path = "bin/main.rs"
 anyhow = "1.0"
 smallvec = "1.6"
 fnv = "1.0"
+
+[profile.release]
+debug = 1
+lto = "fat"
