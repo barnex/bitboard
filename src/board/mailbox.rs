@@ -24,19 +24,7 @@ impl Mailbox {
 	}
 
 	pub fn starting_position() -> Self {
-		Self::from_str(
-			r"
-rnbqkbnr
-pppppppp
-........
-........
-........
-........
-PPPPPPPP
-RNBQKBNR
-	",
-		)
-		.unwrap()
+		starting_position::<Self>()
 	}
 
 	#[must_use]
@@ -249,10 +237,13 @@ RNBQKBNR
 		delta(1, -2),
 		delta(1, 2),
 	];
-
 }
 
 impl Board for Mailbox {
+	fn at(&self, pos: Pos) -> Square {
+		self[pos]
+	}
+
 	fn all_moves(&self, player: Color) -> SmVec<Move> {
 		self.all_moves(player)
 	}
@@ -261,8 +252,8 @@ impl Board for Mailbox {
 		self.with_move(mv)
 	}
 
-	fn at(&self, pos: Pos) -> Square {
-		self[pos]
+	fn set(&mut self, pos: Pos, sq: Square) {
+		self[pos] = sq
 	}
 }
 
@@ -306,6 +297,12 @@ impl FromStr for Mailbox {
 			board[pos] = piece;
 		}
 		Ok(board)
+	}
+}
+
+impl Default for Mailbox {
+	fn default() -> Self {
+		Self::new()
 	}
 }
 

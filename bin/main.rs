@@ -15,6 +15,9 @@ fn main() {
 
 fn play_game() -> Option<Color> {
 	let mut board = Mailbox::starting_position();
+	//let mut board: Mailbox = starting_position();
+
+	print_ansi(&board, &Set::default());
 
 	let mut player = White;
 	for ply in 0..100 {
@@ -40,7 +43,7 @@ fn take_turn(board: Mailbox, player: Color) -> Mailbox {
 	let mv_value = evaluate_moves(&board, player, DEPTH);
 	let elapsed = start.elapsed();
 
-	print_options(&board, player, &mv_value);
+	//print_options(&board, player, &mv_value);
 
 	let mv = pick_move(&mv_value);
 

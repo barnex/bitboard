@@ -1,9 +1,10 @@
 pub use super::internal::*;
 
-pub trait Board {
+pub trait Board: Default {
+	fn at(&self, pos: Pos) -> Square;
+	fn set(&mut self, pos: Pos, sq: Square);
 	fn all_moves(&self, player: Color) -> SmVec<Move>;
 	fn with_move(&self, mv: Move) -> Self;
-	fn at(&self, pos: Pos) -> Square;
 }
 
 /// Check if player is checkmate.
@@ -31,4 +32,33 @@ pub fn is_check(board: &impl Board, player: Color) -> bool {
 		}
 	}
 	false
+}
+
+pub fn starting_position<B: Board>() -> B {
+	use Square::*;
+	let mut b = B::default();
+	b.set(pos(0, 0), WRook);
+	b.set(pos(0, 1), WKnight);
+	b.set(pos(0, 2), WBisshop);
+	b.set(pos(0, 3), WKing);
+	b.set(pos(0, 4), WQueen);
+	b.set(pos(0, 5), WBisshop);
+	b.set(pos(0, 6), WKnight);
+	b.set(pos(0, 7), WRook);
+
+	for c in 0..8 {
+		b.set(pos(1, c), WPawn);
+		b.set(pos(6, c), BPawn);
+	}
+
+	b.set(pos(7, 0), BRook);
+	b.set(pos(7, 1), BKnight);
+	b.set(pos(7, 2), BBisshop);
+	b.set(pos(7, 3), BKing);
+	b.set(pos(7, 4), BQueen);
+	b.set(pos(7, 5), BBisshop);
+	b.set(pos(7, 6), BKnight);
+	b.set(pos(7, 7), BRook);
+
+	b
 }
