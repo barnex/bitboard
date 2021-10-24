@@ -1,4 +1,5 @@
 pub use std::fmt;
+pub use std::ops::Index;
 pub use std::str::FromStr;
 
 #[allow(unused)]

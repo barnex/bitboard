@@ -45,33 +45,6 @@ impl Mailbox {
 			.filter(|(pos, _)| pos.is_valid())
 	}
 
-	/// Full chess notation of move `mv`. E.g.:
-	///   p b2c3 xn +
-	pub fn annotate_move(&self, mv: Move) -> String {
-		// piece...
-		let mut str = self[mv.from].to_string().to_ascii_uppercase();
-
-		// ...moves to
-		str += &mv.to_string();
-
-		// ... captures?
-		if !self[mv.to].has_bit(EMPTY) {
-			str += "x";
-			str += &self[mv.to].to_string().to_ascii_uppercase();
-		}
-
-		if let Some(player) = self[mv.from].color() {
-			// ... checkmate?
-			if is_mate(&self.with_move(mv), player.opposite()) {
-				str += "#";
-			// ...or just check?
-			} else if is_check(&self.with_move(mv), player.opposite()) {
-				str += "+";
-			}
-		}
-		str
-	}
-
 	/// TODO: take color, not mask
 	pub fn all_moves(&self, player: Color) -> SmVec<Move> {
 		let mask = player.mask();

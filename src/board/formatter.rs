@@ -19,7 +19,7 @@ where
 	str + "  a b c d e f g h"
 }
 
-pub fn print_ansi(board: &Mailbox, mark: &Set<Pos>) {
+pub fn print_ansi(board: &impl Board, mark: &Set<Pos>) {
 	let is_light = |p: Pos| (p.row() + p.col()) % 2 == 0;
 	let color_of = |p: Pos| match (is_light(p), mark.contains(&p)) {
 		(false, false) => DARK,
@@ -35,7 +35,7 @@ pub fn print_ansi(board: &Mailbox, mark: &Set<Pos>) {
 
 		for c in 0..8 {
 			let pos = pos(r, c);
-			let piece = board[pos].unicode();
+			let piece = board.at(pos).unicode();
 
 			print!("{}", RESET);
 			if pos.col() == 0 {
@@ -79,10 +79,6 @@ pub fn print_ansi(board: &Mailbox, mark: &Set<Pos>) {
 const RESET: &str = "\x1b[39;49m";
 const HALF_L: &str = "\u{258C}";
 const HALF_R: &str = "\u{2590}";
-const BG_LIGHT: &str = "\x1b[48;5;255m";
-const BG_DARK: &str = "\x1b[48;5;250m";
-const FG_LIGHT: &str = "\x1b[38;5;255m";
-const FG_BLACK: &str = "\x1b[38;5;232m";
 const FG_DARK: &str = "\x1b[38;5;242m";
 const BG: &str = "\x1b[48;5;";
 const FG: &str = "\x1b[38;5;";
@@ -91,3 +87,7 @@ const LIGHT: &str = "231m";
 const BLACK: &str = "232m";
 const MARK_DARK: &str = "49m";
 const MARK_LIGHT: &str = "193m";
+//const BG_LIGHT: &str = "\x1b[48;5;255m";
+//const BG_DARK: &str = "\x1b[48;5;250m";
+//const FG_LIGHT: &str = "\x1b[38;5;255m";
+//const FG_BLACK: &str = "\x1b[38;5;232m";
