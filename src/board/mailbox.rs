@@ -23,6 +23,22 @@ impl Mailbox {
 		Self { board }
 	}
 
+	pub fn starting_position() -> Self{
+	Self::from_str(
+		r"
+rnbqkbnr
+pppppppp
+........
+........
+........
+........
+PPPPPPPP
+RNBQKBNR
+	",
+	)
+	.unwrap()
+	}
+
 	#[must_use]
 	pub fn with_move(&self, mv: Move) -> Self {
 		debug_assert!(mv.is_valid());
@@ -58,6 +74,7 @@ impl Mailbox {
 		str
 	}
 
+	/// TODO: take color, not mask
 	pub fn all_moves(&self, mask: u8) -> SmVec<Move> {
 		debug_assert!(mask == WHITE || mask == BLACK);
 

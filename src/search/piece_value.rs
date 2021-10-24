@@ -19,14 +19,14 @@ pub fn piece_value(piece: Square) -> (i32, i32) {
 		WBisshop => (3, 0),
 		WRook => (5, 0),
 		WQueen => (9, 0),
-		WKing => (999, 0), // TODO: remove
+		WKing => (1000, 0), // TODO: remove
 
 		BPawn => (0, 1),
 		BKnight => (0, 3),
 		BBisshop => (0, 3),
 		BRook => (0, 5),
 		BQueen => (0, 9),
-		BKing => (0, 999), // TODO: remove
+		BKing => (0, 1000), // TODO: remove
 
 		_ => (0, 0),
 	}

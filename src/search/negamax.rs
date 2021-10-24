@@ -1,11 +1,26 @@
 use super::internal::*;
 
+const INF: i32 = 1_000_000; // effectively infinite value
+
 pub fn negamax(board: &Mailbox, depth: u32, c: Color, mv: Move) -> i32 {
+
+	//if board[mv.to].mask(KIND_MASK) == KING{
+	//	return - INF  * board[mv.to].color().map_or(0, Color::sign)
+	//}
+
+
 	let board = board.with_move(mv);
 	if depth == 0{
 		return material_value_white(&board);
 	}
-	todo!()
+
+	let mut value = INF;
+
+	for mv in board.all_moves(c.opposite().mask()){
+		value = i32::min(value, -negamax(&board, depth-1, c.opposite(), mv))
+	}
+
+	value
 }
 
 /*

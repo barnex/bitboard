@@ -28,6 +28,7 @@ pub fn print_ansi(board: &Mailbox, mark: &Set<Pos>) {
 		(true, true) => MARK_LIGHT,
 	};
 
+	println!("{}{}{}{}", RESET, FG_DARK, "  a b c d e f g h", RESET);
 	for r in (0..8).rev() {
 		// row number
 		print!("{}{}{}{}", RESET, FG_DARK, r + 1, RESET);
@@ -58,7 +59,8 @@ pub fn print_ansi(board: &Mailbox, mark: &Set<Pos>) {
 
 		// print final transition, end of row
 		print!("{}{}{}{}", RESET, FG, color_of(pos(r, 7)), HALF_L);
-		println!("{}", RESET);
+		// row number, again
+		println!("{}{}{}{}", RESET, FG_DARK, r + 1, RESET);
 	}
 	// print column numbers
 	println!("{}{}{}{}", RESET, FG_DARK, "  a b c d e f g h", RESET);
@@ -71,7 +73,7 @@ const BG_LIGHT: &str = "\x1b[48;5;255m";
 const BG_DARK: &str = "\x1b[48;5;250m";
 const FG_LIGHT: &str = "\x1b[38;5;255m";
 const FG_BLACK: &str = "\x1b[38;5;232m";
-const FG_DARK: &str = "\x1b[38;5;250m";
+const FG_DARK: &str = "\x1b[38;5;242m";
 const BG: &str = "\x1b[48;5;";
 const FG: &str = "\x1b[38;5;";
 const DARK: &str = "252m";
