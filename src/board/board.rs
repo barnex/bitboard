@@ -4,8 +4,6 @@ pub trait Board {
 	fn all_moves(&self, player: Color) -> SmVec<Move>;
 	fn with_move(&self, mv: Move) -> Self;
 	fn at(&self, pos: Pos) -> Square;
-
-	fn material_value(&self) -> i32;
 }
 
 // argh, cannot be a defaoult impl, size of Self.

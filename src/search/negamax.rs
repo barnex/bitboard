@@ -9,7 +9,7 @@ pub fn negamax(board: &impl Board, depth: u32, c: Color, mv: Move) -> i32 {
 
 	let board = board.with_move(mv);
 	if depth == 0 {
-		return board.material_value()
+		return material_value(&board)
 	}
 
 	let mut value = INF;

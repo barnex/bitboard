@@ -251,12 +251,6 @@ RNBQKBNR
 		delta(1, 2),
 	];
 
-	pub fn material_value(&self) -> i32 {
-		self.iter()
-			.map(|(_, sq)| sq.material_value())
-			.reduce(i32::add)
-			.unwrap_or(0)
-	}
 }
 
 impl Board for Mailbox {
@@ -270,10 +264,6 @@ impl Board for Mailbox {
 
 	fn at(&self, pos: Pos) -> Square {
 		self[pos]
-	}
-
-	fn material_value(&self) -> i32 {
-		self.material_value()
 	}
 }
 
