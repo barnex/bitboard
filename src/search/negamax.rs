@@ -16,7 +16,7 @@ pub fn negamax(board: &Mailbox, depth: u32, c: Color, mv: Move) -> i32 {
 
 	let mut value = INF;
 
-	for mv in board.all_moves(c.opposite().mask()){
+	for mv in board.all_moves(c.opposite()){
 		value = i32::min(value, -negamax(&board, depth-1, c.opposite(), mv))
 	}
 

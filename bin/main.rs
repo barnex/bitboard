@@ -1,9 +1,10 @@
-use std::time::Instant;
+use std::{time::Instant};
+use std::time::SystemTime;
 
 use bitboard::*;
 use Color::*;
 
-const DEPTH: u32 = 4;
+const DEPTH: u32 = 1;
 
 fn main() {
 	match play_game(){
@@ -43,7 +44,7 @@ fn take_turn(board: Mailbox, player: Color) -> Mailbox {
 
 	print_options(&board, player, &mv_value);
 
-	let mv = mv_value.get(0).expect("at least one possible move").0;
+	let mv = pick_move(&mv_value);
 
 	println!("{:?} plays {} in {}ms", player, board.annotate_move(mv), elapsed.as_millis());
 	let board = board.with_move(mv);
@@ -51,6 +52,13 @@ fn take_turn(board: Mailbox, player: Color) -> Mailbox {
 	print_ansi(&board, &mark);
 	println!();
 	board
+}
+
+fn pick_move(mv_value: &[(Move, i32)])-> Move{
+	let best_value = mv_value.get(0).expect("at least one possible move").1;
+	let equal_value = mv_value.iter().filter(|(mv,v)|*v==best_value).collect::<Vec<_>>();
+	let rand = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_nanos() as usize;
+	equal_value[rand % equal_value.len()].0
 }
 
 fn winner(board: &Mailbox)-> Option<Color>{

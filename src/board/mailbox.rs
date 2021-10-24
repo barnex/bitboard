@@ -60,14 +60,25 @@ RNBQKBNR
 	/// Full chess notation of move `mv`. E.g.:
 	///   p b2c3 xn +
 	pub fn annotate_move(&self, mv: Move) -> String {
+		// piece...
 		let mut str = self[mv.from].to_string().to_ascii_uppercase();
+
+		// ...moves to
 		str += &mv.to_string();
+
+		// ... captures?
 		if !self[mv.to].has_bit(EMPTY) {
 			str += "x";
 			str += &self[mv.to].to_string().to_ascii_uppercase();
 		}
+
 		if let Some(player) = self[mv.from].color() {
-			if self.with_move(mv).is_check(player.opposite()) {
+
+			// ... checkmate?
+			if self.with_move(mv).is_mate(player.opposite()) {
+				str += "#";
+				// ...or just check?
+			}else if self.with_move(mv).is_check(player.opposite()) {
 				str += "+";
 			}
 		}
@@ -75,7 +86,8 @@ RNBQKBNR
 	}
 
 	/// TODO: take color, not mask
-	pub fn all_moves(&self, mask: u8) -> SmVec<Move> {
+	pub fn all_moves(&self, player: Color) -> SmVec<Move> {
+		let mask = player.mask();
 		debug_assert!(mask == WHITE || mask == BLACK);
 
 		let mut moves = SmVec::new();
@@ -92,10 +104,18 @@ RNBQKBNR
 
 	pub fn is_check(&self, victim: Color) -> bool {
 		let attacter = victim.opposite();
-		let victim = victim.mask();
-		for mv in self.all_moves(attacter.mask()) {
+		for mv in self.all_moves(attacter) {
 			if self[mv.to].mask(KIND_MASK) == KING {
 				return true;
+			}
+		}
+		false
+	}
+
+	pub fn is_mate(&self, victim: Color) -> bool {
+		for mv in self.all_moves(victim) {
+			if !self.with_move(mv).is_check(victim){
+				return false
 			}
 		}
 		false
