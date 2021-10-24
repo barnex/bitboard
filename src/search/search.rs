@@ -8,6 +8,7 @@ pub fn evaluate_moves(board: &Mailbox, player: Color, depth: u32) -> SmVec<(Move
 	let mut mv_value = board
 		.all_moves(player)
 		.iter()
+		.filter(|&mv|!board.with_move(*mv).is_check(player))
 		.map(|&mv| (mv, player.sign() * negamax(board, depth, player, mv)))
 		.collect::<SmVec<_>>();
 

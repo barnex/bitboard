@@ -44,7 +44,7 @@ fn take_turn(board: Mailbox, player: Color) -> Mailbox {
 
 	print_options(&board, player, &mv_value);
 
-	let mv = pick_move(&mv_value);
+	let mv = pick_move(player, &mv_value);
 
 	println!("{:?} plays {} in {}ms", player, board.annotate_move(mv), elapsed.as_millis());
 	let board = board.with_move(mv);
@@ -54,7 +54,7 @@ fn take_turn(board: Mailbox, player: Color) -> Mailbox {
 	board
 }
 
-fn pick_move(mv_value: &[(Move, i32)])-> Move{
+fn pick_move(player: Color, mv_value: &[(Move, i32)])-> Move{
 	let best_value = mv_value.get(0).expect("at least one possible move").1;
 	let equal_value = mv_value.iter().filter(|(_,v)|*v==best_value).collect::<Vec<_>>();
 	let rand = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_nanos() as usize;
