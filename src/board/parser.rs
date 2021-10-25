@@ -1,5 +1,4 @@
 use super::internal::*;
-use core::convert::TryFrom;
 
 /// Parse a chess board from the following notation:
 ///

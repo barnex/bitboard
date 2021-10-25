@@ -20,8 +20,6 @@ pub enum Square {
 	BBisshop,
 	BQueen,
 	BKing,
-
-	OffBoard,
 }
 
 use Square::*;
@@ -41,10 +39,6 @@ impl Square {
 
 	pub fn is_empty(self) -> bool {
 		self == Empty
-	}
-
-	pub fn is_valid(self) -> bool {
-		self != Square::OffBoard
 	}
 
 	pub fn color(self) -> Option<Color> {
@@ -71,7 +65,6 @@ impl Square {
 			BBisshop => 10,
 			BQueen => 11,
 			BKing => 12,
-			OffBoard => 13,
 		}
 	}
 
@@ -122,7 +115,6 @@ impl TryFrom<char> for Square {
 			'b' => BBisshop,
 			'q' => BQueen,
 			'k' => BKing,
-			'?' => OffBoard,
 			invalid => return Err(format_err!("invalid piece: {}", invalid)),
 		})
 	}

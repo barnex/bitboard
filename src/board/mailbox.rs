@@ -17,11 +17,7 @@ pub struct Mailbox {
 impl Mailbox {
 	/// Empty board.
 	pub fn new() -> Self {
-		let mut board = [OffBoard; 256];
-		for i in 0..64 {
-			board[Pos::from_index64(i).unwrap().index256()] = Empty;
-		}
-		Self { board }
+		Self { board: [Empty; 256] }
 	}
 
 	pub fn starting_position() -> Self {
