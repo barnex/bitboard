@@ -3,13 +3,15 @@ use super::internal::*;
 const INF: i32 = 1_000_000; // effectively infinite value
 
 pub fn negamax(board: &impl Board, depth: u32, c: Color, mv: Move) -> i32 {
+	debug_assert!(depth != 0);
+
 	//if board[mv.to].mask(KIND_MASK) == KING{
 	//	return - INF  * board[mv.to].color().map_or(0, Color::sign)
 	//}
 
 	let board = board.with_move(mv);
-	if depth == 0 {
-		return material_value(&board)
+	if depth == 1 {
+		return material_value(&board);
 	}
 
 	let mut value = INF;

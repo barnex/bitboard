@@ -4,7 +4,7 @@ use std::time::SystemTime;
 use bitboard::*;
 use Color::*;
 
-const DEPTH: u32 = 3;
+const DEPTH: u32 = 2;
 
 fn main() {
 	match play_game() {
