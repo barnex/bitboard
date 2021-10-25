@@ -15,7 +15,7 @@ fn random_boards(n: usize) -> Vec<Mailbox> {
 			let r = rng.gen_range(0..8) as u8;
 			let c = rng.gen_range(0..8) as u8;
 			let pos = pos(r, c);
-			if !board.at(pos).has_bit(KING) {
+			if !board.at(pos).is_king() {
 				board.set(pos, Square::Empty)
 			}
 		}
@@ -25,7 +25,7 @@ fn random_boards(n: usize) -> Vec<Mailbox> {
 			let moves = board.all_moves(player);
 			if moves.len() != 0 {
 				let mv = moves[rng.gen_range(0..moves.len())];
-				if !board.at(mv.to).has_bit(KING) {
+				if !board.at(mv.to).is_king() {
 					board.do_move(mv)
 				}
 			}

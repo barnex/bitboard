@@ -30,13 +30,13 @@ const WHITE: u8 = 0b_00_10_000;
 const BLACK: u8 = 0b_00_01_000;
 const COLOR_MASK: u8 = 0b_00_11_000;
 
-pub const PAWN: u8 = 0;
-pub const ROOK: u8 = 1;
-pub const KNIGHT: u8 = 2;
-pub const BISSHOP: u8 = 3;
-pub const QUEEN: u8 = 4;
-pub const KING: u8 = 5;
-pub const KIND_MASK: u8 = 0b111;
+const PAWN: u8 = 0;
+const ROOK: u8 = 1;
+const KNIGHT: u8 = 2;
+const BISSHOP: u8 = 3;
+const QUEEN: u8 = 4;
+const KING: u8 = 5;
+const KIND_MASK: u8 = 0b111;
 
 use Square::*;
 
@@ -53,9 +53,9 @@ impl Square {
 		self.into()
 	}
 
-	pub fn has_bit(self, mask: u8) -> bool {
-		(self as u8) & mask != 0
-	}
+	//pub fn has_bit(self, mask: u8) -> bool {
+	//	(self as u8) & mask != 0
+	//}
 
 	pub fn mask(self, mask: u8) -> u8 {
 		(self as u8) & mask
@@ -93,6 +93,14 @@ impl Square {
 	pub fn is_black(self) -> bool {
 		(self as u8 & BLACK) != 0
 	}
+
+	pub fn is_king(self) -> bool {
+		match self {
+			WKing | BKing => true,
+			_ => false,
+		}
+	}
+
 	pub fn unicode(self) -> char {
 		match self {
 			Empty => ' ',

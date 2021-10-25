@@ -27,7 +27,7 @@ pub fn is_mate(board: &impl Board, player: Color) -> bool {
 pub fn is_check(board: &impl Board, player: Color) -> bool {
 	let attacter = player.opposite();
 	for mv in board.all_moves(attacter) {
-		if board.at(mv.to).mask(KIND_MASK) == KING {
+		if board.at(mv.to).is_king() {
 			return true;
 		}
 	}
