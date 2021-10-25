@@ -44,21 +44,13 @@ impl Square {
 	pub const ALL: [Square; 12] = [
 		WPawn, WRook, WKnight, WBisshop, WQueen, WKing, BPawn, BRook, BKnight, BBisshop, BQueen, BKing,
 	];
-	const ASCII: [char; 12] = ['P', 'R', 'N', 'B', 'Q', 'K', 'p', 'r', 'n', 'b', 'q', 'k'];
-	const UNICODE: [char; 12] = ['♙', '♖', '♘', '♗', '♕', '♔', '♟', '♜', '♞', '♝', '♛', '♚'];
+	const ASCII: [char; 14] = ['.', 'P', 'R', 'N', 'B', 'Q', 'K', 'p', 'r', 'n', 'b', 'q', 'k', '?'];
+	const UNICODE: [char; 14] = [' ', '♙', '♖', '♘', '♗', '♕', '♔', '♟', '♜', '♞', '♝', '♛', '♚', '?'];
 
 	/// Piece representation following https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation.
 	/// `None` is represented as '.', `OffBoard` as `?`.
 	pub fn to_char(self) -> char {
 		self.into()
-	}
-
-	//pub fn has_bit(self, mask: u8) -> bool {
-	//	(self as u8) & mask != 0
-	//}
-
-	pub fn mask(self, mask: u8) -> u8 {
-		(self as u8) & mask
 	}
 
 	pub fn is_empty(self) -> bool {
@@ -69,29 +61,36 @@ impl Square {
 		self != Square::OffBoard
 	}
 
-	pub fn opt_color(self) -> u8 {
-		(self as u8) & COLOR_MASK
-	}
-
 	pub fn color(self) -> Option<Color> {
 		use Color::*;
-		match self.opt_color() {
-			WHITE => Some(White),
-			BLACK => Some(Black),
+		match self {
+			WPawn | WRook | WKnight | WBisshop | WQueen | WKing => Some(White),
+			BPawn | BRook | BKnight | BBisshop | BQueen | BKing => Some(Black),
 			_ => None,
+		}
+	}
+
+	pub fn index(self) -> usize {
+		match self {
+			Empty => 0,
+			WPawn => 1,
+			WRook => 2,
+			WKnight => 3,
+			WBisshop => 4,
+			WQueen => 5,
+			WKing => 6,
+			BPawn => 7,
+			BRook => 8,
+			BKnight => 9,
+			BBisshop => 10,
+			BQueen => 11,
+			BKing => 12,
+			OffBoard => 13,
 		}
 	}
 
 	pub fn is_color(self, color: Color) -> bool {
 		self.color() == Some(color)
-	}
-
-	pub fn is_white(self) -> bool {
-		(self as u8 & WHITE) != 0
-	}
-
-	pub fn is_black(self) -> bool {
-		(self as u8 & BLACK) != 0
 	}
 
 	pub fn is_king(self) -> bool {
@@ -102,15 +101,7 @@ impl Square {
 	}
 
 	pub fn unicode(self) -> char {
-		match self {
-			Empty => ' ',
-			OffBoard => '?',
-			valid => match valid.opt_color() {
-				WHITE => Self::UNICODE[(self as u8 & KIND_MASK) as usize],
-				BLACK => Self::UNICODE[(self as u8 & KIND_MASK) as usize + 6],
-				_ => unreachable!(),
-			},
-		}
+		Self::UNICODE[self.index()]
 	}
 }
 
@@ -122,16 +113,7 @@ impl fmt::Display for Square {
 
 impl Into<char> for Square {
 	fn into(self) -> char {
-		use Square::*;
-		match self {
-			Empty => '.',
-			OffBoard => '?',
-			valid => match valid.opt_color() {
-				WHITE => Self::ASCII[(self as u8 & KIND_MASK) as usize],
-				BLACK => Self::ASCII[(self as u8 & KIND_MASK) as usize + 6],
-				_ => unreachable!(),
-			},
-		}
+		Self::ASCII[self.index()]
 	}
 }
 
