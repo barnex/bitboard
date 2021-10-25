@@ -4,7 +4,7 @@ use super::internal::*;
 
 #[derive(Clone, Default)]
 pub struct BitBoard {
-	pieces: [u64; 12],
+	pieces: [u64; 13],
 }
 
 impl Board for BitBoard {
@@ -15,7 +15,7 @@ impl Board for BitBoard {
 				return Self::idx2piece(i);
 			}
 		}
-		Square::Empty
+		unreachable!()
 	}
 
 	fn set(&mut self, pos: Pos, sq: Square) {
@@ -30,13 +30,6 @@ impl Board for BitBoard {
 		}
 	}
 
-	// fn set_i(&mut self, pos: u8, : Square) {
-	// 	//let idx = Self::set_idx(sq);
-	// 	//if idx != 255{
-	// 	//    self.sets[i]
-	// 	//}
-	// }
-
 	fn all_moves(&self, player: Color) -> SmVec<Move> {
 		SmVec::new()
 	}
@@ -49,9 +42,31 @@ impl Board for BitBoard {
 	}
 }
 
+const I_EMPTY: usize = 0;
+const W_PAWN: usize = 1;
+const W_ROOK: usize = 2;
+const W_KNIGHT: usize = 3;
+const W_BISSHOP: usize = 4;
+const W_QUEEN: usize = 5;
+const W_KING: usize = 6;
+const B_PAWN: usize = 7;
+const B_ROOK: usize = 8;
+const B_KNIGHT: usize = 9;
+const B_BISSHOP: usize = 10;
+const B_QUEEN: usize = 11;
+const B_KING: usize = 12;
+
 impl BitBoard {
 	pub fn new() -> Self {
 		Self::default()
+	}
+
+	fn w_pawn_pushes(&self) -> u64 {
+		//let pawns = self.pieces[W_PAWN_I];
+		//let push1 = (pawns << 8 & self.pieces[EMPTY_I]);
+
+		//push1
+		0
 	}
 
 	fn clear(&mut self, pos: u8) {
@@ -64,37 +79,39 @@ impl BitBoard {
 	fn piece_idx(sq: Square) -> usize {
 		use Square::*;
 		match sq {
-			WPawn => 0,
-			WRook => 1,
-			WKnight => 2,
-			WBisshop => 3,
-			WQueen => 4,
-			WKing => 5,
-			BPawn => 6,
-			BRook => 7,
-			BKnight => 8,
-			BBisshop => 9,
-			BQueen => 10,
-			BKing => 11,
-			_ => 255,
+			Empty => I_EMPTY,
+			WPawn => W_PAWN,
+			WRook => W_ROOK,
+			WKnight => W_KNIGHT,
+			WBisshop => W_BISSHOP,
+			WQueen => W_QUEEN,
+			WKing => W_KING,
+			BPawn => B_PAWN,
+			BRook => B_ROOK,
+			BKnight => B_KNIGHT,
+			BBisshop => B_BISSHOP,
+			BQueen => B_QUEEN,
+			BKing => B_KING,
+			_ => unreachable!(),
 		}
 	}
 
 	fn idx2piece(idx: usize) -> Square {
 		use Square::*;
 		match idx {
-			0 => WPawn,
-			1 => WRook,
-			2 => WKnight,
-			3 => WBisshop,
-			4 => WQueen,
-			5 => WKing,
-			6 => BPawn,
-			7 => BRook,
-			8 => BKnight,
-			9 => BBisshop,
-			10 => BQueen,
-			11 => BKing,
+			I_EMPTY => Empty,
+			W_PAWN => WPawn,
+			W_ROOK => WRook,
+			W_KNIGHT => WKnight,
+			W_BISSHOP => WBisshop,
+			W_QUEEN => WQueen,
+			W_KING => WKing,
+			B_PAWN => BPawn,
+			B_ROOK => BRook,
+			B_KNIGHT => BKnight,
+			B_BISSHOP => BBisshop,
+			B_QUEEN => BQueen,
+			B_KING => BKing,
 			_ => unreachable!(),
 		}
 	}

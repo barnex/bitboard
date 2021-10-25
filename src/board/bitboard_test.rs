@@ -62,3 +62,25 @@ fn set_get() {
 		}
 	}
 }
+
+#[test]
+fn all_moves() {
+	use Color::*;
+
+	// for board in &random_boards(1000) {
+	// 	let mut bb = BitBoard::new();
+	// 	for (pos, sq) in board.iter() {
+	// 		bb.set(pos, sq);
+	// 	}
+
+	// 	for player in [White, Black] {
+	// 		let have = bb.all_moves(player);
+	// 		let want = board.all_moves(player);
+
+	// 		if have != want {
+	// 			print_ansi(board, &Set::default());
+	// 			assert_eq!(have, want);
+	// 		}
+	// 	}
+	// }
+}

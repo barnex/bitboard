@@ -1,6 +1,6 @@
 use super::internal::*;
 
-#[derive(Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Move {
 	pub from: Pos,
 	pub to: Pos,
@@ -27,6 +27,12 @@ impl Move {
 impl fmt::Display for Move {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
 		write!(f, "{}{}", self.from, self.to)
+	}
+}
+
+impl fmt::Debug for Move {
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+		write!(f, "{}", self)
 	}
 }
 
