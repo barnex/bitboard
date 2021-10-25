@@ -7,7 +7,7 @@ pub struct BitBoard {
 
 impl Board for BitBoard {
 	fn at(&self, pos: Pos) -> Square {
-		let mask = 1 << pos.must_index64();
+		let mask = 1 << pos.index();
 		for i in 0..self.pieces.len() {
 			if self.pieces[i] & mask != 0 {
 				return Self::idx2piece(i);
@@ -19,7 +19,7 @@ impl Board for BitBoard {
 	fn set(&mut self, pos: Pos, sq: Square) {
 		debug_assert!(pos.is_valid());
 
-		let pos = pos.must_index64() as u8;
+		let pos = pos.index() as u8;
 		self.clear(pos);
 
 		let idx = Self::piece_idx(sq);

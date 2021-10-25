@@ -24,7 +24,7 @@ pub fn parse_charboard(s: &str) -> Result<[char; 64]> {
 				return Err(format_err!("col out of range"));
 			}
 			let j = j as u8;
-			board[pos(7 - i, j).index64().unwrap()] = chr;
+			board[pos(7 - i, j).index()] = chr;
 		}
 	}
 	if max_line != 7 {

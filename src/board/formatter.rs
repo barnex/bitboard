@@ -12,7 +12,7 @@ where
 		str += &format!("{}", r + 1);
 		for c in 0..8 {
 			str.push(' ');
-			str += &(collect[pos(r, c).index64().unwrap()]).to_string();
+			str += &(collect[pos(r, c).index()]).to_string();
 		}
 		str.push('\n')
 	}

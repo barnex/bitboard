@@ -33,38 +33,19 @@ impl Pos {
 		Self(row << 4 | col)
 	}
 
-	/// Linear index (row-major).
-	/// In range 0..256, not necessarily valid.
-	pub fn index256(self) -> usize {
-		debug_assert!(self.is_valid());
-		self.0 as usize
-	}
-
-	/// Linear index (row-major) in range 0..64,
-	/// or None for invalid positions.
-	pub fn index64(self) -> Option<usize> {
-		match self.is_valid() {
-			true => Some((self.row() << 3 | self.col()) as usize),
-			false => None,
-		}
-	}
-
-	/// Linear index (row-major) in range 0..64,
-	/// assumes position is valid.
-	pub fn must_index64(self) -> usize {
+	/// Linear index (row-major) in range 0..64.
+	#[inline]
+	pub fn index(self) -> usize {
 		debug_assert!(self.is_valid());
 		(self.row() << 3 | self.col()) as usize
 	}
 
 	/// Convert row-major index (in range 0..64) to a position.
-	pub fn from_index64(index: usize) -> Result<Self> {
-		if index < 64 {
-			let row = (index >> 3) as u8;
-			let col = (index & 0b111) as u8;
-			Ok(pos(row, col))
-		} else {
-			Err(format_err!("position index out of bounds: {}", index))
-		}
+	pub fn from_index(index: usize) -> Self {
+		debug_assert!(index < 64);
+		let row = (index >> 3) as u8;
+		let col = (index & 0b111) as u8;
+		pos(row, col)
 	}
 
 	/// Row. In range 0..16, not necessarily valid.
@@ -107,12 +88,6 @@ impl Add<u8> for Pos {
 	}
 }
 
-impl From<usize> for Pos {
-	fn from(i: usize) -> Self {
-		Self(i as u8)
-	}
-}
-
 #[cfg(test)]
 mod test {
 	use super::*;
@@ -121,13 +96,6 @@ mod test {
 	fn row_col() {
 		assert_eq!(pos(3, 4).row(), 3);
 		assert_eq!(pos(3, 4).col(), 4);
-	}
-
-	#[test]
-	fn index() {
-		assert_eq!(pos(0, 1).index256(), 1);
-		assert_eq!(pos(1, 0).index256(), 16);
-		assert_eq!(pos(7, 7).index256(), 119);
 	}
 
 	#[test]

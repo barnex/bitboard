@@ -388,7 +388,7 @@ fn check_moves_(who: &str, board: &Mailbox, have: Set<Pos>, want: &str) {
 		.iter()
 		.enumerate()
 		.filter(|(_, &chr)| chr == 'x')
-		.map(|(i, _)| Pos::from_index64(i).unwrap())
+		.map(|(i, _)| Pos::from_index(i))
 		.collect();
 
 	if have != want {

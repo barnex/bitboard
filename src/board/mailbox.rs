@@ -9,15 +9,13 @@ use Square::*;
 /// A straightforward board implementation used for testing BitBoard.
 #[derive(Eq, PartialEq, Clone)]
 pub struct Mailbox {
-	// Layout using 0x88 indexing (https://en.wikipedia.org/wiki/0x88),
-	// and fully surrounded by `Offboard` Squares so that indexing can never go out of bounds.
-	board: [Square; 256],
+	board: [Square; 64],
 }
 
 impl Mailbox {
 	/// Empty board.
 	pub fn new() -> Self {
-		Self { board: [Empty; 256] }
+		Self { board: [Empty; 64] }
 	}
 
 	pub fn starting_position() -> Self {
@@ -41,7 +39,7 @@ impl Mailbox {
 		self.board
 			.iter()
 			.enumerate()
-			.map(|(i, piece)| (Pos::from(i), *piece))
+			.map(|(i, piece)| (Pos::from_index(i), *piece))
 			.filter(|(pos, _)| pos.is_valid())
 	}
 
@@ -232,14 +230,14 @@ impl Index<Pos> for Mailbox {
 
 	#[inline]
 	fn index(&self, pos: Pos) -> &Self::Output {
-		&self.board[pos.index256()]
+		&self.board[pos.index()]
 	}
 }
 
 impl IndexMut<Pos> for Mailbox {
 	#[inline]
 	fn index_mut(&mut self, pos: Pos) -> &mut Self::Output {
-		&mut self.board[pos.index256()]
+		&mut self.board[pos.index()]
 	}
 }
 
@@ -263,7 +261,10 @@ impl FromStr for Mailbox {
 		let chars = parse_charboard(s)?;
 		for (i, &chr) in chars.iter().enumerate() {
 			let piece = Square::try_from(chr)?;
-			let pos = Pos::from_index64(i)?;
+			if i >= 64 {
+				return Err(format_err!("line too long"));
+			}
+			let pos = Pos::from_index(i);
 			board[pos] = piece;
 		}
 		Ok(board)
