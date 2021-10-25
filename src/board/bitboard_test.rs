@@ -1,21 +1,10 @@
 use super::internal::*;
-//use Color::*;
-//use Square::*;
 
-/* COPY-PASTE ZONE
-	check_all_moves(
-		Piece,
-		r"
-		. . . . . . . .
-		. . . . . . . .
-		. . . . . . . .
-		. . . . . . . .
-		. . . . . . . .
-		. . . . . . . .
-		. . . . . . . .
-		. . . . . . . .
-		",
-		r"
-		",
-	);
-*/
+
+#[test]
+fn set_get(){
+
+	for i in 0..1000{
+		//let 	
+	}
+}

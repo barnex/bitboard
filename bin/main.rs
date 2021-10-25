@@ -21,7 +21,12 @@ fn play_game() -> Option<Color> {
 	let mut player = White;
 	for ply in 0..100 {
 		println!("Ply {}", ply + 1);
-		board = take_turn(board, player);
+
+		if player == White {
+			board = take_turn(board, player, &material_value);
+		} else {
+			board = take_turn(board, player, &material_value);
+		}
 
 		if let Some(winner) = winner(&board) {
 			return Some(winner);
@@ -37,9 +42,13 @@ fn play_game() -> Option<Color> {
 	None
 }
 
-fn take_turn<B: Board>(board: B, player: Color) -> B {
+fn take_turn<B, F>(board: B, player: Color, val: &F) -> B
+where
+	B: Board,
+	F: Fn(&B) -> i32,
+{
 	let start = Instant::now();
-	let mv_value = evaluate_moves(&board, player, DEPTH);
+	let mv_value = evaluate_moves(&board, player, DEPTH, val);
 	let elapsed = start.elapsed();
 
 	//print_options(&board, player, &mv_value);

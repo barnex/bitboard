@@ -2,7 +2,11 @@ use super::internal::*;
 
 const INF: i32 = 1_000_000; // effectively infinite value
 
-pub fn negamax(board: &impl Board, depth: u32, c: Color, mv: Move) -> i32 {
+pub fn negamax<B, F>(board: &B, depth: u32, c: Color, mv: Move, val: &F) -> i32
+where
+	B: Board,
+	F: Fn(&B) -> i32,
+{
 	debug_assert!(depth != 0);
 
 	//if board[mv.to].mask(KIND_MASK) == KING{
@@ -11,13 +15,13 @@ pub fn negamax(board: &impl Board, depth: u32, c: Color, mv: Move) -> i32 {
 
 	let board = board.with_move(mv);
 	if depth == 1 {
-		return material_value(&board);
+		return val(&board);
 	}
 
 	let mut value = INF;
 
 	for mv in board.all_moves(c.opposite()) {
-		value = i32::min(value, -negamax(&board, depth - 1, c.opposite(), mv))
+		value = i32::min(value, -negamax(&board, depth - 1, c.opposite(), mv, val))
 	}
 
 	value
