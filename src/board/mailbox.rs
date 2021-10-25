@@ -52,14 +52,11 @@ impl Mailbox {
 
 	/// TODO: take color, not mask
 	pub fn all_moves(&self, player: Color) -> SmVec<Move> {
-		let mask = player.mask();
-		debug_assert!(mask == WHITE || mask == BLACK);
-
 		let mut moves = SmVec::new();
 		for r in 0..8 {
 			for c in 0..8 {
 				let pos = pos(r, c);
-				if self[pos].has_bit(mask) {
+				if self[pos].is_color(player) {
 					moves.extend(self.dests_for(pos).iter().map(|&dst| Move::new(pos, dst)))
 				}
 			}
@@ -81,12 +78,12 @@ impl Mailbox {
 			Empty => (),
 			WPawn => self.w_pawn_moves(dst, pos),
 			BPawn => self.b_pawn_moves(dst, pos),
-			WRook => self.rook_moves(dst, BLACK, pos),
-			BRook => self.rook_moves(dst, WHITE, pos),
-			WBisshop => self.bisshop_moves(dst, BLACK, pos),
-			BBisshop => self.bisshop_moves(dst, WHITE, pos),
-			WQueen => self.queen_moves(dst, BLACK, pos),
-			BQueen => self.queen_moves(dst, WHITE, pos),
+			WRook => self.rook_moves(dst, White, pos),
+			BRook => self.rook_moves(dst, Black, pos),
+			WBisshop => self.bisshop_moves(dst, White, pos),
+			BBisshop => self.bisshop_moves(dst, Black, pos),
+			WQueen => self.queen_moves(dst, White, pos),
+			BQueen => self.queen_moves(dst, Black, pos),
 			WKnight => self.w_knight_moves(dst, pos),
 			BKnight => self.b_knight_moves(dst, pos),
 			WKing => self.w_king_moves(dst, pos),
@@ -113,32 +110,32 @@ impl Mailbox {
 		self.jump(dests, pos, Self::KNIGHT_JUMPS, Black)
 	}
 
-	fn queen_moves(&self, dests: &mut SmVec<Pos>, allowed: u8, pos: Pos) {
-		self.rook_moves(dests, allowed, pos);
-		self.bisshop_moves(dests, allowed, pos);
+	fn queen_moves(&self, dests: &mut SmVec<Pos>, player: Color, pos: Pos) {
+		self.rook_moves(dests, player, pos);
+		self.bisshop_moves(dests, player, pos);
 	}
 
-	fn bisshop_moves(&self, dests: &mut SmVec<Pos>, allowed: u8, pos: Pos) {
-		self.march(dests, allowed, pos, NORTH_EAST);
-		self.march(dests, allowed, pos, NORTH_WEST);
-		self.march(dests, allowed, pos, SOUTH_EAST);
-		self.march(dests, allowed, pos, SOUTH_WEST);
+	fn bisshop_moves(&self, dests: &mut SmVec<Pos>, player: Color, pos: Pos) {
+		self.march(dests, player, pos, NORTH_EAST);
+		self.march(dests, player, pos, NORTH_WEST);
+		self.march(dests, player, pos, SOUTH_EAST);
+		self.march(dests, player, pos, SOUTH_WEST);
 	}
 
-	fn rook_moves(&self, dests: &mut SmVec<Pos>, allowed: u8, pos: Pos) {
-		self.march(dests, allowed, pos, NORTH);
-		self.march(dests, allowed, pos, EAST);
-		self.march(dests, allowed, pos, SOUTH);
-		self.march(dests, allowed, pos, WEST);
+	fn rook_moves(&self, dests: &mut SmVec<Pos>, player: Color, pos: Pos) {
+		self.march(dests, player, pos, NORTH);
+		self.march(dests, player, pos, EAST);
+		self.march(dests, player, pos, SOUTH);
+		self.march(dests, player, pos, WEST);
 	}
 
 	fn w_pawn_moves(&self, dests: &mut SmVec<Pos>, pos: Pos) {
-		self.pawn_captures(dests, BLACK, pos, delta(1, -1), delta(1, 1));
+		self.pawn_captures(dests, White, pos, delta(1, -1), delta(1, 1));
 		self.pawn_pushes(dests, pos, delta(1, 0), 2);
 	}
 
 	fn b_pawn_moves(&self, dests: &mut SmVec<Pos>, pos: Pos) {
-		self.pawn_captures(dests, WHITE, pos, delta(-1, -1), delta(-1, 1));
+		self.pawn_captures(dests, Black, pos, delta(-1, -1), delta(-1, 1));
 		self.pawn_pushes(dests, pos, delta(-1, 0), 5);
 	}
 
@@ -157,17 +154,17 @@ impl Mailbox {
 		}
 	}
 
-	fn pawn_captures(&self, dests: &mut SmVec<Pos>, allowed: u8, pos: Pos, left: u8, right: u8) {
+	fn pawn_captures(&self, dests: &mut SmVec<Pos>, player: Color, pos: Pos, left: u8, right: u8) {
 		for delta in [left, right] {
 			let pos = pos + delta;
-			if self[pos].opt_color() == allowed {
+			if self[pos].is_color(player.opposite()) {
 				dests.push(pos)
 			}
 		}
 	}
 
 	#[inline]
-	fn march(&self, dests: &mut SmVec<Pos>, capture_color: u8, pos: Pos, dir: u8) {
+	fn march(&self, dests: &mut SmVec<Pos>, player: Color, pos: Pos, dir: u8) {
 		let mut pos = pos;
 
 		for _ in 0..8 {
@@ -175,7 +172,7 @@ impl Mailbox {
 			match self[pos] {
 				Empty => dests.push(pos),
 				square => {
-					if square.opt_color() == capture_color {
+					if square.is_color(player.opposite()) {
 						dests.push(pos);
 					}
 					return;

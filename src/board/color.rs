@@ -9,12 +9,12 @@ pub enum Color {
 use Color::*;
 
 impl Color {
-	pub fn mask(self) -> u8 {
-		match self {
-			White => WHITE,
-			Black => BLACK,
-		}
-	}
+	//pub fn mask(self) -> u8 {
+	//	match self {
+	//		White => WHITE,
+	//		Black => BLACK,
+	//	}
+	//}
 
 	pub fn opposite(self) -> Self {
 		match self {

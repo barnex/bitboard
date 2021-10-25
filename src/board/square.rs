@@ -26,8 +26,8 @@ pub enum Square {
 const EMPTY: u8 = 0b_10_00_000;
 const OCC: u8 = 0b_01_00_000;
 
-pub const WHITE: u8 = 0b_00_10_000;
-pub const BLACK: u8 = 0b_00_01_000;
+const WHITE: u8 = 0b_00_10_000;
+const BLACK: u8 = 0b_00_01_000;
 const COLOR_MASK: u8 = 0b_00_11_000;
 
 pub const PAWN: u8 = 0;
