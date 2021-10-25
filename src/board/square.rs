@@ -5,38 +5,24 @@ use super::internal::*;
 #[repr(u8)]
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Square {
-	Empty = EMPTY,
-	OffBoard = OCC,
+	Empty,
 
-	WPawn = OCC | WHITE | PAWN,
-	WRook = OCC | WHITE | ROOK,
-	WKnight = OCC | WHITE | KNIGHT,
-	WBisshop = OCC | WHITE | BISSHOP,
-	WQueen = OCC | WHITE | QUEEN,
-	WKing = OCC | WHITE | KING,
+	WPawn,
+	WRook,
+	WKnight,
+	WBisshop,
+	WQueen,
+	WKing,
 
-	BPawn = OCC | BLACK | PAWN,
-	BRook = OCC | BLACK | ROOK,
-	BKnight = OCC | BLACK | KNIGHT,
-	BBisshop = OCC | BLACK | BISSHOP,
-	BQueen = OCC | BLACK | QUEEN,
-	BKing = OCC | BLACK | KING,
+	BPawn,
+	BRook,
+	BKnight,
+	BBisshop,
+	BQueen,
+	BKing,
+
+	OffBoard,
 }
-
-const EMPTY: u8 = 0b_10_00_000;
-const OCC: u8 = 0b_01_00_000;
-
-const WHITE: u8 = 0b_00_10_000;
-const BLACK: u8 = 0b_00_01_000;
-const COLOR_MASK: u8 = 0b_00_11_000;
-
-const PAWN: u8 = 0;
-const ROOK: u8 = 1;
-const KNIGHT: u8 = 2;
-const BISSHOP: u8 = 3;
-const QUEEN: u8 = 4;
-const KING: u8 = 5;
-const KIND_MASK: u8 = 0b111;
 
 use Square::*;
 
