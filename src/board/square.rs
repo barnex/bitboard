@@ -25,8 +25,11 @@ pub enum Square {
 use Square::*;
 
 impl Square {
-	pub const ALL: [Square; 12] = [
+	pub const ALL_PIECES: [Square; 12] = [
 		WPawn, WRook, WKnight, WBisshop, WQueen, WKing, BPawn, BRook, BKnight, BBisshop, BQueen, BKing,
+	];
+	pub const ALL_SQUARES: [Square; 13] = [
+		Empty, WPawn, WRook, WKnight, WBisshop, WQueen, WKing, BPawn, BRook, BKnight, BBisshop, BQueen, BKing,
 	];
 	const ASCII: [char; 14] = ['.', 'P', 'R', 'N', 'B', 'Q', 'K', 'p', 'r', 'n', 'b', 'q', 'k', '?'];
 	const UNICODE: [char; 14] = [' ', '♙', '♖', '♘', '♗', '♕', '♔', '♟', '♜', '♞', '♝', '♛', '♚', '?'];

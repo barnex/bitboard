@@ -1,6 +1,7 @@
 pub use super::internal::*;
 
-pub trait Board: Default {
+pub trait Board {
+	fn new() -> Self;
 	fn at(&self, pos: Pos) -> Square;
 	fn set(&mut self, pos: Pos, sq: Square);
 	fn all_moves(&self, player: Color) -> SmVec<Move>;
@@ -36,7 +37,7 @@ pub fn is_check(board: &impl Board, player: Color) -> bool {
 
 pub fn starting_position<B: Board>() -> B {
 	use Square::*;
-	let mut b = B::default();
+	let mut b = B::new();
 	b.set(pos(0, 0), WRook);
 	b.set(pos(0, 1), WKnight);
 	b.set(pos(0, 2), WBisshop);

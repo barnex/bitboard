@@ -13,11 +13,6 @@ pub struct Mailbox {
 }
 
 impl Mailbox {
-	/// Empty board.
-	pub fn new() -> Self {
-		Self { board: [Empty; 64] }
-	}
-
 	pub fn starting_position() -> Self {
 		starting_position::<Self>()
 	}
@@ -208,6 +203,11 @@ impl Mailbox {
 }
 
 impl Board for Mailbox {
+	/// Empty board.
+	fn new() -> Self {
+		Self { board: [Empty; 64] }
+	}
+
 	fn at(&self, pos: Pos) -> Square {
 		self[pos]
 	}
