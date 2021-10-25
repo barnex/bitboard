@@ -4,7 +4,7 @@ use std::time::SystemTime;
 use bitboard::*;
 use Color::*;
 
-const DEPTH: u32 = 2;
+const DEPTH: u32 = 3;
 
 fn main() {
 	match play_game() {
@@ -14,7 +14,7 @@ fn main() {
 }
 
 fn play_game() -> Option<Color> {
-	let mut board: BitBoard = starting_position();
+	let mut board: Mailbox = starting_position();
 
 	print_ansi(&board, &Set::default());
 
@@ -78,7 +78,7 @@ pub fn annotate_move(board: &impl Board, mv: Move) -> String {
 	str += &mv.to_string();
 
 	// ... captures?
-	if !board.at(mv.to).has_bit(EMPTY) {
+	if !board.at(mv.to).is_empty() {
 		str += "x";
 		str += &board.at(mv.to).to_string().to_ascii_uppercase();
 	}

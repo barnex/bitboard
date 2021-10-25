@@ -3,6 +3,7 @@ use std::convert::TryFrom;
 use std::ops::Index;
 use std::ops::IndexMut;
 use std::str::FromStr;
+use Color::*;
 use Square::*;
 
 /// A straightforward board implementation used for testing BitBoard.
@@ -97,19 +98,19 @@ impl Mailbox {
 	}
 
 	fn w_king_moves(&self, dests: &mut SmVec<Pos>, pos: Pos) {
-		self.jump(dests, pos, Self::KING_JUMPS, EMPTY | BLACK)
+		self.jump(dests, pos, Self::KING_JUMPS, White)
 	}
 
 	fn b_king_moves(&self, dests: &mut SmVec<Pos>, pos: Pos) {
-		self.jump(dests, pos, Self::KING_JUMPS, EMPTY | WHITE)
+		self.jump(dests, pos, Self::KING_JUMPS, Black)
 	}
 
 	fn w_knight_moves(&self, dests: &mut SmVec<Pos>, pos: Pos) {
-		self.jump(dests, pos, Self::KNIGHT_JUMPS, EMPTY | BLACK)
+		self.jump(dests, pos, Self::KNIGHT_JUMPS, White)
 	}
 
 	fn b_knight_moves(&self, dests: &mut SmVec<Pos>, pos: Pos) {
-		self.jump(dests, pos, Self::KNIGHT_JUMPS, EMPTY | WHITE)
+		self.jump(dests, pos, Self::KNIGHT_JUMPS, Black)
 	}
 
 	fn queen_moves(&self, dests: &mut SmVec<Pos>, allowed: u8, pos: Pos) {
@@ -144,12 +145,12 @@ impl Mailbox {
 	fn pawn_pushes(&self, dests: &mut SmVec<Pos>, pos: Pos, delta: u8, first_row: u8) {
 		// one forward
 		let pos = pos + delta;
-		if self[pos].has_bit(EMPTY) {
+		if self[pos].is_empty() {
 			dests.push(pos);
 			// another one forward
 			if pos.row() == first_row {
 				let pos = pos + delta;
-				if self[pos].has_bit(EMPTY) {
+				if self[pos].is_empty() {
 					dests.push(pos)
 				}
 			}
@@ -184,10 +185,10 @@ impl Mailbox {
 	}
 
 	#[inline]
-	fn jump<const N: usize>(&self, dests: &mut SmVec<Pos>, pos: Pos, delta: [u8; N], allowed: u8) {
+	fn jump<const N: usize>(&self, dests: &mut SmVec<Pos>, pos: Pos, delta: [u8; N], player: Color) {
 		for delta in delta {
 			let pos = pos + delta;
-			if self[pos].has_bit(allowed) {
+			if pos.is_valid() && !self[pos].is_color(player) {
 				dests.push(pos)
 			}
 		}

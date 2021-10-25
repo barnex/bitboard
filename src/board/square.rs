@@ -23,7 +23,7 @@ pub enum Square {
 	BKing = OCC | BLACK | KING,
 }
 
-pub const EMPTY: u8 = 0b_10_00_000;
+const EMPTY: u8 = 0b_10_00_000;
 const OCC: u8 = 0b_01_00_000;
 
 pub const WHITE: u8 = 0b_00_10_000;
@@ -61,9 +61,9 @@ impl Square {
 		(self as u8) & mask
 	}
 
-	// pub fn is_empty(self) -> bool {
-	// 	(self as u8 & OCC) == 0
-	// }
+	pub fn is_empty(self) -> bool {
+		self == Empty
+	}
 
 	pub fn is_valid(self) -> bool {
 		self != Square::OffBoard
@@ -80,6 +80,10 @@ impl Square {
 			BLACK => Some(Black),
 			_ => None,
 		}
+	}
+
+	pub fn is_color(self, color: Color) -> bool {
+		self.color() == Some(color)
 	}
 
 	pub fn is_white(self) -> bool {
@@ -100,7 +104,6 @@ impl Square {
 			},
 		}
 	}
-
 }
 
 impl fmt::Display for Square {
