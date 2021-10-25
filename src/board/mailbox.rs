@@ -41,7 +41,6 @@ impl Mailbox {
 		self[mv.from] = Empty;
 	}
 
-	/// TODO: don't iter over offboard squares.
 	pub fn iter<'s>(&'s self) -> impl Iterator<Item = (Pos, Square)> + 's {
 		self.board
 			.iter()
@@ -142,7 +141,7 @@ impl Mailbox {
 	fn pawn_pushes(&self, dests: &mut SmVec<Pos>, pos: Pos, delta: u8, first_row: u8) {
 		// one forward
 		let pos = pos + delta;
-		if self[pos].is_empty() {
+		if pos.is_valid() && self[pos].is_empty() {
 			dests.push(pos);
 			// another one forward
 			if pos.row() == first_row {
@@ -157,7 +156,7 @@ impl Mailbox {
 	fn pawn_captures(&self, dests: &mut SmVec<Pos>, player: Color, pos: Pos, left: u8, right: u8) {
 		for delta in [left, right] {
 			let pos = pos + delta;
-			if self[pos].is_color(player.opposite()) {
+			if pos.is_valid() && self[pos].is_color(player.opposite()) {
 				dests.push(pos)
 			}
 		}
@@ -165,10 +164,9 @@ impl Mailbox {
 
 	#[inline]
 	fn march(&self, dests: &mut SmVec<Pos>, player: Color, pos: Pos, dir: u8) {
-		let mut pos = pos;
+		let mut pos = pos + dir;
 
-		for _ in 0..8 {
-			pos = pos + dir;
+		while pos.is_valid() {
 			match self[pos] {
 				Empty => dests.push(pos),
 				square => {
@@ -178,6 +176,7 @@ impl Mailbox {
 					return;
 				}
 			}
+			pos = pos + dir;
 		}
 	}
 

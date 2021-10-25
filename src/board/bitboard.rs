@@ -19,7 +19,7 @@ impl Board for BitBoard {
 	fn set(&mut self, pos: Pos, sq: Square) {
 		debug_assert!(pos.is_valid());
 
-		let pos = pos.must_index64();
+		let pos = pos.must_index64() as u8;
 		self.clear(pos);
 
 		let idx = Self::piece_idx(sq);

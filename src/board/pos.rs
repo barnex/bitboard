@@ -35,8 +35,8 @@ impl Pos {
 
 	/// Linear index (row-major).
 	/// In range 0..256, not necessarily valid.
-	#[inline]
-	pub const fn index256(self) -> usize {
+	pub fn index256(self) -> usize {
+		debug_assert!(self.is_valid());
 		self.0 as usize
 	}
 
@@ -51,9 +51,9 @@ impl Pos {
 
 	/// Linear index (row-major) in range 0..64,
 	/// assumes position is valid.
-	pub fn must_index64(self) -> u8 {
+	pub fn must_index64(self) -> usize {
 		debug_assert!(self.is_valid());
-		(self.row() << 3 | self.col()) as u8
+		(self.row() << 3 | self.col()) as usize
 	}
 
 	/// Convert row-major index (in range 0..64) to a position.
