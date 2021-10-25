@@ -1,28 +1,33 @@
+use std::io::Empty;
+
 use super::internal::*;
 
 #[derive(Clone, Default)]
 pub struct BitBoard {
-	sets: [u64; 12],
-	mailbox: Mailbox,
+	pieces: [u64; 12],
 }
 
 impl Board for BitBoard {
 	fn at(&self, pos: Pos) -> Square {
-		self.mailbox.at(pos)
+		let mask = 1 << pos.must_index64();
+		for i in 0..self.pieces.len() {
+			if self.pieces[i] & mask != 0 {
+				return Self::idx2piece(i);
+			}
+		}
+		Square::Empty
 	}
 
 	fn set(&mut self, pos: Pos, sq: Square) {
 		debug_assert!(pos.is_valid());
 
-		self.mailbox.set(pos, sq)
+		let pos = pos.must_index64();
+		self.clear(pos);
 
-		//let pos = pos.index64();
-		//self.clear(pos);
-
-		//let idx = Self::set_idx(sq);
-		//if idx != 255{
-		//    self.sets[i]
-		//}
+		let idx = Self::piece_idx(sq);
+		if idx != 255 {
+			self.pieces[idx] |= 1 << pos;
+		}
 	}
 
 	// fn set_i(&mut self, pos: u8, : Square) {
@@ -33,7 +38,7 @@ impl Board for BitBoard {
 	// }
 
 	fn all_moves(&self, player: Color) -> SmVec<Move> {
-		self.mailbox.all_moves(player)
+		SmVec::new()
 	}
 
 	fn with_move(&self, mv: Move) -> Self {
@@ -51,12 +56,12 @@ impl BitBoard {
 
 	fn clear(&mut self, pos: u8) {
 		let mask = !(1 << pos);
-		for i in 0..self.sets.len() {
-			self.sets[i] &= mask;
+		for i in 0..self.pieces.len() {
+			self.pieces[i] &= mask;
 		}
 	}
 
-	fn set_idx(sq: Square) -> u8 {
+	fn piece_idx(sq: Square) -> usize {
 		use Square::*;
 		match sq {
 			WPawn => 0,
@@ -72,6 +77,25 @@ impl BitBoard {
 			BQueen => 10,
 			BKing => 11,
 			_ => 255,
+		}
+	}
+
+	fn idx2piece(idx: usize) -> Square {
+		use Square::*;
+		match idx {
+			0 => WPawn,
+			1 => WRook,
+			2 => WKnight,
+			3 => WBisshop,
+			4 => WQueen,
+			5 => WKing,
+			6 => BPawn,
+			7 => BRook,
+			8 => BKnight,
+			9 => BBisshop,
+			10 => BQueen,
+			11 => BKing,
+			_ => unreachable!(),
 		}
 	}
 }

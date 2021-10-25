@@ -49,6 +49,13 @@ impl Pos {
 		}
 	}
 
+	/// Linear index (row-major) in range 0..64,
+	/// assumes position is valid.
+	pub fn must_index64(self) -> u8 {
+		debug_assert!(self.is_valid());
+		(self.row() << 3 | self.col()) as u8
+	}
+
 	/// Convert row-major index (in range 0..64) to a position.
 	pub fn from_index64(index: usize) -> Result<Self> {
 		if index < 64 {
