@@ -1,3 +1,4 @@
+/*
 use std::hash::Hasher;
 
 pub fn rand(seed: u64, i: usize) -> u64 {
@@ -7,3 +8,7 @@ pub fn rand(seed: u64, i: usize) -> u64 {
 }
 
 
+pub fn randn(seed: u64, i: usize, n: u64) -> u64 {
+	rand(seed, i) % n
+}
+*/

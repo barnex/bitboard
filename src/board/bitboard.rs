@@ -45,6 +45,10 @@ impl Board for BitBoard {
 }
 
 impl BitBoard {
+	pub fn new() -> Self {
+		Self::default()
+	}
+
 	fn clear(&mut self, pos: u8) {
 		let mask = !(1 << pos);
 		for i in 0..self.sets.len() {

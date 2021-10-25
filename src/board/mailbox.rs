@@ -31,9 +31,13 @@ impl Mailbox {
 	pub fn with_move(&self, mv: Move) -> Self {
 		debug_assert!(mv.is_valid());
 		let mut b = self.clone();
-		b[mv.to] = b[mv.from];
-		b[mv.from] = Empty;
+		b.do_move(mv);
 		b
+	}
+
+	pub fn do_move(&mut self, mv: Move) {
+		self[mv.to] = self[mv.from];
+		self[mv.from] = Empty;
 	}
 
 	/// TODO: don't iter over offboard squares.
