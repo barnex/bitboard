@@ -1,9 +1,7 @@
-use std::ops::BitAnd;
-
 use super::internal::*;
 use rand::prelude::*;
 use rand::SeedableRng;
-use Square::*;
+//use Square::*;
 
 /* COPY-PASTE ZONE
 	let board = BitBoard::from_str(
@@ -30,7 +28,7 @@ fn w_pawn_pushes() {
 		. . . . . . . .
 		. . . . . . . .
 		. . . . . r . .
-		. r . P . . . .
+		. R . P . . . .
 		P P . . . P . P
 		. . . . . . . .
 		",
@@ -40,7 +38,7 @@ fn w_pawn_pushes() {
 		. . . . . . . .
 		. . . . . . . .
 		x . . x . R . x
-		x r . P . x . x
+		x R . P . x . x
 		P P . . . P . P
 		. . . . . . . .
 		",

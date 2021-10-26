@@ -53,7 +53,7 @@ impl Square {
 		}
 	}
 
-	pub fn index(self) -> usize {
+	pub const fn index(self) -> usize {
 		match self {
 			Empty => 0,
 			WPawn => 1,

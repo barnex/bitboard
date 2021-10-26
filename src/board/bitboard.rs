@@ -44,7 +44,20 @@ impl Board for BitBoard {
 
 impl BitBoard {
 	pub fn w_pawn_pushes(&self) -> u64 {
-		0
+		let empty = self.empty();
+		let pawns = self.sets[WPawn.index()];
+
+		// 1 square forward
+		let push1 = sh_n(pawns) & empty;
+
+		// 2 squares forward on first move
+		let push2 = sh_n(sh_n(pawns & ROW1) & empty) & empty;
+
+		push1 | push2
+	}
+
+	fn empty(&self) -> u64 {
+		self.sets[Empty.index()]
 	}
 
 	fn clear(&mut self, pos: u8) {
@@ -53,6 +66,15 @@ impl BitBoard {
 			self.sets[sq.index()] &= mask;
 		}
 	}
+}
+
+const ROW0: u64 = 0b_11111111;
+const ROW1: u64 = sh_n(ROW0);
+
+/// Shift one row north.
+#[inline]
+const fn sh_n(set: u64) -> u64 {
+	set << 8
 }
 
 impl FromStr for BitBoard {

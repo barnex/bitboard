@@ -114,6 +114,7 @@ fn winner(board: &impl Board) -> Option<Color> {
 	None
 }
 
+/*
 fn print_options(board: &impl Board, player: Color, mv_value: &[(Move, i32)]) {
 	let options = mv_value
 		.iter()
@@ -122,3 +123,4 @@ fn print_options(board: &impl Board, player: Color, mv_value: &[(Move, i32)]) {
 		.join(", ");
 	println!("{:?} has options {}", player, options);
 }
+*/

@@ -1,5 +1,4 @@
 use super::internal::*;
-use std::convert::TryFrom;
 use std::ops::Index;
 use std::ops::IndexMut;
 use std::str::FromStr;
@@ -76,7 +75,6 @@ impl Mailbox {
 			BKnight => self.b_knight_moves(dst, pos),
 			WKing => self.w_king_moves(dst, pos),
 			BKing => self.b_king_moves(dst, pos),
-			_ => (),
 		}
 
 		dest
