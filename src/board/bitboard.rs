@@ -60,7 +60,20 @@ impl BitBoard {
 	}
 
 	fn all_moves(&self, player: Color) -> SmVec<Move> {
-		SmVec::new()
+		let mut moves = SmVec::new();
+		match player{
+			White => self.all_w_moves(&mut moves),
+			Black => self.all_b_moves(&mut moves),
+		}
+		moves
+	}
+
+	fn all_w_moves(&self, moves: &mut SmVec<Move>) {
+
+	}
+
+	fn all_b_moves(&self, moves: &mut SmVec<Move>) {
+
 	}
 
 	fn clear(&mut self, pos: u8) {

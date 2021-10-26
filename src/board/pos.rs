@@ -80,6 +80,24 @@ impl fmt::Display for Pos {
 	}
 }
 
+impl TryFrom<&[u8]> for Pos {
+	type Error = anyhow::Error;
+
+	fn try_from(bytes: &[u8]) -> Result<Self> {
+		if bytes.len() != 2 {
+			return Err(format_err!("need 2 bytes, got: {}", bytes.len()));
+		}
+		let col = bytes[0] - b'a';
+		let row = bytes[1] - b'1';
+
+		if row < 8 && col < 8 {
+			Ok(pos(row, col))
+		} else {
+			Err(format_err!("invalid pos: {}{}", bytes[0] as char, bytes[1] as char))
+		}
+	}
+}
+
 impl Add<u8> for Pos {
 	type Output = Pos;
 

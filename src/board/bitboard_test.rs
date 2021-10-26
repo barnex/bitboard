@@ -1,12 +1,40 @@
 use super::internal::*;
 use rand::prelude::*;
 use rand::SeedableRng;
+use Color::*;
 //use Square::*;
 
 /* COPY-PASTE ZONE
 #[test]
 fn _() {
-	check(
+	test_moves(
+		BitBoard::f,
+		r"
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		",
+		r"
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		",
+	);
+}
+
+#[test]
+fn _() {
+	test_bits(
 		BitBoard::f,
 		r"
 		. . . . . . . .
@@ -33,8 +61,26 @@ fn _() {
 */
 
 #[test]
+fn all_b_moves() {
+	test_moves(
+		Black,
+		r"
+		. . . . . . . .
+		. . . p . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		",
+		&["pd7d6", "pd7d5"],
+	);
+}
+
+#[test]
 fn b_pawn_move() {
-	check(
+	test_bits(
 		BitBoard::b_pawn_move,
 		r"
 		. . . . . . . .
@@ -61,7 +107,7 @@ fn b_pawn_move() {
 
 #[test]
 fn b_pawn_capture() {
-	check(
+	test_bits(
 		BitBoard::b_pawn_capture,
 		r"
 		. . . . . . . .
@@ -88,7 +134,7 @@ fn b_pawn_capture() {
 
 #[test]
 fn b_pawn_capture_we() {
-	check(
+	test_bits(
 		BitBoard::b_pawn_capture_sw,
 		r"
 		. . . . . . . .
@@ -115,7 +161,7 @@ fn b_pawn_capture_we() {
 
 #[test]
 fn b_pawn_capture_se() {
-	check(
+	test_bits(
 		BitBoard::b_pawn_capture_se,
 		r"
 		. . . . . . . .
@@ -142,7 +188,7 @@ fn b_pawn_capture_se() {
 
 #[test]
 fn b_pawn_push() {
-	check(
+	test_bits(
 		BitBoard::b_pawn_push,
 		r"
 		. . . . . . . .
@@ -169,7 +215,7 @@ fn b_pawn_push() {
 
 #[test]
 fn w_pawn_move() {
-	check(
+	test_bits(
 		BitBoard::w_pawn_move,
 		r"
 		P . . . . . . P
@@ -196,7 +242,7 @@ fn w_pawn_move() {
 
 #[test]
 fn w_pawn_capture() {
-	check(
+	test_bits(
 		BitBoard::w_pawn_capture,
 		r"
 		P . . . . . . P
@@ -223,7 +269,7 @@ fn w_pawn_capture() {
 
 #[test]
 fn w_pawn_capture_nw() {
-	check(
+	test_bits(
 		BitBoard::w_pawn_capture_nw,
 		r"
 		P . . . . . . P
@@ -250,7 +296,7 @@ fn w_pawn_capture_nw() {
 
 #[test]
 fn w_pawn_capture_ne() {
-	check(
+	test_bits(
 		BitBoard::w_pawn_capture_ne,
 		r"
 		P . . . . . . P
@@ -277,7 +323,7 @@ fn w_pawn_capture_ne() {
 
 #[test]
 fn w_pawn_push() {
-	check(
+	test_bits(
 		BitBoard::w_pawn_push,
 		r"
 		. . . . . . P .
@@ -304,7 +350,7 @@ fn w_pawn_push() {
 
 #[test]
 fn white_black() {
-	check(
+	test_bits(
 		BitBoard::white,
 		r"
 		r n b k q . . .
@@ -327,7 +373,7 @@ fn white_black() {
 		x x x x x . . .
 		",
 	);
-	check(
+	test_bits(
 		BitBoard::black,
 		r"
 		r n b k q . . .
@@ -352,7 +398,22 @@ fn white_black() {
 	);
 }
 
-fn check<F: Fn(&BitBoard) -> u64>(f: F, board: &str, want: &str) {
+fn test_moves(player: Color, board: &str, want: &[&str]) {
+	let board = BitBoard::from_str(board).unwrap();
+	let have = board.all_moves(player).iter().copied().collect::<Set<_>>();
+	let want = want.iter().map(|s| Move::from_str(s).unwrap()).collect::<Set<_>>();
+	if have != want {
+		let have = have.iter().map(|mv| mv.to).collect();
+		let want = want.iter().map(|mv| mv.to).collect();
+		println!("have:");
+		print_ansi(&board, &have);
+		println!("want:");
+		print_ansi(&board, &want);
+		assert_eq!(have, want);
+	}
+}
+
+fn test_bits<F: Fn(&BitBoard) -> u64>(f: F, board: &str, want: &str) {
 	let board = BitBoard::from_str(board).unwrap();
 	let have = as_set(f(&board));
 	let want = parse_positions(want);

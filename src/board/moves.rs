@@ -36,6 +36,19 @@ impl fmt::Debug for Move {
 	}
 }
 
+impl FromStr for Move {
+	type Err = anyhow::Error;
+
+	fn from_str(s: &str) -> Result<Self> {
+		let bytes = s.as_bytes();
+		let _piece = Square::try_from(bytes[0] as char)?;
+		let from = Pos::try_from(&bytes[1..3])?;
+		let to = Pos::try_from(&bytes[3..5])?;
+		Ok(Move::new(from, to))
+		//let capture = Square::from_str(chars[0])
+	}
+}
+
 pub struct Moves {
 	inner: SmVec<Move>,
 }
