@@ -244,30 +244,8 @@ impl IndexMut<Pos> for Mailbox {
 impl FromStr for Mailbox {
 	type Err = anyhow::Error;
 
-	/// Parse a chess board from the following notation:
-	/// (whitespace optional)
-	///
-	/// r n b q k b n r
-	/// p p p p p p p p
-	/// . . . . . . . .
-	/// . . . . . . . .
-	/// . . . . . . . .
-	/// . . . . . . . .
-	/// P P P P P P P P
-	/// R N B Q K B N R
-	///
 	fn from_str(s: &str) -> Result<Self> {
-		let mut board = Mailbox::new();
-		let chars = parse_charboard(s)?;
-		for (i, &chr) in chars.iter().enumerate() {
-			let piece = Square::try_from(chr)?;
-			if i >= 64 {
-				return Err(format_err!("line too long"));
-			}
-			let pos = Pos::from_index(i);
-			board[pos] = piece;
-		}
-		Ok(board)
+		parse_board(s)
 	}
 }
 

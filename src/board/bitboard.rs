@@ -42,19 +42,25 @@ impl Board for BitBoard {
 	}
 }
 
-fn fmt_bits(bits: u64) -> String {
-	let mut str = String::with_capacity(2 * 64 + 8);
-	for r in (0..8).rev() {
-		for c in 0..8 {
-			let mask = 1 << pos(r, c).index();
-			let bit = (bits & mask) != 0;
-
-			str.push(if bit { '1' } else { '0' });
-			str.push(' ');
-		}
-		str.push('\n');
+impl BitBoard {
+	pub fn w_pawn_pushes(&self) -> u64 {
+		0
 	}
-	str
+
+	fn clear(&mut self, pos: u8) {
+		let mask = !(1 << pos);
+		for sq in Square::ALL_SQUARES {
+			self.sets[sq.index()] &= mask;
+		}
+	}
+}
+
+impl FromStr for BitBoard {
+	type Err = anyhow::Error;
+
+	fn from_str(s: &str) -> Result<Self> {
+		parse_board(s)
+	}
 }
 
 impl fmt::Debug for BitBoard {
@@ -66,19 +72,19 @@ impl fmt::Debug for BitBoard {
 	}
 }
 
-impl BitBoard {
-	fn w_pawn_pushes(&self) -> u64 {
-		//let pawns = self.pieces[W_PAWN_I];
-		//let push1 = (pawns << 8 & self.pieces[EMPTY_I]);
-
-		//push1
-		0
-	}
-
-	fn clear(&mut self, pos: u8) {
-		let mask = !(1 << pos);
-		for sq in Square::ALL_SQUARES {
-			self.sets[sq.index()] &= mask;
+fn fmt_bits(bits: u64) -> String {
+	let mut str = String::with_capacity(2 * 64 + 8);
+	for r in (0..8).rev() {
+		for c in 0..8 {
+			str.push(if bit_at(bits, pos(r, c)) { '1' } else { '0' });
+			str.push(' ');
 		}
+		str.push('\n');
 	}
+	str
+}
+
+pub fn bit_at(set: u64, pos: Pos) -> bool {
+	let mask = 1 << pos.index();
+	(set & mask) != 0
 }

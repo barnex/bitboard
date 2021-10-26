@@ -1,7 +1,125 @@
+use std::ops::BitAnd;
+
 use super::internal::*;
 use rand::prelude::*;
 use rand::SeedableRng;
 use Square::*;
+
+/* COPY-PASTE ZONE
+	let board = BitBoard::from_str(
+		r"
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		",
+	).unwrap();
+*/
+
+#[test]
+fn w_pawn_pushes() {
+	check(
+		BitBoard::w_pawn_pushes,
+		r"
+		. . . . . . P .
+		. . . . P . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . r . .
+		. r . P . . . .
+		P P . . . P . P
+		. . . . . . . .
+		",
+		r"
+		. . . . x . P .
+		. . . . P . . .
+		. . . . . . . .
+		. . . . . . . .
+		x . . x . R . x
+		x r . P . x . x
+		P P . . . P . P
+		. . . . . . . .
+		",
+	);
+}
+
+fn check<F: Fn(&BitBoard) -> u64>(f: F, board: &str, want: &str) {
+	let board = BitBoard::from_str(board).unwrap();
+	let have = as_set(f(&board));
+	let want = parse_positions(want);
+	if have != want {
+		println!("have:");
+		print_ansi(&board, &have);
+		println!("want:");
+		print_ansi(&board, &want);
+		assert_eq!(have, want);
+	}
+}
+
+#[test]
+fn all_moves() {
+	// use Color::*;
+
+	// for board in &random_boards(1000) {
+	// 	let mut bb = BitBoard::new();
+	// 	for (pos, sq) in board.iter() {
+	// 		bb.set(pos, sq);
+	// 	}
+
+	// 	for player in [White, Black] {
+	// 		let have = bb.all_moves(player);
+	// 		let want = board.all_moves(player);
+
+	// 		if have != want {
+	// 			print_ansi(board, &Set::default());
+	// 			assert_eq!(have, want);
+	// 		}
+	// 	}
+	// }
+}
+
+#[test]
+fn set_get() {
+	for board in &random_boards(100) {
+		let mut bb = BitBoard::new();
+		for (pos, sq) in board.iter() {
+			bb.set(pos, sq);
+		}
+
+		let mut mb = Mailbox::new();
+		for r in 0..8 {
+			for c in 0..8 {
+				let pos = pos(r, c);
+				mb.set(pos, bb.at(pos))
+			}
+		}
+
+		if &mb != board {
+			println!("have:");
+			print_ansi(&mb, &Set::default());
+			println!("want:");
+			print_ansi(board, &Set::default());
+			panic!("test failed");
+		}
+	}
+}
+
+fn as_set(bits: u64) -> Set<Pos> {
+	let mut set = Set::default();
+	for r in 0..8 {
+		for c in 0..8 {
+			let pos = pos(r, c);
+			if bit_at(bits, pos) {
+				set.insert(pos);
+			}
+		}
+	}
+	set
+}
 
 fn random_boards(n: usize) -> Vec<Mailbox> {
 	let seed = 12345;
@@ -36,52 +154,4 @@ fn random_boards(n: usize) -> Vec<Mailbox> {
 	}
 
 	boards
-}
-
-#[test]
-fn set_get() {
-	for board in &random_boards(100) {
-		let mut bb = BitBoard::new();
-		for (pos, sq) in board.iter() {
-			bb.set(pos, sq);
-		}
-
-		let mut mb = Mailbox::new();
-		for r in 0..8 {
-			for c in 0..8 {
-				let pos = pos(r, c);
-				mb.set(pos, bb.at(pos))
-			}
-		}
-
-		if &mb != board {
-			println!("have:");
-			print_ansi(&mb, &Set::default());
-			println!("want:");
-			print_ansi(board, &Set::default());
-			panic!("test failed");
-		}
-	}
-}
-
-#[test]
-fn all_moves() {
-	// use Color::*;
-
-	// for board in &random_boards(1000) {
-	// 	let mut bb = BitBoard::new();
-	// 	for (pos, sq) in board.iter() {
-	// 		bb.set(pos, sq);
-	// 	}
-
-	// 	for player in [White, Black] {
-	// 		let have = bb.all_moves(player);
-	// 		let want = board.all_moves(player);
-
-	// 		if have != want {
-	// 			print_ansi(board, &Set::default());
-	// 			assert_eq!(have, want);
-	// 		}
-	// 	}
-	// }
 }

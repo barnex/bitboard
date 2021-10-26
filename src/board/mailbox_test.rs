@@ -383,13 +383,7 @@ fn check_moves_(who: &str, board: &Mailbox, have: Set<Pos>, want: &str) {
 	for pos in &have {
 		assert!(pos.is_valid())
 	}
-	let want: Set<Pos> = parse_charboard(want)
-		.unwrap()
-		.iter()
-		.enumerate()
-		.filter(|(_, &chr)| chr == 'x')
-		.map(|(i, _)| Pos::from_index(i))
-		.collect();
+	let want = parse_positions(want);
 
 	if have != want {
 		println!(
