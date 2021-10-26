@@ -101,6 +101,21 @@ impl BitBoard {
 		}
 	}
 
+	pub fn w_rook_moves(&self) -> u64 {
+		self.rook_moves(self.bits(WRook), self.white())
+	}
+
+	pub fn b_rook_moves(&self) -> u64 {
+		self.rook_moves(self.bits(BRook), self.black())
+	}
+
+	pub fn rook_moves(&self, rooks: u64, player: u64) -> u64 {
+		self.rook_reach(rooks) & !player
+	}
+
+	pub fn rook_reach(&self, bits: u64) -> u64 {
+		self.slide(bits, sh_n) | self.slide(bits, sh_e) | self.slide(bits, sh_s) | self.slide(bits, sh_w)
+	}
 
 	pub fn w_pawn_move(&self) -> u64 {
 		self.w_pawn_push() | self.w_pawn_capture()
@@ -158,8 +173,24 @@ impl BitBoard {
 		sh_sw(self.bits(BPawn)) & self.white()
 	}
 
+	pub fn slide<F: Fn(u64) -> u64>(&self, bits: u64, sh: F) -> u64 {
+		let empty = self.empty();
+
+		let mut cursor = sh(bits);
+		let mut acc = cursor;
+
+		// TODO: check if unrolled, unroll manually if needed.
+		for _ in 0..6 {
+			cursor &= empty;
+			cursor = sh(cursor);
+			acc |= cursor;
+		}
+
+		acc
+	}
+
 	#[inline]
-	fn bits(&self, sq: Square) -> u64 {
+	pub fn bits(&self, sq: Square) -> u64 {
 		self.sets[sq.index()]
 	}
 
@@ -203,33 +234,45 @@ const fn sh_n(set: u64) -> u64 {
 	set << 8
 }
 
+/// Shift one column east.
+#[inline]
+pub const fn sh_e(set: u64) -> u64 {
+	(set << 1) & !COL0
+}
+
+/// Shift one column west.
+#[inline]
+pub const fn sh_w(set: u64) -> u64 {
+	(set >> 1) & !COL7
+}
+
 /// Shift one row south.
 #[inline]
-const fn sh_s(set: u64) -> u64 {
+pub const fn sh_s(set: u64) -> u64 {
 	set >> 8
 }
 
 /// Shift one row north east.
 #[inline]
-const fn sh_ne(set: u64) -> u64 {
+pub const fn sh_ne(set: u64) -> u64 {
 	(set & !COL7) << 9
 }
 
 /// Shift one row south east.
 #[inline]
-const fn sh_se(set: u64) -> u64 {
+pub const fn sh_se(set: u64) -> u64 {
 	(set & !COL7) >> 7
 }
 
 /// Shift one row south west.
 #[inline]
-const fn sh_sw(set: u64) -> u64 {
+pub const fn sh_sw(set: u64) -> u64 {
 	(set & !COL0) >> 9
 }
 
 /// Shift one row north west.
 #[inline]
-const fn sh_nw(set: u64) -> u64 {
+pub const fn sh_nw(set: u64) -> u64 {
 	(set & !COL0) << 7
 }
 

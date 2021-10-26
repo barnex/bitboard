@@ -1,8 +1,10 @@
+use std::ops::Sub;
+
 use super::internal::*;
 use rand::prelude::*;
 use rand::SeedableRng;
 use Color::*;
-//use Square::*;
+use Square::*;
 
 /* COPY-PASTE ZONE
 #[test]
@@ -59,6 +61,110 @@ fn _() {
 	);
 }
 */
+
+#[test]
+fn rook_reach() {
+	test_bits(
+		|b| b.rook_reach(b.bits(BRook)),
+		r"
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		r . . . . . . .
+		",
+		r"
+		x . . . . . . .
+		x . . . . . . .
+		x . . . . . . .
+		x . . . . . . .
+		x . . . . . . .
+		x . . . . . . .
+		x . . . . . . .
+		r x x x x x x x
+		",
+	);
+	test_bits(
+		|b| b.rook_reach(b.bits(WRook)),
+		r"
+		. . . . . . R .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . p . R . p .
+		p . . . . . . .
+		. . . . p . . .
+		R p . P . P R .
+		",
+		r"
+		x x x x x x R x
+		. . . . x . x .
+		. . . . x . x .
+		. . . . x . x .
+		. . x x R x x .
+		x . . . x . x .
+		x . . . x . x .
+		R x . . . x R x
+		",
+	);
+}
+
+#[test]
+fn slide_w() {
+	test_bits(
+		|b| b.slide(b.bits(WRook), sh_w),
+		r"
+		. . . . . . . R
+		. . . . . . . .
+		R . . . . . . .
+		. . . . . . . .
+		. . p . R . p .
+		. . . . . . . .
+		. . . . . . . .
+		R R . P . . R .
+		",
+		r"
+		x x x x x x x R
+		. . . . . . . .
+		R . . . . . . .
+		. . . . . . . .
+		. . x x R . . .
+		. . . . . . . .
+		. . . . . . . .
+		x R . x x x R .
+		",
+	);
+}
+
+#[test]
+fn slide_e() {
+	test_bits(
+		|b| b.slide(b.bits(WRook), sh_e),
+		r"
+		. . . . . . . R
+		. . . . . . . .
+		R . . . . . . .
+		. . . . . . . .
+		. . . . R . p .
+		. . . . . . . .
+		. . . . . . . .
+		R . . P . . R .
+		",
+		r"
+		. . . . . . . R
+		. . . . . . . .
+		R x x x x x x x
+		. . . . . . . .
+		. . . . R x x .
+		. . . . . . . .
+		. . . . . . . .
+		R x x x . . R x
+		",
+	);
+}
 
 #[test]
 fn all_b_pawn_moves() {
@@ -401,7 +507,10 @@ fn white_black() {
 fn test_moves(player: Color, board: &str, want: &[&str]) {
 	let board = BitBoard::from_str(board).unwrap();
 	let have = board.all_moves(player).iter().copied().collect::<Set<_>>();
-	let want = want.iter().map(|s| Move::from_str(s).expect("move: syntax error")).collect::<Set<_>>();
+	let want = want
+		.iter()
+		.map(|s| Move::from_str(s).expect("move: syntax error"))
+		.collect::<Set<_>>();
 	if have != want {
 		let have = have.iter().map(|mv| mv.to).collect();
 		let want = want.iter().map(|mv| mv.to).collect();
@@ -409,6 +518,7 @@ fn test_moves(player: Color, board: &str, want: &[&str]) {
 		print_ansi(&board, &have);
 		println!("want:");
 		print_ansi(&board, &want);
+		println!("diff: +{:?}, -{:?}", have.sub(&want), want.sub(&have));
 		assert_eq!(have, want);
 	}
 }
@@ -422,6 +532,7 @@ fn test_bits<F: Fn(&BitBoard) -> u64>(f: F, board: &str, want: &str) {
 		print_ansi(&board, &have);
 		println!("want:");
 		print_ansi(&board, &want);
+		println!("diff: +{:?}, -{:?}", have.sub(&want), want.sub(&have));
 		assert_eq!(have, want);
 	}
 }
