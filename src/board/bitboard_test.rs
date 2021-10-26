@@ -4,7 +4,10 @@ use rand::SeedableRng;
 //use Square::*;
 
 /* COPY-PASTE ZONE
-	let board = BitBoard::from_str(
+#[test]
+fn _() {
+	check(
+		BitBoard::f,
 		r"
 		. . . . . . . .
 		. . . . . . . .
@@ -15,13 +18,132 @@ use rand::SeedableRng;
 		. . . . . . . .
 		. . . . . . . .
 		",
-	).unwrap();
+		r"
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		",
+	);
+}
 */
+
+#[test]
+fn w_pawn_move() {
+	check(
+		BitBoard::w_pawn_move,
+		r"
+		P . . . . . . P
+		. . . . . . . .
+		. . . . . . . .
+		. r . . r . . .
+		. . P P . . . .
+		r P . . r P r .
+		P . . . . P . P
+		. . . . . . . .
+		",
+		r"
+		P . . . . . . P
+		. . . . . . . .
+		. . . . . . . .
+		. x x x x . . .
+		. x P P . x . x
+		r P . . x P x x
+		P . . . . P . P
+		. . . . . . . .
+		",
+	);
+}
+
+#[test]
+fn w_pawn_capture() {
+	check(
+		BitBoard::w_pawn_capture,
+		r"
+		P . . . . . . P
+		. . . . . . . .
+		. . . . . . . .
+		. r . . r . . .
+		. . P P . . . .
+		r . . . r . r .
+		P . . . . P . .
+		. . . . . . . P
+		",
+		r"
+		P . . . . . . P
+		. . . . . . . .
+		. . . . . . . .
+		. x . . x . . .
+		. . P P . . . .
+		r . . . x . x .
+		P . . . . P . .
+		. . . . . . . P
+		",
+	);
+}
+
+#[test]
+fn w_pawn_capture_nw() {
+	check(
+		BitBoard::w_pawn_capture_nw,
+		r"
+		P . . . . . . P
+		. . . . . . . .
+		. . . . . . . .
+		. r . . r . . .
+		. . P P . . . .
+		r . . . r . r .
+		P . . . . P . .
+		. . . . . . . P
+		",
+		r"
+		P . . . . . . P
+		. . . . . . . .
+		. . . . . . . .
+		. x . . r . . .
+		. . P P . . . .
+		r . . . x . . .
+		P . . . . P . .
+		. . . . . . . P
+		",
+	);
+}
+
+#[test]
+fn w_pawn_capture_ne() {
+	check(
+		BitBoard::w_pawn_capture_ne,
+		r"
+		P . . . . . . P
+		. . . . . . . .
+		. . . . . . . .
+		. . . . r . . .
+		. . P P . . . .
+		r . . . r . r .
+		P . . . . P . .
+		. . . . . . . P
+		",
+		r"
+		P . . . . . . P
+		. . . . . . . .
+		. . . . . . . .
+		. . . . x . . .
+		. . P P . . . .
+		r . . . r . x .
+		P . . . . P . .
+		. . . . . . . P
+		",
+	);
+}
 
 #[test]
 fn w_pawn_pushes() {
 	check(
-		BitBoard::w_pawn_pushes,
+		BitBoard::w_pawn_push,
 		r"
 		. . . . . . P .
 		. . . . P . . .
@@ -40,6 +162,56 @@ fn w_pawn_pushes() {
 		x . . x . R . x
 		x R . P . x . x
 		P P . . . P . P
+		. . . . . . . .
+		",
+	);
+}
+
+#[test]
+fn white_black() {
+	check(
+		BitBoard::white,
+		r"
+		r n b k q . . .
+		p . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		P . . . . . . .
+		R N B K Q . . .
+		",
+		r"
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		x . . . . . . .
+		x x x x x . . .
+		",
+	);
+	check(
+		BitBoard::black,
+		r"
+		r n b k q . . .
+		p . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		P . . . . . . .
+		R N B K Q . . .
+		",
+		r"
+		x x x x x . . .
+		x . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
 		. . . . . . . .
 		",
 	);
