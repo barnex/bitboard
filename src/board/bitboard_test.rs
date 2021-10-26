@@ -63,6 +63,56 @@ fn _() {
 */
 
 #[test]
+fn rook_moves() {
+	test_bits(
+		BitBoard::b_rook_moves,
+		r"
+		. . . . . . . .
+		. p . . r . . P
+		. . . . . . . .
+		. . . . . . . .
+		. P . . R . . .
+		. . . . . . . .
+		. . . . P . . .
+		. . . . . . . .
+		",
+		r"
+		. . . . x . . .
+		. p x x r x x x
+		. . . . x . . .
+		. . . . x . . .
+		. P . . x . . .
+		. . . . . . . .
+		. . . . P . . .
+		. . . . . . . .
+		",
+	);
+	test_bits(
+		BitBoard::w_rook_moves,
+		r"
+		. . . . . . . .
+		. p . . r . . P
+		. . . . . . . .
+		. . . . . . . .
+		. P . . R . . .
+		. . . . . . . .
+		. . . . P . . .
+		. . . . . . . .
+		",
+		r"
+		. . . . . . . .
+		. p . . x . . P
+		. . . . x . . .
+		. . . . x . . .
+		. P x x R x x x
+		. . . . x . . .
+		. . . . P . . .
+		. . . . . . . .
+		",
+	);
+}
+
+#[test]
 fn rook_reach() {
 	test_bits(
 		|b| b.rook_reach(b.bits(BRook)),
