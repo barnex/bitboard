@@ -61,20 +61,20 @@ fn _() {
 */
 
 #[test]
-fn all_b_moves() {
+fn all_b_pawn_moves() {
 	test_moves(
 		Black,
 		r"
 		. . . . . . . .
 		. . . p . . . .
+		. . . . R . . .
 		. . . . . . . .
 		. . . . . . . .
-		. . . . . . . .
-		. . . . . . . .
-		. . . . . . . .
+		. . . . . . . p
+		. . . . . . R R
 		. . . . . . . .
 		",
-		&["pd7d6", "pd7d5"],
+		&["pd7d6", "pd7d5", "pd7e6", "pg3g2"],
 	);
 }
 
@@ -401,7 +401,7 @@ fn white_black() {
 fn test_moves(player: Color, board: &str, want: &[&str]) {
 	let board = BitBoard::from_str(board).unwrap();
 	let have = board.all_moves(player).iter().copied().collect::<Set<_>>();
-	let want = want.iter().map(|s| Move::from_str(s).unwrap()).collect::<Set<_>>();
+	let want = want.iter().map(|s| Move::from_str(s).expect("move: syntax error")).collect::<Set<_>>();
 	if have != want {
 		let have = have.iter().map(|mv| mv.to).collect();
 		let want = want.iter().map(|mv| mv.to).collect();

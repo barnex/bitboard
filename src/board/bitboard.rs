@@ -1,4 +1,5 @@
 use super::internal::*;
+use Color::*;
 use Square::*;
 
 #[derive(Clone)]
@@ -52,6 +53,13 @@ impl BitBoard {
 		self.sets[sq.index()] |= 1 << pos;
 	}
 
+	fn clear(&mut self, pos: u8) {
+		let mask = !(1 << pos);
+		for sq in Square::ALL_SQUARES {
+			self.sets[sq.index()] &= mask;
+		}
+	}
+
 	fn with_move(&self, mv: Move) -> Self {
 		let mut b = self.clone();
 		b.set(mv.to, b.at(mv.from));
@@ -61,7 +69,7 @@ impl BitBoard {
 
 	fn all_moves(&self, player: Color) -> SmVec<Move> {
 		let mut moves = SmVec::new();
-		match player{
+		match player {
 			White => self.all_w_moves(&mut moves),
 			Black => self.all_b_moves(&mut moves),
 		}
@@ -69,19 +77,30 @@ impl BitBoard {
 	}
 
 	fn all_w_moves(&self, moves: &mut SmVec<Move>) {
-
+		Self::decode(WPawn, self.w_pawn_push1(), delta(-1, 0), moves);
+		Self::decode(WPawn, self.w_pawn_push2(), delta(-2, 0), moves);
+		Self::decode(WPawn, self.w_pawn_capture_ne(), delta(-1, -1), moves);
+		Self::decode(WPawn, self.w_pawn_capture_nw(), delta(-1, 1), moves);
 	}
 
 	fn all_b_moves(&self, moves: &mut SmVec<Move>) {
-
+		Self::decode(BPawn, self.b_pawn_push1(), delta(1, 0), moves);
+		Self::decode(BPawn, self.b_pawn_push2(), delta(2, 0), moves);
+		Self::decode(BPawn, self.b_pawn_capture_se(), delta(1, -1), moves);
+		Self::decode(BPawn, self.b_pawn_capture_sw(), delta(1, 1), moves);
 	}
 
-	fn clear(&mut self, pos: u8) {
-		let mask = !(1 << pos);
-		for sq in Square::ALL_SQUARES {
-			self.sets[sq.index()] &= mask;
+	fn decode(piece: Square, bits: u64, delta: u8, moves: &mut SmVec<Move>) {
+		// TODO: use bitscan intrinsic.
+		for i in 0..64 {
+			let pos = Pos::from_index(i);
+			if bit_at(bits, pos) {
+				let from = pos + delta;
+				moves.push(Move::with_piece(piece, from, pos));
+			}
 		}
 	}
+
 
 	pub fn w_pawn_move(&self) -> u64 {
 		self.w_pawn_push() | self.w_pawn_capture()
@@ -92,23 +111,27 @@ impl BitBoard {
 	}
 
 	pub fn w_pawn_push(&self) -> u64 {
-		let empty = self.bits(Empty);
-		let pawns = self.bits(WPawn);
+		self.w_pawn_push1() | self.w_pawn_push2()
+	}
 
-		// 1 forward
-		sh_n(pawns) & empty |
-		// or 2 forward on first move
-		sh_n(sh_n(pawns & ROW1) & empty) & empty
+	pub fn w_pawn_push1(&self) -> u64 {
+		sh_n(self.bits(WPawn)) & self.empty()
+	}
+
+	pub fn w_pawn_push2(&self) -> u64 {
+		sh_n(sh_n(self.bits(WPawn) & ROW1) & self.empty()) & self.empty()
 	}
 
 	pub fn b_pawn_push(&self) -> u64 {
-		let empty = self.bits(Empty);
-		let pawns = self.bits(BPawn);
+		self.b_pawn_push1() | self.b_pawn_push2()
+	}
 
-		// 1 forward
-		sh_s(pawns) & empty |
-		// or 2 forward on first move
-		sh_s(sh_s(pawns & ROW6) & empty) & empty
+	pub fn b_pawn_push1(&self) -> u64 {
+		sh_s(self.bits(BPawn)) & self.empty()
+	}
+
+	pub fn b_pawn_push2(&self) -> u64 {
+		sh_s(sh_s(self.bits(BPawn) & ROW6) & self.empty()) & self.empty()
 	}
 
 	pub fn w_pawn_capture(&self) -> u64 {
@@ -160,6 +183,11 @@ impl BitBoard {
 			| self.bits(BBisshop)
 			| self.bits(BQueen)
 			| self.bits(BKing)
+	}
+
+	#[inline]
+	fn empty(&self) -> u64 {
+		self.bits(Empty)
 	}
 }
 

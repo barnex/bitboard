@@ -1,7 +1,10 @@
+use std::io::Empty;
+
 use super::internal::*;
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Move {
+	// TODO: piece
 	pub from: Pos,
 	pub to: Pos,
 }
@@ -10,6 +13,12 @@ impl Move {
 	#[inline]
 	pub fn new(from: Pos, to: Pos) -> Self {
 		debug_assert!(from != to);
+		Self { from, to }
+	}
+
+	pub fn with_piece(piece: Square, from: Pos, to: Pos) -> Self {
+		debug_assert!(from != to);
+		debug_assert!(!piece.is_empty());
 		Self { from, to }
 	}
 
