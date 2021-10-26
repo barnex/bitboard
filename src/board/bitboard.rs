@@ -19,7 +19,6 @@ impl Board for BitBoard {
 		self.set(pos, sq)
 	}
 
-
 	fn all_moves(&self, player: Color) -> SmVec<Move> {
 		self.all_moves(player)
 	}
@@ -30,7 +29,6 @@ impl Board for BitBoard {
 }
 
 impl BitBoard {
-
 	fn new() -> Self {
 		let mut pieces = [0; 13];
 		pieces[Empty.index()] = !0;
@@ -72,6 +70,58 @@ impl BitBoard {
 		}
 	}
 
+	pub fn w_pawn_move(&self) -> u64 {
+		self.w_pawn_push() | self.w_pawn_capture()
+	}
+
+	pub fn b_pawn_move(&self) -> u64 {
+		self.b_pawn_push() | self.b_pawn_capture()
+	}
+
+	pub fn w_pawn_push(&self) -> u64 {
+		let empty = self.bits(Empty);
+		let pawns = self.bits(WPawn);
+
+		// 1 forward
+		sh_n(pawns) & empty |
+		// or 2 forward on first move
+		sh_n(sh_n(pawns & ROW1) & empty) & empty
+	}
+
+	pub fn b_pawn_push(&self) -> u64 {
+		let empty = self.bits(Empty);
+		let pawns = self.bits(BPawn);
+
+		// 1 forward
+		sh_s(pawns) & empty |
+		// or 2 forward on first move
+		sh_s(sh_s(pawns & ROW6) & empty) & empty
+	}
+
+	pub fn w_pawn_capture(&self) -> u64 {
+		self.w_pawn_capture_ne() | self.w_pawn_capture_nw()
+	}
+
+	pub fn b_pawn_capture(&self) -> u64 {
+		self.b_pawn_capture_se() | self.b_pawn_capture_sw()
+	}
+
+	pub fn w_pawn_capture_ne(&self) -> u64 {
+		sh_ne(self.bits(WPawn)) & self.black()
+	}
+
+	pub fn b_pawn_capture_se(&self) -> u64 {
+		sh_se(self.bits(BPawn)) & self.white()
+	}
+
+	pub fn w_pawn_capture_nw(&self) -> u64 {
+		sh_nw(self.bits(WPawn)) & self.black()
+	}
+
+	pub fn b_pawn_capture_sw(&self) -> u64 {
+		sh_sw(self.bits(BPawn)) & self.white()
+	}
+
 	#[inline]
 	fn bits(&self, sq: Square) -> u64 {
 		self.sets[sq.index()]
@@ -98,41 +148,12 @@ impl BitBoard {
 			| self.bits(BQueen)
 			| self.bits(BKing)
 	}
-
-	pub fn w_pawn_move(&self) -> u64 {
-		self.w_pawn_push() | self.w_pawn_capture()
-	}
-
-	pub fn w_pawn_push(&self) -> u64 {
-		let empty = self.bits(Empty);
-		let pawns = self.bits(WPawn);
-
-		// 1 square forward
-		let push1 = sh_n(pawns) & empty;
-
-		// 2 squares forward on first move
-		let push2 = sh_n(sh_n(pawns & ROW1) & empty) & empty;
-
-		push1 | push2
-	}
-
-	pub fn w_pawn_capture(&self) -> u64 {
-		self.w_pawn_capture_ne() | self.w_pawn_capture_nw()
-	}
-
-	pub fn w_pawn_capture_ne(&self) -> u64 {
-		sh_ne(self.bits(WPawn)) & self.black()
-	}
-
-	pub fn w_pawn_capture_nw(&self) -> u64 {
-		sh_nw(self.bits(WPawn)) & self.black()
-	}
 }
 
 const ROW0: u64 = 0b_11111111;
-const ROW1: u64 = sh_n(ROW0);
-
-const COL0: u64 = 0b_00000001_00000001_00000001_00000001_00000001_00000001_00000001_00000001;
+const ROW1: u64 = ROW0 << (1 * 8);
+const ROW6: u64 = ROW0 << (6 * 8);
+const COL0: u64 = 0x_01_01_01_01_01_01_01_01;
 const COL7: u64 = COL0 << 7;
 
 /// Shift one row north.
@@ -141,10 +162,28 @@ const fn sh_n(set: u64) -> u64 {
 	set << 8
 }
 
+/// Shift one row south.
+#[inline]
+const fn sh_s(set: u64) -> u64 {
+	set >> 8
+}
+
 /// Shift one row north east.
 #[inline]
 const fn sh_ne(set: u64) -> u64 {
 	(set & !COL7) << 9
+}
+
+/// Shift one row south east.
+#[inline]
+const fn sh_se(set: u64) -> u64 {
+	(set & !COL7) >> 7
+}
+
+/// Shift one row south west.
+#[inline]
+const fn sh_sw(set: u64) -> u64 {
+	(set & !COL0) >> 9
 }
 
 /// Shift one row north west.

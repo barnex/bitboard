@@ -33,6 +33,141 @@ fn _() {
 */
 
 #[test]
+fn b_pawn_move() {
+	check(
+		BitBoard::b_pawn_move,
+		r"
+		. . . . . . . .
+		. . . p . . . .
+		p . . . . . . .
+		. R . . . . p .
+		. . p . . R . R
+		. R . R . . . .
+		. . . . . . . .
+		. . . . . p . .
+		",
+		r"
+		. . . . . . . .
+		. . . p . . . .
+		p . . x . . . .
+		x x . x . . p .
+		. . p . . x x x
+		. x x x . . . .
+		. . . . . . . .
+		. . . . . p . .
+		",
+	);
+}
+
+#[test]
+fn b_pawn_capture() {
+	check(
+		BitBoard::b_pawn_capture,
+		r"
+		. . . . . . . .
+		. . . p . . . .
+		p . . . . . . .
+		. R . . . . p .
+		. . p . . R . R
+		. R . R . . . .
+		. . . . . . . .
+		. . . . . p . .
+		",
+		r"
+		. . . . . . . .
+		. . . p . . . .
+		p . . . . . . .
+		. x . . . . p .
+		. . p . . x . x
+		. x . x . . . .
+		. . . . . . . .
+		. . . . . p . .
+		",
+	);
+}
+
+#[test]
+fn b_pawn_capture_we() {
+	check(
+		BitBoard::b_pawn_capture_sw,
+		r"
+		. . . . . . . .
+		. . . p . . . .
+		p . . . . . . .
+		. R . . . . p .
+		. . p . . R . R
+		. R . R . . . .
+		. . . . . . . .
+		. . . . . p . .
+		",
+		r"
+		. . . . . . . .
+		. . . p . . . .
+		p . . . . . . .
+		. R . . . . p .
+		. . p . . x . R
+		. x . R . . . .
+		. . . . . . . .
+		. . . . . p . .
+		",
+	);
+}
+
+#[test]
+fn b_pawn_capture_se() {
+	check(
+		BitBoard::b_pawn_capture_se,
+		r"
+		. . . . . . . .
+		. . . p . . . .
+		p . . . . . . .
+		. R . . . . p .
+		. . p . . R . R
+		. R . R . . . .
+		. . . . . . . .
+		. . . . . p . .
+		",
+		r"
+		. . . . . . . .
+		. . . p . . . .
+		p . . . . . . .
+		. x . . . . p .
+		. . p . . R . x
+		. R . x . . . .
+		. . . . . . . .
+		. . . . . p . .
+		",
+	);
+}
+
+#[test]
+fn b_pawn_push() {
+	check(
+		BitBoard::b_pawn_push,
+		r"
+		. . . . . . . .
+		p . p . . . p p
+		r . . . . . R .
+		. . . . . . . .
+		. . p p p . . .
+		. . . R . . . .
+		. . . . . . . .
+		p . . . . . . p
+		",
+		r"
+		. . . . . . . .
+		p . p . . . p p
+		r . x . . . R x
+		. . x . . . . x
+		. . p p p . . .
+		. . x R x . . .
+		. . . . . . . .
+		p . . . . . . p
+		",
+	);
+}
+
+#[test]
 fn w_pawn_move() {
 	check(
 		BitBoard::w_pawn_move,
@@ -141,7 +276,7 @@ fn w_pawn_capture_ne() {
 }
 
 #[test]
-fn w_pawn_pushes() {
+fn w_pawn_push() {
 	check(
 		BitBoard::w_pawn_push,
 		r"
