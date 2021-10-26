@@ -1,6 +1,7 @@
 use super::internal::*;
 use rand::prelude::*;
 use rand::SeedableRng;
+use Square::*;
 
 fn random_boards(n: usize) -> Vec<Mailbox> {
 	let seed = 12345;
