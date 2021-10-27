@@ -2,7 +2,7 @@ use std::fmt::DebugTuple;
 
 use super::internal::*;
 
-const INF: i32 = 1_000_000; // effectively infinite value
+const INF: i32 = 999_999_999; // effectively infinite value
 
 pub fn negamax<B, F>(board: &B, depth: u32, c: Color, mv: Move, val: &F) -> i32
 where
@@ -23,20 +23,36 @@ where
 	value
 }
 
+/// How good is board for player?
+/// Good scores are always positive, bad scores always negative,
+/// regardless of player color.
 fn negamax2<B, F>(board: &B, player: Color, leaf_eval: &F, depth: u32) -> i32
 where
 	B: Board,
 	F: Fn(&B, Color) -> i32,
 {
+	// must stop iteration so that we would not trade a king for a king :-)
+	if !board.has_king(player) {
+		return -INF;
+	}
+	if !board.has_king(player.opposite()) {
+		return INF;
+	}
+
 	if depth == 0 {
-		// TODO: or checkmate
 		return leaf_eval(board, player);
 	}
 
 	let mut value = -INF;
 	for mv in board.all_moves(player) {
 		let board = board.with_move(mv);
-		value = i32::max(value, -negamax2(&board, player.opposite(), leaf_eval, depth - 1))
+
+		// TODO: filter out bad moves at board level.
+		if board.is_check(player) {
+			continue;
+		}
+
+		value = i32::max(value, -negamax2(&board, player.opposite(), leaf_eval, depth - 1));
 	}
 	value
 }
@@ -45,6 +61,28 @@ where
 mod test {
 	use super::*;
 	use Color::*;
+
+	#[test]
+	fn test_negamax_mate() {
+		let board = board(
+			r"
+		. . . . R . . k
+		. . . . R . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . K
+		",
+		);
+
+		debug_assert_eq!(negamax2(&board, White, &material, 0), 10);
+		debug_assert_eq!(negamax2(&board, Black, &material, 0), -10);
+
+		debug_assert_eq!(negamax2(&board, White, &material, 1), INF);
+		debug_assert_eq!(negamax2(&board, Black, &material, 2), -INF);
+	}
 
 	#[test]
 	fn test_negamax_1() {
@@ -57,31 +95,31 @@ mod test {
 		. . . . . . . .
 		. . . . Q . . .
 		. . . . . . . .
-		. . . . . . . .
+		k . . . . . . K
 		",
 		);
 
 		debug_assert_eq!(negamax2(&board, White, &material, 0), 7);
 		debug_assert_eq!(negamax2(&board, Black, &material, 0), -7);
 
-		debug_assert_eq!(negamax2(&board, White, &material, 1), 8);
+		debug_assert_eq!(negamax2(&board, White, &material, 1), 8); // white greedily takes a pawn
 		debug_assert_eq!(negamax2(&board, Black, &material, 1), -7);
 
-		debug_assert_eq!(negamax2(&board, White, &material, 2), 7);
+		debug_assert_eq!(negamax2(&board, White, &material, 2), 7); // white sees that the pawn is protected
 	}
 
 	#[test]
 	fn test_negamax_2() {
 		let board = board(
 			r"
-		Q . . p p p . .
+		Q . . p p p . k
 		. . . . . . . .
 		. . . . . . . .
 		. . . . . . . .
 		. . . . . . . .
 		. . . . . . . .
 		. . . . . . . .
-		. . . . . . . .
+		. . . . . . . K
 		",
 		);
 
@@ -105,14 +143,14 @@ mod test {
 	fn test_negamax_3() {
 		let board = board(
 			r"
+		. . . . . . . k
 		. . . . . . . .
 		. . . . . . . .
 		. . . . . . . .
 		. . . . . . . .
 		. . . . . . . .
 		. . . . . . . .
-		. . . . . . . .
-		q . . P P P . .
+		q . . P P P . K
 		",
 		);
 

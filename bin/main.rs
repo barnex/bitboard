@@ -32,7 +32,7 @@ fn play_game() -> Option<Color> {
 			return Some(winner);
 		}
 
-		if is_check(&board, player) {
+		if board.is_check(player) {
 			println!("{} checked their self", player);
 			return Some(player.opposite());
 		}
@@ -87,7 +87,7 @@ pub fn annotate_move(board: &impl Board, mv: Move) -> String {
 		if is_mate(&board.with_move(mv), player.opposite()) {
 			str += "#";
 		// ...or just check?
-		} else if is_check(&board.with_move(mv), player.opposite()) {
+		} else if board.with_move(mv).is_check(player.opposite()) {
 			str += "+";
 		}
 	}

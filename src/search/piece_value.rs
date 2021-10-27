@@ -19,13 +19,13 @@ pub fn piece_value(sq: Square) -> i32 {
 		WBisshop => 3,
 		WRook => 5,
 		WQueen => 9,
-		WKing => 1000, // silly
+		WKing => 0,
 		BPawn => -1,
 		BKnight => -3,
 		BBisshop => -3,
 		BRook => -5,
 		BQueen => -9,
-		BKing => -1000, // silly
+		BKing => 0,
 		_ => 0,
 	}
 }

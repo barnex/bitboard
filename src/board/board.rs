@@ -6,6 +6,33 @@ pub trait Board {
 	fn set(&mut self, pos: Pos, sq: Square);
 	fn all_moves(&self, player: Color) -> SmVec<Move>;
 	fn with_move(&self, mv: Move) -> Self;
+
+	// TODO: optimize for bitboard
+	// or remove board trait?
+	fn has_king(&self, player: Color) -> bool {
+		let king = match player {
+			Color::White => Square::WKing,
+			Color::Black => Square::BKing,
+		};
+		for r in 0..8 {
+			for c in 0..8 {
+				if self.at(pos(r, c)) == king {
+					return true;
+				}
+			}
+		}
+		false
+	}
+
+	fn is_check(&self, player: Color) -> bool {
+		let attacter = player.opposite();
+		for mv in self.all_moves(attacter) {
+			if self.at(mv.to).is_king() {
+				return true;
+			}
+		}
+		false
+	}
 }
 
 /// Check if player is checkmate.
@@ -14,25 +41,11 @@ pub trait Board {
 /// not to be used in a value computation.
 pub fn is_mate(board: &impl Board, player: Color) -> bool {
 	for mv in board.all_moves(player) {
-		if !is_check(&board.with_move(mv), player) {
+		if !board.with_move(mv).is_check(player) {
 			return false;
 		}
 	}
 	true
-}
-
-/// Check if player is check.
-/// This is a slow but general implementation
-/// intended to annotate moves,
-/// not to be used in a value computation.
-pub fn is_check(board: &impl Board, player: Color) -> bool {
-	let attacter = player.opposite();
-	for mv in board.all_moves(attacter) {
-		if board.at(mv.to).is_king() {
-			return true;
-		}
-	}
-	false
 }
 
 pub fn starting_position<B: Board>() -> B {

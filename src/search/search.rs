@@ -15,7 +15,7 @@ where
 	let mut mv_value = board
 		.all_moves(player)
 		.iter()
-		.filter(|&mv| !is_check(&board.with_move(*mv), player))
+		.filter(|&mv| !board.with_move(*mv).is_check(player))
 		.map(|&mv| (mv, player.sign() * negamax(board, depth, player, mv, val)))
 		.collect::<SmVec<_>>();
 
