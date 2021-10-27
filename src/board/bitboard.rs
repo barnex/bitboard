@@ -98,6 +98,13 @@ impl BitBoard {
 		self.unpack(BQueen, |s, b| s.queen_moves(b, black), buf);
 	}
 
+	pub fn reach(&self, player: Color) -> u64 {
+		match player {
+			White => self.w_reach(),
+			Black => self.b_reach(),
+		}
+	}
+
 	pub fn w_reach(&self) -> u64 {
 		self.king_reach(self.bits(WKing))
 			| self.bisshop_reach(self.bits(WQueen) | self.bits(WBisshop))
@@ -445,5 +452,13 @@ impl Board for BitBoard {
 
 	fn with_move(&self, mv: Move) -> Self {
 		self.with_move(mv)
+	}
+
+	fn has_king(&self, player: Color) -> bool {
+		self.bits(player.king()) != 0
+	}
+
+	fn is_check(&self, player: Color) -> bool {
+		(self.reach(player.opposite()) & self.bits(player.king())) != 0
 	}
 }

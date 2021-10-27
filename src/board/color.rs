@@ -9,13 +9,6 @@ pub enum Color {
 use Color::*;
 
 impl Color {
-	//pub fn mask(self) -> u8 {
-	//	match self {
-	//		White => WHITE,
-	//		Black => BLACK,
-	//	}
-	//}
-
 	pub fn opposite(self) -> Self {
 		match self {
 			White => Black,
@@ -25,6 +18,13 @@ impl Color {
 
 	pub fn sign(self) -> i32 {
 		self as i32
+	}
+
+	pub fn king(self) -> Square {
+		match self {
+			White => Square::WKing,
+			Black => Square::BKing,
+		}
 	}
 }
 

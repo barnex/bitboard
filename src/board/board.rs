@@ -8,7 +8,6 @@ pub trait Board {
 	fn with_move(&self, mv: Move) -> Self;
 
 	// TODO: optimize for bitboard
-	// or remove board trait?
 	fn has_king(&self, player: Color) -> bool {
 		let king = match player {
 			Color::White => Square::WKing,
