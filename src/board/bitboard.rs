@@ -101,16 +101,65 @@ impl BitBoard {
 		}
 	}
 
+	pub fn w_king_moves(&self) -> u64 {
+		self.king_moves(self.bits(WKing), self.white())
+	}
+
+	pub fn b_king_moves(&self) -> u64 {
+		self.king_moves(self.bits(BKing), self.black())
+	}
+
+	fn king_moves(&self, king: u64, player: u64) -> u64 {
+		let mut acc = king;
+		acc |= sh_n(acc);
+		acc |= sh_s(acc);
+		acc |= sh_e(acc);
+		acc |= sh_w(acc);
+		acc & !player
+	}
+
+	pub fn w_knight_moves(&self) -> u64 {
+		self.knight_moves(self.bits(WKnight), self.white())
+	}
+
+	pub fn b_knight_moves(&self) -> u64 {
+		self.knight_moves(self.bits(BKnight), self.black())
+	}
+
+	fn knight_moves(&self, knights: u64, player: u64) -> u64 {
+		let e = sh_e(knights);
+		let ee = sh_e(e);
+
+		let w = sh_w(knights);
+		let ww = sh_w(w);
+
+		let n = sh_n(e | w);
+		let nn = sh_n(n | ee | ww);
+
+		let s = sh_s(e | w);
+		let ss = sh_s(s | ee | ww);
+
+		(nn | ss) & !player
+	}
+
+	pub fn w_bisshop_moves(&self) -> u64 {
+		self.bisshop_reach(self.bits(WBisshop)) & !self.white()
+	}
+
+	pub fn b_bisshop_moves(&self) -> u64 {
+		self.bisshop_reach(self.bits(BBisshop)) & !self.black()
+	}
+
+	pub fn bisshop_reach(&self, bits: u64) -> u64 {
+		self.slide(bits, sh_ne) | self.slide(bits, sh_se) | self.slide(bits, sh_sw) | self.slide(bits, sh_nw)
+	}
+
 	pub fn w_rook_moves(&self) -> u64 {
-		self.rook_moves(self.bits(WRook), self.white())
+		self.rook_reach(self.bits(WRook)) & !self.white()
 	}
 
 	pub fn b_rook_moves(&self) -> u64 {
-		self.rook_moves(self.bits(BRook), self.black())
-	}
-
-	pub fn rook_moves(&self, rooks: u64, player: u64) -> u64 {
-		self.rook_reach(rooks) & !player
+		self.rook_reach(self.bits(BRook)) & !self.black()
 	}
 
 	pub fn rook_reach(&self, bits: u64) -> u64 {
