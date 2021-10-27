@@ -50,6 +50,9 @@ impl FromStr for Move {
 
 	fn from_str(s: &str) -> Result<Self> {
 		let bytes = s.as_bytes();
+		if bytes.len() != 5 {
+			return Err(format_err!("move '{}': syntax error: need 5 characters", s));
+		}
 		let _piece = Square::try_from(bytes[0] as char)?;
 		let from = Pos::try_from(&bytes[1..3])?;
 		let to = Pos::try_from(&bytes[3..5])?;

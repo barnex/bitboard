@@ -7,10 +7,11 @@ use Color::*;
 use Square::*;
 
 /* COPY-PASTE ZONE
+
 #[test]
 fn _() {
 	test_moves(
-		BitBoard::f,
+		Color,
 		r"
 		. . . . . . . .
 		. . . . . . . .
@@ -21,16 +22,7 @@ fn _() {
 		. . . . . . . .
 		. . . . . . . .
 		",
-		r"
-		. . . . . . . .
-		. . . . . . . .
-		. . . . . . . .
-		. . . . . . . .
-		. . . . . . . .
-		. . . . . . . .
-		. . . . . . . .
-		. . . . . . . .
-		",
+		&["",],
 	);
 }
 
@@ -61,6 +53,74 @@ fn _() {
 	);
 }
 */
+
+#[test]
+fn random_all_moves() {
+	// use Color::*;
+
+	// for board in &random_boards(1000) {
+	// 	let mut bb = BitBoard::new();
+	// 	for (pos, sq) in board.iter() {
+	// 		bb.set(pos, sq);
+	// 	}
+
+	// 	for player in [White, Black] {
+	// 		let have = bb.all_moves(player);
+	// 		let want = board.all_moves(player);
+
+	// 		if have != want {
+	// 			print_ansi(board, &Set::default());
+	// 			assert_eq!(have, want);
+	// 		}
+	// 	}
+	// }
+}
+
+#[test]
+fn all_moves() {
+	test_moves(
+		White,
+		r"
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. K . . . . . .
+		",
+		&["Kb1a1", "Kb1c1", "Kb1a2", "Kb1b2", "Kb1c2"],
+	);
+	test_moves(
+		Black,
+		r"
+		. . . . . . . n
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . n
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		",
+		&["nh4g2", "nh4f3", "nh4f5", "nh4g6", "nh8g6", "nh8f7"],
+	);
+	test_moves(
+		White,
+		r"
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. p . . . . . .
+		. . . . . . . .
+		. R p . . . . .
+		. . . . . . . .
+		",
+		&["Rb2b3", "Rb2b1", "Rb2c2", "Rb2a2", "Rb2b4"],
+	);
+}
 
 #[test]
 fn king_moves() {
@@ -380,7 +440,7 @@ fn all_b_pawn_moves() {
 		. . . . . . R R
 		. . . . . . . .
 		",
-		&["pd7d6", "pd7d5", "pd7e6", "pg3g2"],
+		&["pd7d6", "pd7d5", "pd7e6", "ph3g2"],
 	);
 }
 
@@ -712,14 +772,16 @@ fn test_moves(player: Color, board: &str, want: &[&str]) {
 		.map(|s| Move::from_str(s).expect("move: syntax error"))
 		.collect::<Set<_>>();
 	if have != want {
+		println!("have: {:?}", &have);
+		println!("want: {:?}", &want);
+		println!("diff: +{:?}, -{:?}", have.sub(&want), want.sub(&have));
 		let have = have.iter().map(|mv| mv.to).collect();
 		let want = want.iter().map(|mv| mv.to).collect();
 		println!("have:");
 		print_ansi(&board, &have);
 		println!("want:");
 		print_ansi(&board, &want);
-		println!("diff: +{:?}, -{:?}", have.sub(&want), want.sub(&have));
-		assert_eq!(have, want);
+		panic!("test failed")
 	}
 }
 
@@ -735,28 +797,6 @@ fn test_bits<F: Fn(&BitBoard) -> u64>(f: F, board: &str, want: &str) {
 		println!("diff: +{:?}, -{:?}", have.sub(&want), want.sub(&have));
 		assert_eq!(have, want);
 	}
-}
-
-#[test]
-fn all_moves() {
-	// use Color::*;
-
-	// for board in &random_boards(1000) {
-	// 	let mut bb = BitBoard::new();
-	// 	for (pos, sq) in board.iter() {
-	// 		bb.set(pos, sq);
-	// 	}
-
-	// 	for player in [White, Black] {
-	// 		let have = bb.all_moves(player);
-	// 		let want = board.all_moves(player);
-
-	// 		if have != want {
-	// 			print_ansi(board, &Set::default());
-	// 			assert_eq!(have, want);
-	// 		}
-	// 	}
-	// }
 }
 
 #[test]

@@ -76,21 +76,53 @@ impl BitBoard {
 		moves
 	}
 
-	fn all_w_moves(&self, moves: &mut SmVec<Move>) {
-		Self::decode(WPawn, self.w_pawn_push1(), delta(-1, 0), moves);
-		Self::decode(WPawn, self.w_pawn_push2(), delta(-2, 0), moves);
-		Self::decode(WPawn, self.w_pawn_capture_ne(), delta(-1, -1), moves);
-		Self::decode(WPawn, self.w_pawn_capture_nw(), delta(-1, 1), moves);
+	fn all_w_moves(&self, buf: &mut SmVec<Move>) {
+		let white = self.white();
+
+		Self::unpack_pawn(WPawn, self.w_pawn_push1(), delta(-1, 0), buf);
+		Self::unpack_pawn(WPawn, self.w_pawn_push2(), delta(-2, 0), buf);
+		Self::unpack_pawn(WPawn, self.w_pawn_capture_ne(), delta(-1, -1), buf);
+		Self::unpack_pawn(WPawn, self.w_pawn_capture_nw(), delta(-1, 1), buf);
+
+		self.unpack(WKing, |s, b| s.king_moves(b, white), buf);
+		self.unpack(WKnight, |s, b| s.knight_moves(b, white), buf);
+		self.unpack(WRook, |s, b| s.rook_moves(b, white), buf);
 	}
 
-	fn all_b_moves(&self, moves: &mut SmVec<Move>) {
-		Self::decode(BPawn, self.b_pawn_push1(), delta(1, 0), moves);
-		Self::decode(BPawn, self.b_pawn_push2(), delta(2, 0), moves);
-		Self::decode(BPawn, self.b_pawn_capture_se(), delta(1, -1), moves);
-		Self::decode(BPawn, self.b_pawn_capture_sw(), delta(1, 1), moves);
+	fn all_b_moves(&self, buf: &mut SmVec<Move>) {
+		let black = self.black();
+
+		Self::unpack_pawn(BPawn, self.b_pawn_push1(), delta(1, 0), buf);
+		Self::unpack_pawn(BPawn, self.b_pawn_push2(), delta(2, 0), buf);
+		Self::unpack_pawn(BPawn, self.b_pawn_capture_se(), delta(1, -1), buf);
+		Self::unpack_pawn(BPawn, self.b_pawn_capture_sw(), delta(1, 1), buf);
+
+		self.unpack(BKing, |s, b| s.king_moves(b, black), buf);
+		self.unpack(BKnight, |s, b| s.knight_moves(b, black), buf);
+		self.unpack(BRook, |s, b| s.rook_moves(b, black), buf);
 	}
 
-	fn decode(piece: Square, bits: u64, delta: u8, moves: &mut SmVec<Move>) {
+	fn unpack<F>(&self, piece: Square, f: F, buf: &mut SmVec<Move>)
+	where
+		F: Fn(&Self, u64) -> u64,
+	{
+		let bits = self.bits(piece);
+		for i in 0..64 {
+			let from = Pos::from_index(i);
+			if bit_at(bits, from) {
+				let bits = 1 << i;
+				let moves = (&f)(self, bits);
+				for j in 0..64 {
+					let to = Pos::from_index(j);
+					if bit_at(moves, to) {
+						buf.push(Move::with_piece(piece, from, to))
+					}
+				}
+			}
+		}
+	}
+
+	fn unpack_pawn(piece: Square, bits: u64, delta: u8, moves: &mut SmVec<Move>) {
 		// TODO: use bitscan intrinsic.
 		for i in 0..64 {
 			let pos = Pos::from_index(i);
@@ -128,17 +160,13 @@ impl BitBoard {
 
 	fn knight_moves(&self, knights: u64, player: u64) -> u64 {
 		let e = sh_e(knights);
-		let ee = sh_e(e);
-
 		let w = sh_w(knights);
+		let ee = sh_e(e);
 		let ww = sh_w(w);
-
 		let n = sh_n(e | w);
-		let nn = sh_n(n | ee | ww);
-
 		let s = sh_s(e | w);
+		let nn = sh_n(n | ee | ww);
 		let ss = sh_s(s | ee | ww);
-
 		(nn | ss) & !player
 	}
 
@@ -155,11 +183,15 @@ impl BitBoard {
 	}
 
 	pub fn w_rook_moves(&self) -> u64 {
-		self.rook_reach(self.bits(WRook)) & !self.white()
+		self.rook_moves(self.bits(WRook), self.white())
 	}
 
 	pub fn b_rook_moves(&self) -> u64 {
-		self.rook_reach(self.bits(BRook)) & !self.black()
+		self.rook_moves(self.bits(BRook), self.black())
+	}
+
+	fn rook_moves(&self, rooks: u64, player: u64) -> u64 {
+		self.rook_reach(rooks) & !player
 	}
 
 	pub fn rook_reach(&self, bits: u64) -> u64 {
