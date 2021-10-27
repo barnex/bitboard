@@ -87,6 +87,8 @@ impl BitBoard {
 		self.unpack(WKing, |s, b| s.king_moves(b, white), buf);
 		self.unpack(WKnight, |s, b| s.knight_moves(b, white), buf);
 		self.unpack(WRook, |s, b| s.rook_moves(b, white), buf);
+		self.unpack(WBisshop, |s, b| s.bisshop_moves(b, white), buf);
+		self.unpack(WQueen, |s, b| s.queen_moves(b, white), buf);
 	}
 
 	fn all_b_moves(&self, buf: &mut SmVec<Move>) {
@@ -100,6 +102,8 @@ impl BitBoard {
 		self.unpack(BKing, |s, b| s.king_moves(b, black), buf);
 		self.unpack(BKnight, |s, b| s.knight_moves(b, black), buf);
 		self.unpack(BRook, |s, b| s.rook_moves(b, black), buf);
+		self.unpack(BBisshop, |s, b| s.bisshop_moves(b, black), buf);
+		self.unpack(BQueen, |s, b| s.queen_moves(b, black), buf);
 	}
 
 	fn unpack<F>(&self, piece: Square, f: F, buf: &mut SmVec<Move>)
@@ -170,12 +174,20 @@ impl BitBoard {
 		(nn | ss) & !player
 	}
 
+	pub fn queen_moves(&self, queen: u64, player: u64) -> u64 {
+		(self.bisshop_reach(queen) | self.rook_reach(queen)) & !player
+	}
+
 	pub fn w_bisshop_moves(&self) -> u64 {
-		self.bisshop_reach(self.bits(WBisshop)) & !self.white()
+		self.bisshop_moves(self.bits(WBisshop), self.white())
 	}
 
 	pub fn b_bisshop_moves(&self) -> u64 {
-		self.bisshop_reach(self.bits(BBisshop)) & !self.black()
+		self.bisshop_moves(self.bits(BBisshop), self.black())
+	}
+
+	pub fn bisshop_moves(&self, bisshops: u64, player: u64) -> u64 {
+		self.bisshop_reach(bisshops) & !player
 	}
 
 	pub fn bisshop_reach(&self, bits: u64) -> u64 {

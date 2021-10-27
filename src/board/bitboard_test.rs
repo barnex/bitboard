@@ -56,24 +56,29 @@ fn _() {
 
 #[test]
 fn random_all_moves() {
-	// use Color::*;
+	for board in &random_boards(1000) {
+		let mut bb = BitBoard::new();
+		for (pos, sq) in board.iter() {
+			bb.set(pos, sq);
+		}
 
-	// for board in &random_boards(1000) {
-	// 	let mut bb = BitBoard::new();
-	// 	for (pos, sq) in board.iter() {
-	// 		bb.set(pos, sq);
-	// 	}
+		for player in [White, Black] {
+			let have: Set<Move> = bb.all_moves(player).iter().copied().collect();
+			let want: Set<Move> = board.all_moves(player).iter().copied().collect();
 
-	// 	for player in [White, Black] {
-	// 		let have = bb.all_moves(player);
-	// 		let want = board.all_moves(player);
+			if have != want {
 
-	// 		if have != want {
-	// 			print_ansi(board, &Set::default());
-	// 			assert_eq!(have, want);
-	// 		}
-	// 	}
-	// }
+				println!("have: {:?}", &have);
+				print_ansi(board, &have.iter().map(|mv|mv.to).collect());
+
+				println!("want: {:?}", &want);
+				print_ansi(board, &want.iter().map(|mv|mv.to).collect());
+
+				println!("diff: +{:?}, -{:?}", have.sub(&want), want.sub(&have));
+				panic!("test failed");
+			}
+		}
+	}
 }
 
 #[test]
@@ -119,6 +124,38 @@ fn all_moves() {
 		. . . . . . . .
 		",
 		&["Rb2b3", "Rb2b1", "Rb2c2", "Rb2a2", "Rb2b4"],
+	);
+	test_moves(
+		Black,
+		r"
+		b . . . . . . .
+		. P . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		",
+		&["ba8b7"],
+	);
+	test_moves(
+		White,
+		r"
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . Q . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		",
+		&[
+			"Qd4c3", "Qd4c5", "Qd4e4", "Qd4d2", "Qd4d6", "Qd4d8", "Qd4a1", "Qd4a7", "Qd4b2", "Qd4b4", "Qd4b6", "Qd4g1",
+			"Qd4g7", "Qd4h4", "Qd4c4", "Qd4h8", "Qd4e3", "Qd4d1", "Qd4d3", "Qd4f2", "Qd4a4", "Qd4f4", "Qd4d5", "Qd4e5",
+			"Qd4f6", "Qd4d7", "Qd4g4",
+		],
 	);
 }
 
