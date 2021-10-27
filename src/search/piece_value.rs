@@ -1,5 +1,10 @@
 use super::internal::*;
 
+pub fn material(b: &impl Board, player: Color) -> i32 {
+	player.sign() * material_value(b)
+}
+
+// TODO: hide
 pub fn material_value(board: &impl Board) -> i32 {
 	let mut value = 0;
 	for r in 0..8 {

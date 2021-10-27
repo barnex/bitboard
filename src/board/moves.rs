@@ -1,5 +1,3 @@
-use std::io::Empty;
-
 use super::internal::*;
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]

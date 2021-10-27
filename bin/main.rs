@@ -1,10 +1,9 @@
 use std::time::Instant;
-use std::time::SystemTime;
 
 use bitboard::*;
 use Color::*;
 
-const DEPTH: u32 = 4;
+const DEPTH: u32 = 2;
 
 fn main() {
 	match play_game() {
@@ -22,11 +21,7 @@ fn play_game() -> Option<Color> {
 	for ply in 0..100 {
 		println!("Ply {}", ply + 1);
 
-		if player == White {
-			board = take_turn(board, player, &material_value);
-		} else {
-			board = take_turn(board, player, &material_value);
-		}
+		board = take_turn(board, player);
 
 		if let Some(winner) = winner(&board) {
 			return Some(winner);
@@ -42,13 +37,12 @@ fn play_game() -> Option<Color> {
 	None
 }
 
-fn take_turn<B, F>(board: B, player: Color, val: &F) -> B
+fn take_turn<B>(board: B, player: Color) -> B
 where
 	B: Board,
-	F: Fn(&B) -> i32,
 {
 	let start = Instant::now();
-	let mv_value = evaluate_moves(&board, player, DEPTH, val);
+	let mv_value = evaluate_moves(&board, player, DEPTH);
 	let elapsed = start.elapsed();
 	print_options(&board, player, &mv_value);
 
@@ -92,16 +86,6 @@ pub fn annotate_move(board: &impl Board, mv: Move) -> String {
 		}
 	}
 	str
-}
-
-fn pick_move(mv_value: &[(Move, i32)]) -> Move {
-	let best_value = mv_value.get(0).expect("at least one possible move").1;
-	let equal_value = mv_value.iter().filter(|(_, v)| *v == best_value).collect::<Vec<_>>();
-	let rand = SystemTime::now()
-		.duration_since(SystemTime::UNIX_EPOCH)
-		.unwrap()
-		.as_nanos() as usize;
-	equal_value[rand % equal_value.len()].0
 }
 
 fn winner(board: &impl Board) -> Option<Color> {
