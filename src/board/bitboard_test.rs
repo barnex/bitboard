@@ -1,59 +1,62 @@
-use std::ops::Sub;
-
 use super::internal::*;
 use rand::prelude::*;
 use rand::SeedableRng;
+use std::ops::Sub;
 use Color::*;
 use Square::*;
 
-/* COPY-PASTE ZONE
 
 #[test]
-fn _() {
-	test_moves(
-		Color,
-		r"
-		. . . . . . . .
-		. . . . . . . .
-		. . . . . . . .
-		. . . . . . . .
-		. . . . . . . .
-		. . . . . . . .
-		. . . . . . . .
-		. . . . . . . .
-		",
-		&["",],
-	);
-}
-
-#[test]
-fn _() {
+fn reach() {
 	test_bits(
-		BitBoard::f,
+		BitBoard::w_reach,
 		r"
 		. . . . . . . .
 		. . . . . . . .
 		. . . . . . . .
 		. . . . . . . .
 		. . . . . . . .
+		. . p . . . . .
+		. . . p . . . .
+		Q . . p . . . K
+		",
+		r"
+		x . . . . . . .
+		x . . . . . . .
+		x . . . . . . .
+		x . . . . . . .
+		x . . . . . . .
+		x . x . . . . .
+		x x . p . . x x
+		Q x x x . . x x
+		",
+	);
+	test_bits(
+		BitBoard::w_reach,
+		r"
+		. . . . . . . .
+		. . . . . P . .
 		. . . . . . . .
 		. . . . . . . .
+		. . . . . . . p
+		p . . P . . . .
+		P . P . P . . P
 		. . . . . . . .
 		",
 		r"
+		. . . . x x x .
+		. . . . . P . .
 		. . . . . . . .
 		. . . . . . . .
-		. . . . . . . .
-		. . . . . . . .
-		. . . . . . . .
-		. . . . . . . .
-		. . . . . . . .
+		. . x x x . . p
+		p x x x x x x x
+		P . P . P . . P
 		. . . . . . . .
 		",
 	);
 }
-*/
 
+// Compare BitBoard moves to Mailbox moves for a large number of random boards.
 #[test]
 fn random_all_moves() {
 	for board in &random_boards(1000) {

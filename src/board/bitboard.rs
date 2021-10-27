@@ -7,35 +7,17 @@ pub struct BitBoard {
 	sets: [u64; 13],
 }
 
-impl Board for BitBoard {
-	fn new() -> Self {
-		Self::new()
-	}
-
-	fn at(&self, pos: Pos) -> Square {
-		self.at(pos)
-	}
-
-	fn set(&mut self, pos: Pos, sq: Square) {
-		self.set(pos, sq)
-	}
-
-	fn all_moves(&self, player: Color) -> SmVec<Move> {
-		self.all_moves(player)
-	}
-
-	fn with_move(&self, mv: Move) -> Self {
-		self.with_move(mv)
-	}
-}
-
 impl BitBoard {
+	/// Empty board
 	fn new() -> Self {
 		let mut pieces = [0; 13];
 		pieces[Empty.index()] = !0;
 		Self { sets: pieces }
 	}
 
+	/// Piece at position.
+	/// Slow linear search only intended outputting the board state,
+	/// not for evaluation.
 	fn at(&self, pos: Pos) -> Square {
 		let mask = 1 << pos.index();
 		for sq in Square::ALL_SQUARES {
@@ -46,11 +28,18 @@ impl BitBoard {
 		unreachable!()
 	}
 
-	fn set(&mut self, pos: Pos, sq: Square) {
+	/// Bitset for all pieces of type `piece`.
+	#[inline]
+	pub fn bits(&self, piece: Square) -> u64 {
+		self.sets[piece.index()]
+	}
+
+	/// Set position to piece.
+	fn set(&mut self, pos: Pos, piece: Square) {
 		debug_assert!(pos.is_valid());
 		let pos = pos.index() as u8;
 		self.clear(pos);
-		self.sets[sq.index()] |= 1 << pos;
+		self.sets[piece.index()] |= 1 << pos;
 	}
 
 	fn clear(&mut self, pos: u8) {
@@ -67,6 +56,7 @@ impl BitBoard {
 		b
 	}
 
+	/// All moves for `player`.
 	fn all_moves(&self, player: Color) -> SmVec<Move> {
 		let mut moves = SmVec::new();
 		match player {
@@ -76,6 +66,7 @@ impl BitBoard {
 		moves
 	}
 
+	/// All moves for white.
 	fn all_w_moves(&self, buf: &mut SmVec<Move>) {
 		let white = self.white();
 
@@ -91,6 +82,7 @@ impl BitBoard {
 		self.unpack(WQueen, |s, b| s.queen_moves(b, white), buf);
 	}
 
+	/// All moves for black.
 	fn all_b_moves(&self, buf: &mut SmVec<Move>) {
 		let black = self.black();
 
@@ -104,6 +96,22 @@ impl BitBoard {
 		self.unpack(BRook, |s, b| s.rook_moves(b, black), buf);
 		self.unpack(BBisshop, |s, b| s.bisshop_moves(b, black), buf);
 		self.unpack(BQueen, |s, b| s.queen_moves(b, black), buf);
+	}
+
+	pub fn w_reach(&self) -> u64 {
+		self.king_reach(self.bits(WKing))
+			| self.bisshop_reach(self.bits(WQueen) | self.bits(WBisshop))
+			| self.rook_reach(self.bits(WQueen) | self.bits(WRook))
+			| self.knight_reach(self.bits(WKnight))
+			| self.w_pawn_reach()
+	}
+
+	pub fn b_reach(&self) -> u64 {
+		self.king_reach(self.bits(BKing))
+			| self.bisshop_reach(self.bits(BQueen) | self.bits(BBisshop))
+			| self.rook_reach(self.bits(BQueen) | self.bits(BRook))
+			| self.knight_reach(self.bits(BKnight))
+			| self.b_pawn_reach()
 	}
 
 	fn unpack<F>(&self, piece: Square, f: F, buf: &mut SmVec<Move>)
@@ -146,12 +154,16 @@ impl BitBoard {
 	}
 
 	fn king_moves(&self, king: u64, player: u64) -> u64 {
+		self.king_reach(king) & !player
+	}
+
+	fn king_reach(&self, king: u64) -> u64 {
 		let mut acc = king;
 		acc |= sh_n(acc);
 		acc |= sh_s(acc);
 		acc |= sh_e(acc);
 		acc |= sh_w(acc);
-		acc & !player
+		acc
 	}
 
 	pub fn w_knight_moves(&self) -> u64 {
@@ -163,6 +175,10 @@ impl BitBoard {
 	}
 
 	fn knight_moves(&self, knights: u64, player: u64) -> u64 {
+		self.knight_reach(knights) & !player
+	}
+
+	fn knight_reach(&self, knights: u64) -> u64 {
 		let e = sh_e(knights);
 		let w = sh_w(knights);
 		let ee = sh_e(e);
@@ -171,7 +187,7 @@ impl BitBoard {
 		let s = sh_s(e | w);
 		let nn = sh_n(n | ee | ww);
 		let ss = sh_s(s | ee | ww);
-		(nn | ss) & !player
+		nn | ss
 	}
 
 	pub fn queen_moves(&self, queen: u64, player: u64) -> u64 {
@@ -266,6 +282,16 @@ impl BitBoard {
 		sh_sw(self.bits(BPawn)) & self.white()
 	}
 
+	fn w_pawn_reach(&self) -> u64 {
+		let pawns = self.bits(WPawn);
+		self.w_pawn_push() | sh_ne(pawns) | sh_nw(pawns)
+	}
+
+	fn b_pawn_reach(&self) -> u64 {
+		let pawns = self.bits(BPawn);
+		self.b_pawn_push() | sh_se(pawns) | sh_sw(pawns)
+	}
+
 	pub fn slide<F: Fn(u64) -> u64>(&self, bits: u64, sh: F) -> u64 {
 		let empty = self.empty();
 
@@ -280,11 +306,6 @@ impl BitBoard {
 		}
 
 		acc
-	}
-
-	#[inline]
-	pub fn bits(&self, sq: Square) -> u64 {
-		self.sets[sq.index()]
 	}
 
 	/// All white pieces.
@@ -309,11 +330,14 @@ impl BitBoard {
 			| self.bits(BKing)
 	}
 
+	/// All empty squares.
 	#[inline]
 	fn empty(&self) -> u64 {
 		self.bits(Empty)
 	}
 }
+
+// ___________________________________________________________ bit fiddling
 
 const ROW0: u64 = 0b_11111111;
 const ROW1: u64 = ROW0 << (1 * 8);
@@ -369,6 +393,14 @@ pub const fn sh_nw(set: u64) -> u64 {
 	(set & !COL0) << 7
 }
 
+#[inline]
+pub fn bit_at(set: u64, pos: Pos) -> bool {
+	let mask = 1 << pos.index();
+	(set & mask) != 0
+}
+
+// ___________________________________________________________ trait implementations
+
 impl FromStr for BitBoard {
 	type Err = anyhow::Error;
 
@@ -379,6 +411,17 @@ impl FromStr for BitBoard {
 
 impl fmt::Debug for BitBoard {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+		fn fmt_bits(bits: u64) -> String {
+			let mut str = String::with_capacity(2 * 64 + 8);
+			for r in (0..8).rev() {
+				for c in 0..8 {
+					str.push(if bit_at(bits, pos(r, c)) { '1' } else { '0' });
+					str.push(' ');
+				}
+				str.push('\n');
+			}
+			str
+		}
 		for sq in Square::ALL_SQUARES {
 			write!(f, "{:?}:\n{}\n", sq, fmt_bits(self.sets[sq.index()]))?;
 		}
@@ -386,19 +429,24 @@ impl fmt::Debug for BitBoard {
 	}
 }
 
-fn fmt_bits(bits: u64) -> String {
-	let mut str = String::with_capacity(2 * 64 + 8);
-	for r in (0..8).rev() {
-		for c in 0..8 {
-			str.push(if bit_at(bits, pos(r, c)) { '1' } else { '0' });
-			str.push(' ');
-		}
-		str.push('\n');
+impl Board for BitBoard {
+	fn new() -> Self {
+		Self::new()
 	}
-	str
-}
 
-pub fn bit_at(set: u64, pos: Pos) -> bool {
-	let mask = 1 << pos.index();
-	(set & mask) != 0
+	fn at(&self, pos: Pos) -> Square {
+		self.at(pos)
+	}
+
+	fn set(&mut self, pos: Pos, sq: Square) {
+		self.set(pos, sq)
+	}
+
+	fn all_moves(&self, player: Color) -> SmVec<Move> {
+		self.all_moves(player)
+	}
+
+	fn with_move(&self, mv: Move) -> Self {
+		self.with_move(mv)
+	}
 }

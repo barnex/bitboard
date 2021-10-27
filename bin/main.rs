@@ -4,7 +4,7 @@ use std::time::SystemTime;
 use bitboard::*;
 use Color::*;
 
-const DEPTH: u32 = 3;
+const DEPTH: u32 = 4;
 
 fn main() {
 	match play_game() {
@@ -14,7 +14,7 @@ fn main() {
 }
 
 fn play_game() -> Option<Color> {
-	let mut board: Mailbox = starting_position();
+	let mut board: BitBoard = starting_position();
 
 	print_ansi(&board, &Set::default());
 
