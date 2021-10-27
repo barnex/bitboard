@@ -67,12 +67,12 @@ fn random_all_moves() {
 			let want: Set<Move> = board.all_moves(player).iter().copied().collect();
 
 			if have != want {
-
+				println!("player: {}", player);
 				println!("have: {:?}", &have);
-				print_ansi(board, &have.iter().map(|mv|mv.to).collect());
+				print_ansi(board, &have.iter().map(|mv| mv.to).collect());
 
 				println!("want: {:?}", &want);
-				print_ansi(board, &want.iter().map(|mv|mv.to).collect());
+				print_ansi(board, &want.iter().map(|mv| mv.to).collect());
 
 				println!("diff: +{:?}, -{:?}", have.sub(&want), want.sub(&have));
 				panic!("test failed");
