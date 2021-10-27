@@ -50,8 +50,7 @@ where
 	let start = Instant::now();
 	let mv_value = evaluate_moves(&board, player, DEPTH, val);
 	let elapsed = start.elapsed();
-
-	//print_options(&board, player, &mv_value);
+	print_options(&board, player, &mv_value);
 
 	let mv = pick_move(&mv_value);
 
@@ -114,7 +113,6 @@ fn winner(board: &impl Board) -> Option<Color> {
 	None
 }
 
-/*
 fn print_options(board: &impl Board, player: Color, mv_value: &[(Move, i32)]) {
 	let options = mv_value
 		.iter()
@@ -123,4 +121,3 @@ fn print_options(board: &impl Board, player: Color, mv_value: &[(Move, i32)]) {
 		.join(", ");
 	println!("{:?} has options {}", player, options);
 }
-*/

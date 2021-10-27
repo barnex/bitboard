@@ -157,6 +157,7 @@ impl BitBoard {
 		self.king_reach(king) & !player
 	}
 
+	// NOTE: includes self.
 	fn king_reach(&self, king: u64) -> u64 {
 		let mut acc = king;
 		acc |= sh_n(acc);
@@ -183,11 +184,7 @@ impl BitBoard {
 		let w = sh_w(knights);
 		let ee = sh_e(e);
 		let ww = sh_w(w);
-		let n = sh_n(e | w);
-		let s = sh_s(e | w);
-		let nn = sh_n(n | ee | ww);
-		let ss = sh_s(s | ee | ww);
-		nn | ss
+		sh_n(sh_n(e | w) | ee | ww) | sh_s(sh_s(e | w) | ee | ww)
 	}
 
 	pub fn queen_moves(&self, queen: u64, player: u64) -> u64 {

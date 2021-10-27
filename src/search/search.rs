@@ -19,6 +19,6 @@ where
 		.map(|&mv| (mv, player.sign() * negamax(board, depth, player, mv, val)))
 		.collect::<SmVec<_>>();
 
-	mv_value.sort_by_key(|(_, v)| -*v);
+	mv_value.sort_by_key(|(_, v)| -v);
 	mv_value
 }

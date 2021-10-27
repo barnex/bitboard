@@ -1,3 +1,5 @@
+use std::fmt::DebugTuple;
+
 use super::internal::*;
 
 const INF: i32 = 1_000_000; // effectively infinite value
@@ -7,46 +9,134 @@ where
 	B: Board,
 	F: Fn(&B) -> i32,
 {
-	debug_assert!(depth != 0);
-
 	//if board[mv.to].mask(KIND_MASK) == KING{
 	//	return - INF  * board[mv.to].color().map_or(0, Color::sign)
 	//}
-
 	let board = board.with_move(mv);
-	if depth == 1 {
+	if depth == 0 {
 		return val(&board);
 	}
-
 	let mut value = INF;
-
 	for mv in board.all_moves(c.opposite()) {
 		value = i32::min(value, -negamax(&board, depth - 1, c.opposite(), mv, val))
 	}
-
 	value
 }
 
-/*
-func (e *worf) negamax(n *Node, depth int, c Color, m Move) int {
-
-	if dst := n.board.At(m.DstI()); dst == WK || dst == BK {
-		return inf(-c * dst.Color())
-	}
-
+fn negamax2<B, F>(board: &B, player: Color, leaf_eval: &F, depth: u32) -> i32
+where
+	B: Board,
+	F: Fn(&B, Color) -> i32,
+{
 	if depth == 0 {
-		return int(c) * Heuristic3(n, m)
+		// TODO: or checkmate
+		return leaf_eval(board, player);
 	}
 
-	value := inf(1)
-
-	n2 := n.WithMove(m)
-	n = nil
-	for _, m := range AllMoves(&n2.board, -c) {
-		v := e.negamax(n2, depth-1, -c, m) * -1
-		value = min(value, v)
+	let mut value = -INF;
+	for mv in board.all_moves(player) {
+		let board = board.with_move(mv);
+		value = i32::max(value, -negamax2(&board, player.opposite(), leaf_eval, depth - 1))
 	}
-	return value
+	value
 }
 
-*/
+#[cfg(test)]
+mod test {
+	use super::*;
+	use Color::*;
+
+	#[test]
+	fn test_negamax_1() {
+		let board = board(
+			r"
+		. . . . . . . .
+		. . . . . p . .
+		. . . . p . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . Q . . .
+		. . . . . . . .
+		. . . . . . . .
+		",
+		);
+
+		debug_assert_eq!(negamax2(&board, White, &material, 0), 7);
+		debug_assert_eq!(negamax2(&board, Black, &material, 0), -7);
+
+		debug_assert_eq!(negamax2(&board, White, &material, 1), 8);
+		debug_assert_eq!(negamax2(&board, Black, &material, 1), -7);
+
+		debug_assert_eq!(negamax2(&board, White, &material, 2), 7);
+	}
+
+	#[test]
+	fn test_negamax_2() {
+		let board = board(
+			r"
+		Q . . p p p . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		",
+		);
+
+		debug_assert_eq!(negamax2(&board, White, &material, 0), 6); // no moves
+		debug_assert_eq!(negamax2(&board, Black, &material, 0), -6); // no moves
+
+		debug_assert_eq!(negamax2(&board, White, &material, 1), 7); // white: Qd8xp
+		debug_assert_eq!(negamax2(&board, Black, &material, 1), -6); // black: no moves
+
+		debug_assert_eq!(negamax2(&board, White, &material, 2), 7); // white: Qd8xp,    black: no moves
+		debug_assert_eq!(negamax2(&board, Black, &material, 2), -7); // black: no moves, white: Qd8xp
+
+		debug_assert_eq!(negamax2(&board, White, &material, 3), 8); // white: Qd8xp,   black: no moves, white: Qe8xp
+		debug_assert_eq!(negamax2(&board, Black, &material, 3), -7); // black: no moves, white: Qd8xp,  black: no moves
+
+		debug_assert_eq!(negamax2(&board, White, &material, 4), 8); // white: Qd8xp,   black: no moves, white: Qe8xp,    black: no moves
+		debug_assert_eq!(negamax2(&board, Black, &material, 4), -8); // black: no moves, white: Qd8xp,  black: no moves, white: Qe8xp
+	}
+
+	#[test]
+	fn test_negamax_3() {
+		let board = board(
+			r"
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		q . . P P P . .
+		",
+		);
+
+		debug_assert_eq!(negamax2(&board, Black, &material, 0), 6);
+		debug_assert_eq!(negamax2(&board, White, &material, 0), -6);
+
+		debug_assert_eq!(negamax2(&board, Black, &material, 1), 7);
+		debug_assert_eq!(negamax2(&board, White, &material, 1), -6);
+
+		debug_assert_eq!(negamax2(&board, Black, &material, 2), 7);
+		debug_assert_eq!(negamax2(&board, White, &material, 2), -7);
+
+		debug_assert_eq!(negamax2(&board, Black, &material, 3), 8);
+		debug_assert_eq!(negamax2(&board, White, &material, 3), -7);
+
+		debug_assert_eq!(negamax2(&board, Black, &material, 4), 8);
+		debug_assert_eq!(negamax2(&board, White, &material, 4), -8);
+	}
+
+	fn material(b: &BitBoard, player: Color) -> i32 {
+		player.sign() * material_value(b)
+	}
+
+	fn board(board: &str) -> BitBoard {
+		BitBoard::from_str(board).unwrap()
+	}
+}
