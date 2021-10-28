@@ -40,7 +40,6 @@ where
 #[cfg(test)]
 mod test {
 	use super::*;
-	use Color::*;
 
 	#[test]
 	fn test_negamax_mate() {

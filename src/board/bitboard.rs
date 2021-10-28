@@ -334,15 +334,22 @@ impl BitBoard {
 			| self.bits(BKing)
 	}
 
+	pub fn all_pieces(&self, player: Color) -> u64 {
+		match player {
+			White => self.white(),
+			Black => self.black(),
+		}
+	}
+
 	/// All empty squares.
 	#[inline]
-	fn empty(&self) -> u64 {
+	pub fn empty(&self) -> u64 {
 		self.bits(Empty)
 	}
 
-	fn material_value(&self) -> i32{
+	fn material_value(&self) -> i32 {
 		let mut sum = 0;
-		for piece in Square::ALL_PIECES{
+		for piece in Square::ALL_PIECES {
 			sum += piece.value() * (self.bits(piece).count_ones() as i32);
 		}
 		sum
@@ -483,6 +490,6 @@ impl Board for BitBoard {
 	}
 
 	fn material_value(&self) -> i32 {
-		self.material_value()	
+		self.material_value()
 	}
 }

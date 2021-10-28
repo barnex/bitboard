@@ -10,7 +10,15 @@ pub struct Args {
 
 	/// Maximum number of turns
 	#[structopt(short, long, default_value = "50")]
-	pub max_turns: u64,
+	pub max_turns: u32,
+
+	/// Lookahead depth for white
+	#[structopt(long, default_value = "2")]
+	pub w_depth: u32,
+
+	/// Lookahead depth for black
+	#[structopt(long, default_value = "2")]
+	pub b_depth: u32,
 }
 
 fn main() {
@@ -24,8 +32,6 @@ fn main() {
 fn play_game(args: &Args) -> Option<Color> {
 	let mut board: BitBoard = starting_position();
 
-	let eval_w = |board: &BitBoard, player| negamax(board, player, &material, 3);
-	let eval_b = |board: &BitBoard, player| negamax(board, player, &material, 1);
 	print_ansi(&board, &Set::default());
 
 	let mut total_time = [Duration::ZERO, Duration::ZERO];
@@ -37,8 +43,8 @@ fn play_game(args: &Args) -> Option<Color> {
 
 		let start = Instant::now();
 		board = match player {
-			White => take_turn(&mut rng, board, player, &eval_w),
-			Black => take_turn(&mut rng, board, player, &eval_b),
+			White => take_turn(&mut rng, board, player, args),
+			Black => take_turn(&mut rng, board, player, args),
 		};
 		total_time[player.index()] += start.elapsed();
 
@@ -61,23 +67,24 @@ fn play_game(args: &Args) -> Option<Color> {
 	None
 }
 
-fn take_turn<B, F>(rng: &mut StdRng, board: B, player: Color, f: &F) -> B
-where
-	B: Board,
-	F: Fn(&B, Color) -> i32,
-{
+fn take_turn(rng: &mut StdRng, board: BitBoard, player: Color, args: &Args) -> BitBoard {
 	let start = Instant::now();
 
-	let mv_value = evaluate_moves(&board, player, f);
+	//let mv_value = evaluate_moves(&board, player, f);
+	let depth = match player {
+		White => args.w_depth,
+		Black => args.b_depth,
+	};
+	let (mv, value) = alphabeta_(&board, player, &basic_value, -INF, INF, depth);
 
 	let elapsed = start.elapsed();
-	//print_options(&board, player, &mv_value);
-	let mv = pick_best_move(rng, mv_value).expect("at least one valid move");
+	let mv = mv.expect("at least one valid move");
 
 	println!(
-		"{:?} plays {} in {}ms",
+		"{:?} plays {} with value {} in {}ms",
 		player,
 		annotate_move(&board, mv),
+		value,
 		elapsed.as_millis()
 	);
 	let board = board.with_move(mv);
