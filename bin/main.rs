@@ -1,15 +1,27 @@
-use std::time::{Duration, Instant};
-
 use bitboard::*;
+use std::time::{Duration, Instant};
+use structopt::*;
+
+#[derive(StructOpt)]
+pub struct Args {
+	/// Random seed
+	#[structopt(short, long, default_value = "1234567")]
+	pub seed: u64,
+
+	/// Maximum number of turns
+	#[structopt(short, long, default_value = "50")]
+	pub max_turns: u64,
+}
 
 fn main() {
-	match play_game() {
+	let args = Args::from_args();
+	match play_game(&args) {
 		Some(winner) => println!("{} wins", winner),
 		None => println!("stalemate"),
 	}
 }
 
-fn play_game() -> Option<Color> {
+fn play_game(args: &Args) -> Option<Color> {
 	let mut board: BitBoard = starting_position();
 
 	let eval_w = |board: &BitBoard, player| negamax(board, player, &material, 3);
@@ -19,8 +31,8 @@ fn play_game() -> Option<Color> {
 	let mut total_time = [Duration::ZERO, Duration::ZERO];
 
 	let mut player = White;
-	let mut rng = StdRng::seed_from_u64(123456);
-	for ply in 0..100 {
+	let mut rng = StdRng::seed_from_u64(args.seed);
+	for ply in 0..(2 * args.max_turns) {
 		println!("Ply {}", ply + 1);
 
 		let start = Instant::now();
