@@ -11,3 +11,6 @@ pub use anyhow::format_err;
 pub type SmVec<T> = smallvec::SmallVec<[T; 32]>;
 
 pub type Set<T> = fnv::FnvHashSet<T>;
+
+pub use rand::rngs::StdRng;
+pub use rand::Rng;

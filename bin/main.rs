@@ -1,6 +1,7 @@
 use std::time::Instant;
 
 use bitboard::*;
+use rand::SeedableRng;
 use Color::*;
 
 const DEPTH: u32 = 2;
@@ -18,15 +19,15 @@ fn play_game() -> Option<Color> {
 	print_ansi(&board, &Set::default());
 
 	let mut player = White;
+	let mut rng = StdRng::seed_from_u64(123456);
 	for ply in 0..100 {
 		println!("Ply {}", ply + 1);
 
-		board = take_turn(board, player);
+		board = take_turn(&mut rng, board, player);
 
 		if let Some(winner) = winner(&board) {
 			return Some(winner);
 		}
-
 		if board.is_check(player) {
 			println!("{} checked their self", player);
 			return Some(player.opposite());
@@ -37,16 +38,17 @@ fn play_game() -> Option<Color> {
 	None
 }
 
-fn take_turn<B>(board: B, player: Color) -> B
+fn take_turn<B>(rng: &mut StdRng, board: B, player: Color) -> B
 where
 	B: Board,
 {
 	let start = Instant::now();
+
 	let mv_value = evaluate_moves(&board, player, DEPTH);
+
 	let elapsed = start.elapsed();
 	print_options(&board, player, &mv_value);
-
-	let mv = pick_move(&mv_value);
+	let mv = pick_best_move(rng, mv_value).expect("at least one valid move");
 
 	println!(
 		"{:?} plays {} in {}ms",
