@@ -14,3 +14,4 @@ pub type Set<T> = fnv::FnvHashSet<T>;
 
 pub use rand::rngs::StdRng;
 pub use rand::Rng;
+pub use rand::SeedableRng;

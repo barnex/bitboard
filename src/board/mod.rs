@@ -8,7 +8,7 @@ mod mailbox;
 mod moves;
 mod parser;
 mod pos;
-pub mod square;
+mod square;
 
 pub use board::*;
 pub use color::*;
@@ -17,6 +17,11 @@ pub use mailbox::*;
 pub use moves::*;
 pub use square::*;
 
+pub use Color::*;
+pub use Square::*;
+
+#[cfg(test)]
+mod bitboard_stresstest;
 #[cfg(test)]
 mod bitboard_test;
 #[cfg(test)]

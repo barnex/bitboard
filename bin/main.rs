@@ -1,8 +1,6 @@
 use std::time::Instant;
 
 use bitboard::*;
-use rand::SeedableRng;
-use Color::*;
 
 
 fn main() {
@@ -15,8 +13,8 @@ fn main() {
 fn play_game() -> Option<Color> {
 	let mut board: BitBoard = starting_position();
 
-	let eval_w = |board: &BitBoard, player| negamax(board, player, &material, 4);
-	let eval_b = |board: &BitBoard, player| negamax(board, player, &material, 2); 
+	let eval_w = |board: &BitBoard, player| negamax(board, player, &material, 3);
+	let eval_b = |board: &BitBoard, player| negamax(board, player, &material, 1); 
 	print_ansi(&board, &Set::default());
 
 	let mut player = White;
