@@ -1,5 +1,4 @@
 use super::internal::*;
-use rand::prelude::*;
 use rand::SeedableRng;
 use std::ops::Sub;
 use Color::*;

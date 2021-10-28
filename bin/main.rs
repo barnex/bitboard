@@ -4,7 +4,6 @@ use bitboard::*;
 use rand::SeedableRng;
 use Color::*;
 
-const DEPTH: u32 = 2;
 
 fn main() {
 	match play_game() {
@@ -16,6 +15,8 @@ fn main() {
 fn play_game() -> Option<Color> {
 	let mut board: BitBoard = starting_position();
 
+	let eval_w = |board: &BitBoard, player| negamax(board, player, &material, 4);
+	let eval_b = |board: &BitBoard, player| negamax(board, player, &material, 2); 
 	print_ansi(&board, &Set::default());
 
 	let mut player = White;
@@ -23,7 +24,10 @@ fn play_game() -> Option<Color> {
 	for ply in 0..100 {
 		println!("Ply {}", ply + 1);
 
-		board = take_turn(&mut rng, board, player);
+		board = match player {
+			White => take_turn(&mut rng, board, player, &eval_w),
+			Black => take_turn(&mut rng, board, player, &eval_b),
+		};
 
 		if let Some(winner) = winner(&board) {
 			return Some(winner);
@@ -38,13 +42,14 @@ fn play_game() -> Option<Color> {
 	None
 }
 
-fn take_turn<B>(rng: &mut StdRng, board: B, player: Color) -> B
+fn take_turn<B, F>(rng: &mut StdRng, board: B, player: Color, f: &F) -> B
 where
 	B: Board,
+	F: Fn(&B, Color) -> i32,
 {
 	let start = Instant::now();
 
-	let mv_value = evaluate_moves(&board, player, DEPTH);
+	let mv_value = evaluate_moves(&board, player, f);
 
 	let elapsed = start.elapsed();
 	print_options(&board, player, &mv_value);

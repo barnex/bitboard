@@ -18,9 +18,10 @@ pub fn pick_best_move(rng: &mut StdRng, mv_value: SmVec<(Move, i32)>) -> Option<
 
 /// List all `player`'s moves and their value.
 /// TODO: pass valuation function.
-pub fn evaluate_moves<B>(board: &B, player: Color, depth: u32) -> SmVec<(Move, i32)>
+pub fn evaluate_moves<B, F>(board: &B, player: Color, root_eval: &F) -> SmVec<(Move, i32)>
 where
 	B: Board,
+	F: Fn(&B, Color) -> i32,
 {
 	board
 		.all_moves(player)
@@ -28,6 +29,7 @@ where
 		.copied()
 		.map(|mv| (mv, board.with_move(mv)))
 		.filter(|(_, board)| !board.is_check(player)) // TODO: remove, or assert not check
-		.map(|(mv, board)| (mv, -negamax(&board, player.opposite(), &material, depth)))
+		//.map(|(mv, board)| (mv, -negamax(&board, player.opposite(), &material, depth)))
+		.map(|(mv, board)| (mv, -root_eval(&board, player.opposite())))
 		.collect::<SmVec<_>>()
 }
