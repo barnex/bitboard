@@ -13,7 +13,14 @@ where
 	alphabeta_(board, player, leaf_eval, -INF, INF, depth).1
 }
 
-pub fn alphabeta_<B, F>(board: &B, player: Color, leaf_eval: &F, alpha: i32, beta: i32, depth: u32) -> (Option<Move>, i32)
+pub fn alphabeta_<B, F>(
+	board: &B,
+	player: Color,
+	leaf_eval: &F,
+	alpha: i32,
+	beta: i32,
+	depth: u32,
+) -> (Option<Move>, i32)
 where
 	B: Board,
 	F: Fn(&B, Color) -> i32,
@@ -30,9 +37,24 @@ where
 		return (None, leaf_eval(board, player));
 	}
 
+	let mut all_moves = board.all_moves(player);
+
+	// sorting moves most promising first
+	// results in massively better alpha-beta pruning
+	// but is only worth the cost at least two levels above leaf.
+	if depth != 1 {
+		let mut mv_value = all_moves
+			.iter()
+			.copied()
+			.map(|mv| (mv, leaf_eval(&board.with_move(mv), player)))
+			.collect::<SmVec<_>>();
+		mv_value.sort_by_key(|(_, v)| *v);
+		all_moves = mv_value.into_iter().map(|(mv, _)| mv).collect();
+	}
+
 	let mut best_value = -INF;
 	let mut best_move = None;
-	for mv in board.all_moves(player) {
+	for mv in all_moves {
 		// TODO: sort
 		let board = board.with_move(mv);
 

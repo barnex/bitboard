@@ -30,5 +30,5 @@ fn forward_value(b: &BitBoard, player: Color) -> u32 {
 	let threaten = threaten.count_ones();
 	let threaten_unprotected = threaten_unprotected.count_ones();
 
-	mobility + 3 * protect + 2 * threaten + 5 * threaten_unprotected
+	mobility + 3 * protect + 2 * threaten + 50 * threaten_unprotected
 }
