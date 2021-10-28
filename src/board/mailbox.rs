@@ -221,6 +221,16 @@ impl Board for Mailbox {
 	fn set(&mut self, pos: Pos, sq: Square) {
 		self[pos] = sq
 	}
+
+	fn material_value(&self) -> i32 {
+		let mut value = 0;
+		for r in 0..8 {
+			for c in 0..8 {
+				value += self.at(pos(r, c)).value()
+			}
+		}
+		value
+	}
 }
 
 impl Index<Pos> for Mailbox {

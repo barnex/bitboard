@@ -1,7 +1,6 @@
-use std::time::Instant;
+use std::time::{Duration, Instant};
 
 use bitboard::*;
-
 
 fn main() {
 	match play_game() {
@@ -14,18 +13,22 @@ fn play_game() -> Option<Color> {
 	let mut board: BitBoard = starting_position();
 
 	let eval_w = |board: &BitBoard, player| negamax(board, player, &material, 3);
-	let eval_b = |board: &BitBoard, player| negamax(board, player, &material, 1); 
+	let eval_b = |board: &BitBoard, player| negamax(board, player, &material, 1);
 	print_ansi(&board, &Set::default());
+
+	let mut total_time = [Duration::ZERO, Duration::ZERO];
 
 	let mut player = White;
 	let mut rng = StdRng::seed_from_u64(123456);
 	for ply in 0..100 {
 		println!("Ply {}", ply + 1);
 
+		let start = Instant::now();
 		board = match player {
 			White => take_turn(&mut rng, board, player, &eval_w),
 			Black => take_turn(&mut rng, board, player, &eval_b),
 		};
+		total_time[player.index()] += start.elapsed();
 
 		if let Some(winner) = winner(&board) {
 			return Some(winner);
@@ -36,6 +39,12 @@ fn play_game() -> Option<Color> {
 		}
 
 		player = player.opposite();
+
+		println!(
+			"Wall time: White: {}ms, Black: {}ms",
+			total_time[White.index()].as_millis(),
+			total_time[Black.index()].as_millis()
+		);
 	}
 	None
 }
@@ -50,7 +59,7 @@ where
 	let mv_value = evaluate_moves(&board, player, f);
 
 	let elapsed = start.elapsed();
-	print_options(&board, player, &mv_value);
+	//print_options(&board, player, &mv_value);
 	let mv = pick_best_move(rng, mv_value).expect("at least one valid move");
 
 	println!(

@@ -85,6 +85,26 @@ impl Square {
 	pub fn unicode(self) -> char {
 		Self::UNICODE[self.index()]
 	}
+
+	/// https://en.wikipedia.org/wiki/Chess_piece_relative_value.
+	pub fn value(self) -> i32 {
+		use Square::*;
+		match self {
+			WPawn => 1,
+			WKnight => 3,
+			WBisshop => 3,
+			WRook => 5,
+			WQueen => 9,
+			WKing => 0,
+			BPawn => -1,
+			BKnight => -3,
+			BBisshop => -3,
+			BRook => -5,
+			BQueen => -9,
+			BKing => 0,
+			_ => 0,
+		}
+	}
 }
 
 impl fmt::Display for Square {

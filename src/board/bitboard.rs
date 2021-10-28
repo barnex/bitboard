@@ -339,6 +339,14 @@ impl BitBoard {
 	fn empty(&self) -> u64 {
 		self.bits(Empty)
 	}
+
+	fn material_value(&self) -> i32{
+		let mut sum = 0;
+		for piece in Square::ALL_PIECES{
+			sum += piece.value() * (self.bits(piece).count_ones() as i32);
+		}
+		sum
+	}
 }
 
 // ___________________________________________________________ bit fiddling
@@ -472,5 +480,9 @@ impl Board for BitBoard {
 
 	fn is_check(&self, player: Color) -> bool {
 		(self.reach(player.opposite()) & self.bits(player.king())) != 0
+	}
+
+	fn material_value(&self) -> i32 {
+		self.material_value()	
 	}
 }

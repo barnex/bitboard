@@ -20,6 +20,13 @@ impl Color {
 		self as i32
 	}
 
+	pub fn index(self) -> usize {
+		match self {
+			White => 0,
+			Black => 1,
+		}
+	}
+
 	pub fn king(self) -> Square {
 		match self {
 			White => Square::WKing,
