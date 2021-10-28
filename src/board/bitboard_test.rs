@@ -1,8 +1,30 @@
 use super::internal::*;
-use rand::SeedableRng;
 use std::ops::Sub;
 use Color::*;
 use Square::*;
+
+
+#[test]
+fn test_check() {
+	let b1 = BitBoard::from_str(
+		r"
+		. . . k . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. r . . . . . .
+		. . r . . . . K
+		",
+	)
+	.unwrap();
+
+	assert_eq!(b1.is_check(White), true);
+	assert_eq!(b1.is_check(Black), false);
+	assert_eq!(is_mate(&b1, White), true);
+	assert_eq!(is_mate(&b1, Black), false);
+}
 
 #[test]
 fn reach() {

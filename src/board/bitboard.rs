@@ -413,6 +413,18 @@ impl FromStr for BitBoard {
 	}
 }
 
+impl fmt::Display for BitBoard {
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+		let mut pieces = Vec::new();
+		for r in 0..8 {
+			for c in 0..8 {
+				pieces.push(self.at(pos(r, c)));
+			}
+		}
+		f.write_str(&format_board(pieces.iter()))
+	}
+}
+
 impl fmt::Debug for BitBoard {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
 		fn fmt_bits(bits: u64) -> String {

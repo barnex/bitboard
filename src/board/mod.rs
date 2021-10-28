@@ -21,8 +21,10 @@ pub use Color::*;
 pub use Square::*;
 
 #[cfg(test)]
-mod bitboard_stresstest;
-#[cfg(test)]
 mod bitboard_test;
+
+#[cfg(test)]
+mod bitboard_stresstest;
+
 #[cfg(test)]
 mod mailbox_test;
