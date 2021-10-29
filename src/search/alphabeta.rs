@@ -13,14 +13,7 @@ where
 	alphabeta_(board, player, leaf_eval, -INF, INF, depth).1
 }
 
-pub fn alphabeta_<B, F>(
-	board: &B,
-	player: Color,
-	leaf_eval: &F,
-	alpha: i32,
-	beta: i32,
-	depth: u32,
-) -> (Option<Move>, i32)
+pub fn alphabeta_<B, F>(board: &B, player: Color, leaf_eval: &F, alpha: i32, beta: i32, depth: u32) -> (Option<Move>, i32)
 where
 	B: Board,
 	F: Fn(&B, Color) -> i32,
@@ -37,39 +30,44 @@ where
 		return (None, leaf_eval(board, player));
 	}
 
-	let mut all_moves = board.all_moves(player);
+	let mut mv_boards = board //
+		.all_moves(player)
+		.iter()
+		.map(|&mv| (mv, board.with_move(mv)))
+		.collect::<Vec<_>>();
 
 	// sorting moves most promising first
 	// results in massively better alpha-beta pruning
 	// but is only worth the cost at least two levels above leaf.
-	if depth != 1 {
-		let mut mv_value = all_moves
-			.iter()
-			.copied()
-			.map(|mv| (mv, leaf_eval(&board.with_move(mv), player)))
+	if depth > 1 {
+		let mut mv_board_value = mv_boards
+			.into_iter()
+			.map(|(mv, board)| {
+				let value = leaf_eval(&board, player);
+				(mv, board, value)
+			})
 			.collect::<SmVec<_>>();
-		mv_value.sort_by_key(|(_, v)| *v);
-		all_moves = mv_value.into_iter().map(|(mv, _)| mv).collect();
+		mv_board_value.sort_by_key(|(_, _, v)| *v);
+		mv_boards = mv_board_value.into_iter().map(|(mv, board, _)| (mv, board)).collect();
 	}
 
 	let mut best_value = -INF;
 	let mut best_move = None;
-	for mv in all_moves {
-		// TODO: sort
-		let board = board.with_move(mv);
-
+	let mut alpha = alpha;
+	for (mv, board) in mv_boards {
 		// TODO: filter out bad moves at board level.
 		if board.is_check(player) {
 			continue;
 		}
 
 		let (_, value) = alphabeta_(&board, player.opposite(), leaf_eval, -beta, -alpha, depth - 1);
-		if -value >= best_value {
-			best_value = -value;
+		let value = -value;
+		if value >= best_value {
+			best_value = value;
 			best_move = Some(mv);
 		}
 
-		let alpha = i32::max(alpha, value);
+		alpha = i32::max(alpha, value);
 		if alpha >= beta {
 			break;
 		}
