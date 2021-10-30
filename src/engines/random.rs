@@ -11,7 +11,12 @@ impl Random {
 		}
 	}
 	pub fn do_move(&mut self, board: &BitBoard, player: Color) -> Option<Move> {
-		let moves = board.all_moves(player);
+		let moves = board
+			.all_moves(player)
+			.into_iter()
+			.filter(|&mv| !board.with_move(mv).is_check(player))
+			.collect::<SmVec<_>>();
+
 		match moves.len() {
 			0 => None,
 			_ => Some(moves[self.rng.gen_range(0..moves.len())]),
