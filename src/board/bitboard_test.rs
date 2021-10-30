@@ -3,6 +3,25 @@ use std::ops::Sub;
 use Color::*;
 use Square::*;
 
+#[test]
+fn test_king_position() {
+	let b = BitBoard::from_str(
+		r"
+		. . . . . . . k
+		. . . . . . . .
+		. . . p . . . .
+		. . . . . . . .
+		. . . . . R . .
+		. . . . . . . .
+		. . . . . . . .
+		K . . . . . . .
+		",
+	)
+	.unwrap();
+
+	assert_eq!(b.king_position(White), pos(0, 0));
+	assert_eq!(b.king_position(Black), pos(7, 7));
+}
 
 #[test]
 fn test_check() {
@@ -147,9 +166,8 @@ fn all_moves() {
 		. . . . . . . .
 		",
 		&[
-			"Qd4c3", "Qd4c5", "Qd4e4", "Qd4d2", "Qd4d6", "Qd4d8", "Qd4a1", "Qd4a7", "Qd4b2", "Qd4b4", "Qd4b6", "Qd4g1",
-			"Qd4g7", "Qd4h4", "Qd4c4", "Qd4h8", "Qd4e3", "Qd4d1", "Qd4d3", "Qd4f2", "Qd4a4", "Qd4f4", "Qd4d5", "Qd4e5",
-			"Qd4f6", "Qd4d7", "Qd4g4",
+			"Qd4c3", "Qd4c5", "Qd4e4", "Qd4d2", "Qd4d6", "Qd4d8", "Qd4a1", "Qd4a7", "Qd4b2", "Qd4b4", "Qd4b6", "Qd4g1", "Qd4g7", "Qd4h4", "Qd4c4",
+			"Qd4h8", "Qd4e3", "Qd4d1", "Qd4d3", "Qd4f2", "Qd4a4", "Qd4f4", "Qd4d5", "Qd4e5", "Qd4f6", "Qd4d7", "Qd4g4",
 		],
 	);
 }
@@ -799,10 +817,7 @@ fn white_black() {
 fn test_moves(player: Color, board: &str, want: &[&str]) {
 	let board = BitBoard::from_str(board).unwrap();
 	let have = board.all_moves(player).iter().copied().collect::<Set<_>>();
-	let want = want
-		.iter()
-		.map(|s| Move::from_str(s).expect("move: syntax error"))
-		.collect::<Set<_>>();
+	let want = want.iter().map(|s| Move::from_str(s).expect("move: syntax error")).collect::<Set<_>>();
 	if have != want {
 		println!("have: {:?}", &have);
 		println!("want: {:?}", &want);

@@ -164,6 +164,10 @@ impl BitBoard {
 		self.king_reach(king) & !player
 	}
 
+	pub fn king_position(&self, player: Color) -> Pos {
+		Pos::from_index(self.bits(player.king()).trailing_zeros() as usize)
+	}
+
 	// NOTE: includes self.
 	fn king_reach(&self, king: u64) -> u64 {
 		let mut acc = king;
