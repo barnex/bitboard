@@ -1,11 +1,15 @@
 use super::internal::*;
 
-pub fn material(b: &impl Board, player: Color) -> i32 {
-	player.sign() * b.material_value()
+pub fn material_value(board: &BitBoard, player: Color) -> i32 {
+	Square::ALL_PIECES //
+		.into_iter()
+		.map(|p| p.value() * (board.piece_count(p) as i32))
+		.sum::<i32>()
+		* player.sign()
 }
 
 pub fn basic_value(b: &BitBoard, player: Color) -> i32 {
-	1000 * material(b, player) + strategic_value(b, player)
+	1000 * material_value(b, player) + strategic_value(b, player)
 }
 
 fn strategic_value(b: &BitBoard, player: Color) -> i32 {

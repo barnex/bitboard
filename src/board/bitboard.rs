@@ -315,23 +315,13 @@ impl BitBoard {
 	/// All white pieces.
 	#[inline]
 	pub fn white(&self) -> u64 {
-		self.bits(WPawn)
-			| self.bits(WRook)
-			| self.bits(WKnight)
-			| self.bits(WBisshop)
-			| self.bits(WQueen)
-			| self.bits(WKing)
+		self.bits(WPawn) | self.bits(WRook) | self.bits(WKnight) | self.bits(WBisshop) | self.bits(WQueen) | self.bits(WKing)
 	}
 
 	/// All black pieces.
 	#[inline]
 	pub fn black(&self) -> u64 {
-		self.bits(BPawn)
-			| self.bits(BRook)
-			| self.bits(BKnight)
-			| self.bits(BBisshop)
-			| self.bits(BQueen)
-			| self.bits(BKing)
+		self.bits(BPawn) | self.bits(BRook) | self.bits(BKnight) | self.bits(BBisshop) | self.bits(BQueen) | self.bits(BKing)
 	}
 
 	pub fn all_pieces(&self, player: Color) -> u64 {
@@ -347,12 +337,16 @@ impl BitBoard {
 		self.bits(Empty)
 	}
 
-	fn material_value(&self) -> i32 {
-		let mut sum = 0;
-		for piece in Square::ALL_PIECES {
-			sum += piece.value() * (self.bits(piece).count_ones() as i32);
-		}
-		sum
+	//fn material_value(&self) -> i32 {
+	//	let mut sum = 0;
+	//	for piece in Square::ALL_PIECES {
+	//		sum += piece.value() * (self.bits(piece).count_ones() as i32);
+	//	}
+	//	sum
+	//}
+
+	pub fn piece_count(&self, piece: Square) -> u32 {
+		self.bits(piece).count_ones()
 	}
 }
 
@@ -487,9 +481,5 @@ impl Board for BitBoard {
 
 	fn is_check(&self, player: Color) -> bool {
 		(self.reach(player.opposite()) & self.bits(player.king())) != 0
-	}
-
-	fn material_value(&self) -> i32 {
-		self.material_value()
 	}
 }

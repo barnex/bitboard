@@ -7,8 +7,6 @@ pub trait Board {
 	fn all_moves(&self, player: Color) -> SmVec<Move>;
 	fn with_move(&self, mv: Move) -> Self;
 
-	fn material_value(&self) -> i32;
-
 	// TODO: optimize for bitboard
 	fn has_king(&self, player: Color) -> bool {
 		let king = match player {

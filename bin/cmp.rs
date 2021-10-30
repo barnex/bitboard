@@ -54,27 +54,33 @@ fn main_result() -> Result<()> {
 	Ok(())
 }
 
-fn parse_engine(name: &str, seed: u64) -> Result<Box<dyn Engine>> {
-	match name {
-		"random" => Ok(Box::new(Random::new(seed))),
-		"greedy" => Ok(Box::new(Greedy::new(seed))),
-		unknown => Err(format_err!("unknown engine: {}", unknown)),
-	}
-}
-
 #[derive(Default, Debug)]
 struct MatchStats {
 	engine_names: [String; 2],
 	wins: [u32; 2],
 	draws: u32,
+	total_games: u32,
+	total_plies: u32,
+	total_final_material: i32,
 }
 
 impl MatchStats {
-	fn add(&mut self, g: GameStats) {
+	fn add(&mut self, g: &GameStats) {
 		match g.winner {
 			Some(player) => self.wins[player.index()] += 1,
 			None => self.draws += 1,
 		}
+		self.total_games += 1;
+		self.total_plies += g.plies;
+		self.total_final_material += material_value(&g.board, White);
+	}
+
+	fn avg_plies(&self) -> f32 {
+		(self.total_plies as f32) / (self.total_games as f32)
+	}
+
+	fn avg_material(&self) -> f32 {
+		(self.total_final_material as f32) / (self.total_games as f32)
 	}
 }
 
@@ -82,50 +88,63 @@ impl fmt::Display for MatchStats {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
 		write!(
 			f,
-			"wins: A({}): {}, B({}): {}, draws: {}",
-			self.engine_names[0], self.wins[0], self.engine_names[1], self.wins[1], self.draws
+			"wins: A({}): {}, B({}): {}, draws: {}, avg plies: {:.1}, avg material: {:+.1}",
+			self.engine_names[0],
+			self.wins[0],
+			self.engine_names[1],
+			self.wins[1],
+			self.draws,
+			self.avg_plies(),
+			self.avg_material(),
 		)?;
 
 		Ok(())
 	}
 }
 
-#[derive(Default)]
 struct GameStats {
 	winner: Option<Color>,
 	plies: u32,
-	board: Option<BitBoard>,
+	board: BitBoard,
 }
 
 fn play_match(opts: &Opts, engines: &mut [&mut dyn Engine; 2]) -> MatchStats {
 	let mut match_stats = MatchStats::default();
 	for i in 0..opts.num_games {
 		let game_stats = play_game(opts, engines);
-		match_stats.add(game_stats);
+		match_stats.add(&game_stats);
+
+		if opts.v(1) {
+			println!(
+				"game {}: {} plies, {} wins, final material: {:+}",
+				i,
+				game_stats.plies,
+				game_stats.winner.map_or("nobody".to_owned(), |c| c.to_string()),
+				material_value(&game_stats.board, White)
+			)
+		}
+		if opts.v(2) {
+			print_ansi(&game_stats.board, &Set::default())
+		}
 	}
 	match_stats
 }
 
 fn play_game(opts: &Opts, engines: &mut [&mut dyn Engine; 2]) -> GameStats {
-	let mut stats = GameStats::default();
 	let mut board: BitBoard = starting_position();
-
-	if opts.v(3) {}
 
 	let mut player = White;
 
-	for ply in 0..(2 * opts.max_turns) {
-		if opts.v(3) {
-			println!("Turn {} (ply {})", (ply / 2) + 1, ply + 1);
-		}
-		if opts.v(4) {
-			print_ansi(&board, &Set::default())
-		}
-
+	let max_plies = 2 * opts.max_turns;
+	for ply in 0..=max_plies {
 		let mv = match engines[player.index()].do_move(&board, player) {
 			None => {
-				stats.winner = Some(player.opposite());
-				return stats;
+				// player has not valid moves or resigns.
+				return GameStats {
+					winner: Some(player.opposite()),
+					plies: ply,
+					board,
+				};
 			}
 			Some(mv) => mv,
 		};
@@ -133,8 +152,11 @@ fn play_game(opts: &Opts, engines: &mut [&mut dyn Engine; 2]) -> GameStats {
 		board = board.with_move(mv);
 
 		if let Some(winner) = winner(&board) {
-			stats.winner = Some(winner);
-			return stats;
+			return GameStats {
+				winner: Some(winner),
+				board,
+				plies: ply,
+			};
 		}
 
 		if board.is_check(player) {
@@ -142,117 +164,15 @@ fn play_game(opts: &Opts, engines: &mut [&mut dyn Engine; 2]) -> GameStats {
 		}
 
 		player = player.opposite();
-		stats.plies += 1;
-		stats.board = Some(board.clone());
 	}
 
-	stats
-}
-
-/*
-fn play_game(args: &Args) -> Option<Color> {
-
-	let mut board: BitBoard = starting_position();
-
-	print_ansi(&board, &Set::default());
-
-	let mut total_time = [Duration::ZERO, Duration::ZERO];
-
-	let mut player = White;
-	let mut rng = StdRng::seed_from_u64(args.seed);
-	for ply in 0..(2 * args.max_turns) {
-		println!("Ply {}", ply + 1);
-
-		let start = Instant::now();
-		board = match player {
-			White => take_turn(&mut rng, board, player, args),
-			Black => take_turn(&mut rng, board, player, args),
-		};
-		total_time[player.index()] += start.elapsed();
-
-		if let Some(winner) = winner(&board) {
-			return Some(winner);
-		}
-		if board.is_check(player) {
-			println!("{} checked their self", player);
-			return Some(player.opposite());
-		}
-
-		player = player.opposite();
-
-		println!(
-			"Wall time: White: {}ms, Black: {}ms",
-			total_time[White.index()].as_millis(),
-			total_time[Black.index()].as_millis()
-		);
+	// too many moves
+	GameStats {
+		winner: None,
+		board,
+		plies: max_plies,
 	}
-	None
 }
-
-fn take_turn(rng: &mut StdRng, board: BitBoard, player: Color, args: &Args) -> BitBoard {
-	let start = Instant::now();
-
-	//let mv_value = evaluate_moves(&board, player, f);
-	let depth = match player {
-		White => args.w_depth,
-		Black => args.b_depth,
-	};
-	let (mv, value) = alphabeta_(&board, player, &basic_value, -2*INF, 2*INF, depth);
-
-	let elapsed = start.elapsed();
-	let mv = mv.expect("at least one valid move");
-
-	println!(
-		"{:?} plays {} with value {} in {}ms",
-		player,
-		annotate_move(&board, mv),
-		value,
-		elapsed.as_millis()
-	);
-	let board = board.with_move(mv);
-	let mark = [mv.from, mv.to].iter().copied().collect();
-	print_ansi(&board, &mark);
-	println!();
-	board
-}
-
-/// Full chess notation of move `mv`. E.g.:
-///   p b2c3 xn +
-pub fn annotate_move(board: &impl Board, mv: Move) -> String {
-	// piece...
-	let mut str = board.at(mv.from).to_string().to_ascii_uppercase();
-
-	// ...moves to
-	str += &mv.to_string();
-
-	// ... captures?
-	if !board.at(mv.to).is_empty() {
-		str += "x";
-		str += &board.at(mv.to).to_string().to_ascii_uppercase();
-	}
-
-	if let Some(player) = board.at(mv.from).color() {
-		// ... checkmate?
-		if is_mate(&board.with_move(mv), player.opposite()) {
-			str += "#";
-		// ...or just check?
-		} else if board.with_move(mv).is_check(player.opposite()) {
-			str += "+";
-		}
-	}
-	str
-}
-
-
-fn print_options(board: &impl Board, player: Color, mv_value: &[(Move, i32)]) {
-	let options = mv_value
-		.iter()
-		.map(|(mv, value)| format!("{} ({})", annotate_move(board, *mv), value))
-		.collect::<Vec<_>>()
-		.join(", ");
-	println!("{:?} has options {}", player, options);
-}
-*/
 
 fn winner(board: &impl Board) -> Option<Color> {
 	for player in [White, Black] {
@@ -261,4 +181,12 @@ fn winner(board: &impl Board) -> Option<Color> {
 		}
 	}
 	None
+}
+
+fn parse_engine(name: &str, seed: u64) -> Result<Box<dyn Engine>> {
+	match name {
+		"random" => Ok(Box::new(Random::new(seed))),
+		"greedy" => Ok(Box::new(Greedy::new(seed))),
+		unknown => Err(format_err!("unknown engine: {}", unknown)),
+	}
 }

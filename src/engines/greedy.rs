@@ -1,5 +1,3 @@
-use std::ptr::eq;
-
 use super::internal::*;
 
 pub struct Greedy {
@@ -19,10 +17,10 @@ impl Greedy {
 			.into_iter()
 			.map(|mv| (mv, board.with_move(mv)))
 			.filter(|(_, board)| !board.is_check(player))
-			.map(|(mv, board)| (mv, material(&board, player)))
+			.map(|(mv, board)| (mv, material_value(&board, player)))
 			.collect::<SmVec<_>>();
 
-		move_value.sort_by_key(|(_, value)| *value);
+		move_value.sort_by_key(|(_, value)| -*value);
 
 		let best_value = match move_value.len() {
 			0 => return None,

@@ -94,10 +94,10 @@ mod test {
 		",
 		);
 
-		debug_assert_eq!(alphabeta(&board, White, &material, 0), 10);
-		debug_assert_eq!(alphabeta(&board, Black, &material, 0), -10);
+		debug_assert_eq!(alphabeta(&board, White, &material_value, 0), 10);
+		debug_assert_eq!(alphabeta(&board, Black, &material_value, 0), -10);
 
-		debug_assert_eq!(alphabeta(&board, White, &material, 1), INF);
+		debug_assert_eq!(alphabeta(&board, White, &material_value, 1), INF);
 		//debug_assert_eq!(alphabeta(&board, Black, &material, 2), -INF+2);
 	}
 
@@ -116,13 +116,13 @@ mod test {
 		",
 		);
 
-		debug_assert_eq!(alphabeta(&board, White, &material, 0), 7);
-		debug_assert_eq!(alphabeta(&board, Black, &material, 0), -7);
+		debug_assert_eq!(alphabeta(&board, White, &material_value, 0), 7);
+		debug_assert_eq!(alphabeta(&board, Black, &material_value, 0), -7);
 
-		debug_assert_eq!(alphabeta(&board, White, &material, 1), 8); // white greedily takes a pawn
-		debug_assert_eq!(alphabeta(&board, Black, &material, 1), -7);
+		debug_assert_eq!(alphabeta(&board, White, &material_value, 1), 8); // white greedily takes a pawn
+		debug_assert_eq!(alphabeta(&board, Black, &material_value, 1), -7);
 
-		debug_assert_eq!(alphabeta(&board, White, &material, 2), 7); // white sees that the pawn is protected
+		debug_assert_eq!(alphabeta(&board, White, &material_value, 2), 7); // white sees that the pawn is protected
 	}
 
 	#[test]
@@ -140,20 +140,20 @@ mod test {
 		",
 		);
 
-		debug_assert_eq!(alphabeta(&board, White, &material, 0), 6); // no moves
-		debug_assert_eq!(alphabeta(&board, Black, &material, 0), -6); // no moves
+		debug_assert_eq!(alphabeta(&board, White, &material_value, 0), 6); // no moves
+		debug_assert_eq!(alphabeta(&board, Black, &material_value, 0), -6); // no moves
 
-		debug_assert_eq!(alphabeta(&board, White, &material, 1), 7); // white: Qd8xp
-		debug_assert_eq!(alphabeta(&board, Black, &material, 1), -6); // black: no moves
+		debug_assert_eq!(alphabeta(&board, White, &material_value, 1), 7); // white: Qd8xp
+		debug_assert_eq!(alphabeta(&board, Black, &material_value, 1), -6); // black: no moves
 
-		debug_assert_eq!(alphabeta(&board, White, &material, 2), 7); // white: Qd8xp,    black: no moves
-		debug_assert_eq!(alphabeta(&board, Black, &material, 2), -7); // black: no moves, white: Qd8xp
+		debug_assert_eq!(alphabeta(&board, White, &material_value, 2), 7); // white: Qd8xp,    black: no moves
+		debug_assert_eq!(alphabeta(&board, Black, &material_value, 2), -7); // black: no moves, white: Qd8xp
 
-		debug_assert_eq!(alphabeta(&board, White, &material, 3), 8); // white: Qd8xp,   black: no moves, white: Qe8xp
-		debug_assert_eq!(alphabeta(&board, Black, &material, 3), -7); // black: no moves, white: Qd8xp,  black: no moves
+		debug_assert_eq!(alphabeta(&board, White, &material_value, 3), 8); // white: Qd8xp,   black: no moves, white: Qe8xp
+		debug_assert_eq!(alphabeta(&board, Black, &material_value, 3), -7); // black: no moves, white: Qd8xp,  black: no moves
 
-		debug_assert_eq!(alphabeta(&board, White, &material, 4), 8); // white: Qd8xp,   black: no moves, white: Qe8xp,    black: no moves
-		debug_assert_eq!(alphabeta(&board, Black, &material, 4), -8); // black: no moves, white: Qd8xp,  black: no moves, white: Qe8xp
+		debug_assert_eq!(alphabeta(&board, White, &material_value, 4), 8); // white: Qd8xp,   black: no moves, white: Qe8xp,    black: no moves
+		debug_assert_eq!(alphabeta(&board, Black, &material_value, 4), -8); // black: no moves, white: Qd8xp,  black: no moves, white: Qe8xp
 	}
 
 	#[test]
@@ -171,20 +171,20 @@ mod test {
 		",
 		);
 
-		debug_assert_eq!(alphabeta(&board, Black, &material, 0), 6);
-		debug_assert_eq!(alphabeta(&board, White, &material, 0), -6);
+		debug_assert_eq!(alphabeta(&board, Black, &material_value, 0), 6);
+		debug_assert_eq!(alphabeta(&board, White, &material_value, 0), -6);
 
-		debug_assert_eq!(alphabeta(&board, Black, &material, 1), 7);
-		debug_assert_eq!(alphabeta(&board, White, &material, 1), -6);
+		debug_assert_eq!(alphabeta(&board, Black, &material_value, 1), 7);
+		debug_assert_eq!(alphabeta(&board, White, &material_value, 1), -6);
 
-		debug_assert_eq!(alphabeta(&board, Black, &material, 2), 7);
-		debug_assert_eq!(alphabeta(&board, White, &material, 2), -7);
+		debug_assert_eq!(alphabeta(&board, Black, &material_value, 2), 7);
+		debug_assert_eq!(alphabeta(&board, White, &material_value, 2), -7);
 
-		debug_assert_eq!(alphabeta(&board, Black, &material, 3), 8);
-		debug_assert_eq!(alphabeta(&board, White, &material, 3), -7);
+		debug_assert_eq!(alphabeta(&board, Black, &material_value, 3), 8);
+		debug_assert_eq!(alphabeta(&board, White, &material_value, 3), -7);
 
-		debug_assert_eq!(alphabeta(&board, Black, &material, 4), 8);
-		debug_assert_eq!(alphabeta(&board, White, &material, 4), -8);
+		debug_assert_eq!(alphabeta(&board, Black, &material_value, 4), 8);
+		debug_assert_eq!(alphabeta(&board, White, &material_value, 4), -8);
 	}
 
 	fn board(board: &str) -> BitBoard {
