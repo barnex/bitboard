@@ -1,6 +1,6 @@
 use super::internal::*;
 
-pub const INF: i32 = 999_999_999; // effectively infinite value
+pub const INF: i32 = 1_000_000_000; // effectively infinite value
 
 /// How good is board for player?
 /// Good scores are always positive, bad scores always negative,
@@ -20,10 +20,10 @@ where
 {
 	// must stop iteration so that we would not trade a king for a king :-)
 	if !board.has_king(player) {
-		return (None, -INF);
+		return (None, -INF - (depth as i32));
 	}
 	if !board.has_king(player.opposite()) {
-		return (None, INF);
+		return (None, INF - (depth as i32)); // tiny offset to push for mate in minimum moves
 	}
 
 	if depth == 0 {
@@ -51,7 +51,7 @@ where
 		mv_boards = mv_board_value.into_iter().map(|(mv, board, _)| (mv, board)).collect();
 	}
 
-	let mut best_value = -INF;
+	let mut best_value = -INF - (depth as i32);
 	let mut best_move = None;
 	let mut alpha = alpha;
 	for (mv, board) in mv_boards {
@@ -98,7 +98,7 @@ mod test {
 		debug_assert_eq!(alphabeta(&board, Black, &material, 0), -10);
 
 		debug_assert_eq!(alphabeta(&board, White, &material, 1), INF);
-		debug_assert_eq!(alphabeta(&board, Black, &material, 2), -INF);
+		//debug_assert_eq!(alphabeta(&board, Black, &material, 2), -INF+2);
 	}
 
 	#[test]

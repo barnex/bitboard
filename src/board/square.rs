@@ -95,13 +95,13 @@ impl Square {
 			WBisshop => 3,
 			WRook => 5,
 			WQueen => 9,
-			WKing => 0,
+			WKing => 100,
 			BPawn => -1,
 			BKnight => -3,
 			BBisshop => -3,
 			BRook => -5,
 			BQueen => -9,
-			BKing => 0,
+			BKing => -100,
 			_ => 0,
 		}
 	}

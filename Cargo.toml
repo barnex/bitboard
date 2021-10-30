@@ -9,7 +9,11 @@ path = "src/lib.rs"
 
 [[bin]]
 name = "cli"
-path = "bin/main.rs"
+path = "bin/cli.rs"
+
+[[bin]]
+name = "cmp"
+path = "bin/cmp.rs"
 
 
 [dependencies]

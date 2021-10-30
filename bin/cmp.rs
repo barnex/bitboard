@@ -9,26 +9,26 @@ pub struct Args {
 	pub seed: u64,
 
 	/// Maximum number of turns
-	#[structopt(short, long, default_value = "50")]
+	#[structopt(short, long, default_value = "70")]
 	pub max_turns: u32,
 
-	/// Lookahead depth for white
-	#[structopt(long, default_value = "2")]
-	pub w_depth: u32,
-
-	/// Lookahead depth for black
-	#[structopt(long, default_value = "2")]
-	pub b_depth: u32,
+	#[structopt(short, long, default_value = "100")]
+	pub num_games: u32,
 }
 
 fn main() {
 	let args = Args::from_args();
-	match play_game(&args) {
-		Some(winner) => println!("{} wins", winner),
-		None => println!("stalemate"),
-	}
+
+	let mut a = Random::new(args.seed);
+	let mut b = Random::new(args.seed + 1);
+	compare(&args, &mut a, &mut b)
 }
 
+//type Engine = fn(&BitBoard, Color) -> Option<Move>;
+
+fn compare(args: &Args, a: &mut dyn Engine, b: &mut dyn Engine) {}
+
+/*
 fn play_game(args: &Args) -> Option<Color> {
 	let mut board: BitBoard = starting_position();
 
@@ -75,7 +75,7 @@ fn take_turn(rng: &mut StdRng, board: BitBoard, player: Color, args: &Args) -> B
 		White => args.w_depth,
 		Black => args.b_depth,
 	};
-	let (mv, value) = alphabeta_(&board, player, &basic_value, -INF, INF, depth);
+	let (mv, value) = alphabeta_(&board, player, &basic_value, -2*INF, 2*INF, depth);
 
 	let elapsed = start.elapsed();
 	let mv = mv.expect("at least one valid move");
@@ -138,3 +138,4 @@ fn print_options(board: &impl Board, player: Color, mv_value: &[(Move, i32)]) {
 		.join(", ");
 	println!("{:?} has options {}", player, options);
 }
+*/
