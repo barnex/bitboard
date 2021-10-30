@@ -1,5 +1,6 @@
 use super::internal::*;
 
+/// Makes random valid moves.
 pub struct Random {
 	rng: StdRng,
 }
