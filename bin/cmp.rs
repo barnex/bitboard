@@ -1,5 +1,4 @@
 use bitboard::*;
-use std::time::{Duration, Instant};
 use structopt::*;
 
 #[derive(StructOpt)]
@@ -58,6 +57,7 @@ fn main_result() -> Result<()> {
 fn parse_engine(name: &str, seed: u64) -> Result<Box<dyn Engine>> {
 	match name {
 		"random" => Ok(Box::new(Random::new(seed))),
+		"greedy" => Ok(Box::new(Greedy::new(seed))),
 		unknown => Err(format_err!("unknown engine: {}", unknown)),
 	}
 }
@@ -90,19 +90,17 @@ impl fmt::Display for MatchStats {
 	}
 }
 
-#[derive(Default, Debug)]
+#[derive(Default)]
 struct GameStats {
 	winner: Option<Color>,
 	plies: u32,
+	board: Option<BitBoard>,
 }
 
 fn play_match(opts: &Opts, engines: &mut [&mut dyn Engine; 2]) -> MatchStats {
 	let mut match_stats = MatchStats::default();
 	for i in 0..opts.num_games {
 		let game_stats = play_game(opts, engines);
-		if opts.v(2) {
-			println!("game {}: {:?}", i, &game_stats)
-		}
 		match_stats.add(game_stats);
 	}
 	match_stats
@@ -119,6 +117,9 @@ fn play_game(opts: &Opts, engines: &mut [&mut dyn Engine; 2]) -> GameStats {
 	for ply in 0..(2 * opts.max_turns) {
 		if opts.v(3) {
 			println!("Turn {} (ply {})", (ply / 2) + 1, ply + 1);
+		}
+		if opts.v(4) {
+			print_ansi(&board, &Set::default())
 		}
 
 		let mv = match engines[player.index()].do_move(&board, player) {
@@ -142,6 +143,7 @@ fn play_game(opts: &Opts, engines: &mut [&mut dyn Engine; 2]) -> GameStats {
 
 		player = player.opposite();
 		stats.plies += 1;
+		stats.board = Some(board.clone());
 	}
 
 	stats
