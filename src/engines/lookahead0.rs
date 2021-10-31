@@ -1,65 +1,15 @@
 use super::internal::*;
 
 /// Search without lookahead.
-pub struct Lookahead0<F>
+pub struct Lookahead0<F>(pub F)
 where
-	F: Fn(&BitBoard, Color) -> i32,
-{
-	rng: StdRng,
-	value: F,
-}
-
-pub fn greedy_with_king_dist(seed: u64) -> impl Engine {
-	Lookahead0::with(seed, |board, player| {
-		let king = board.king_position(player.opposite());
-		let total_dist = BitBoard::iter(board.all_pieces(player)) //
-			.map(|pos| pos.l1_distance_to(king))
-			.sum::<u8>();
-		1000 * material_value(board, player) - (total_dist as i32)
-	})
-}
-
-impl<F> Lookahead0<F>
-where
-	F: Fn(&BitBoard, Color) -> i32,
-{
-	pub fn with(seed: u64, value: F) -> Self {
-		Self {
-			rng: StdRng::seed_from_u64(seed),
-			value,
-		}
-	}
-
-	pub fn do_move(&mut self, board: &BitBoard, player: Color) -> Option<Move> {
-		// move-value pairs
-		let mut move_value = board
-			.collect_moves(player)
-			.into_iter()
-			.map(|mv| (mv, board.with_move(mv)))
-			.filter(|(_, board)| !board.is_check(player))
-			.map(|(mv, board)| (mv, (self.value)(&board, player)))
-			.collect::<SmVec<_>>();
-
-		// sort in descending value
-		move_value.sort_by_key(|(_, value)| -*value);
-
-		// single-out all moves with equal to best value.
-		let best_value = move_value.get(0)?.1;
-		let equal_value = move_value //
-			.into_iter()
-			.filter(|(_, value)| *value == best_value)
-			.collect::<SmVec<_>>();
-
-		// randomly pick from all moves with best value
-		Some(equal_value[self.rng.gen_range(0..equal_value.len())].0)
-	}
-}
+	F: Fn(&BitBoard, Color) -> i32;
 
 impl<F> Engine for Lookahead0<F>
 where
 	F: Fn(&BitBoard, Color) -> i32,
 {
-	fn do_move(&mut self, board: &BitBoard, player: Color) -> Option<Move> {
-		self.do_move(board, player)
+	fn do_move(&self, rng: &mut StdRng, board: &BitBoard, player: Color) -> Option<Move> {
+		search(rng, board, player, &self.0)
 	}
 }

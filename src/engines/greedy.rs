@@ -1,18 +1,10 @@
 use super::internal::*;
 
 /// Greedily takes material with not lookahead or position value.
-pub struct Greedy {
-	rng: StdRng,
-}
+pub struct Greedy();
 
-impl Greedy {
-	pub fn new(seed: u64) -> Self {
-		Self {
-			rng: StdRng::seed_from_u64(seed),
-		}
-	}
-
-	pub fn do_move(&mut self, board: &BitBoard, player: Color) -> Option<Move> {
+impl Engine for Greedy {
+	fn do_move(&self, rng: &mut StdRng, board: &BitBoard, player: Color) -> Option<Move> {
 		// move-value pairs
 		let mut move_value = board
 			.collect_moves(player)
@@ -33,12 +25,6 @@ impl Greedy {
 			.collect::<SmVec<_>>();
 
 		// randomly pick from all moves with best value
-		Some(equal_value[self.rng.gen_range(0..equal_value.len())].0)
-	}
-}
-
-impl Engine for Greedy {
-	fn do_move(&mut self, board: &BitBoard, player: Color) -> Option<Move> {
-		self.do_move(board, player)
+		Some(equal_value[rng.gen_range(0..equal_value.len())].0)
 	}
 }

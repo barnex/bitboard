@@ -39,8 +39,8 @@ fn main() {
 fn main_result() -> Result<()> {
 	let opts = Opts::from_args();
 
-	let mut a = parse_engine(&opts.engines[0], opts.seed)?;
-	let mut b = parse_engine(&opts.engines[1], opts.seed + 1)?;
+	let mut a = parse_engine(&opts.engines[0])?;
+	let mut b = parse_engine(&opts.engines[1])?;
 
 	let mut stats = play_match(&opts, &mut [a.as_mut(), b.as_mut()]);
 
@@ -119,10 +119,11 @@ struct GameStats {
 	board: BitBoard,
 }
 
-fn play_match(opts: &Opts, engines: &mut [&mut dyn Engine; 2]) -> MatchStats {
+fn play_match(opts: &Opts, engines: &[&dyn Engine; 2]) -> MatchStats {
 	let mut match_stats = MatchStats::default();
 	for i in 0..opts.num_games {
-		let game_stats = play_game(opts, engines);
+		let seed = opts.seed * 10000 + i as u64;
+		let game_stats = play_game(opts, seed, engines);
 		match_stats.add(&game_stats);
 
 		if opts.v(1) {
@@ -141,14 +142,15 @@ fn play_match(opts: &Opts, engines: &mut [&mut dyn Engine; 2]) -> MatchStats {
 	match_stats
 }
 
-fn play_game(opts: &Opts, engines: &mut [&mut dyn Engine; 2]) -> GameStats {
+fn play_game(opts: &Opts, seed: u64, engines: &[&dyn Engine; 2]) -> GameStats {
 	let mut board: BitBoard = starting_position();
 
+	let mut rng = StdRng::seed_from_u64(seed);
 	let mut player = White;
 
 	let max_plies = 2 * opts.max_turns;
 	for ply in 0..=max_plies {
-		let mv = match engines[player.index()].do_move(&board, player) {
+		let mv = match engines[player.index()].do_move(&mut rng, &board, player) {
 			None => {
 				// player has not valid moves or resigns.
 				return GameStats {

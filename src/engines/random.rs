@@ -1,17 +1,10 @@
 use super::internal::*;
 
 /// Makes random valid moves.
-pub struct Random {
-	rng: StdRng,
-}
+pub struct Random();
 
-impl Random {
-	pub fn new(seed: u64) -> Self {
-		Self {
-			rng: StdRng::seed_from_u64(seed),
-		}
-	}
-	pub fn do_move(&mut self, board: &BitBoard, player: Color) -> Option<Move> {
+impl Engine for Random {
+	fn do_move(&self, rng: &mut StdRng, board: &BitBoard, player: Color) -> Option<Move> {
 		let moves = board
 			.collect_moves(player)
 			.into_iter()
@@ -20,13 +13,7 @@ impl Random {
 
 		match moves.len() {
 			0 => None,
-			_ => Some(moves[self.rng.gen_range(0..moves.len())]),
+			_ => Some(moves[rng.gen_range(0..moves.len())]),
 		}
-	}
-}
-
-impl Engine for Random {
-	fn do_move(&mut self, board: &BitBoard, player: Color) -> Option<Move> {
-		self.do_move(board, player)
 	}
 }

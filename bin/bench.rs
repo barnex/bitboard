@@ -20,18 +20,13 @@ pub struct Opts {
 
 fn main() -> Result<()> {
 	let opts = Opts::from_args();
-
 	let boards = random_boards(1024);
+	let mut rng = StdRng::seed_from_u64(opts.seed);
 
-	let engines = opts
-		.engines
-		.iter()
-		.map(|name| parse_engine(name, opts.seed))
-		.collect::<Result<Vec<_>>>()?;
+	let engines = opts.engines.iter().map(|name| parse_engine(name)).collect::<Result<Vec<_>>>()?;
 
 	for (i, engine) in engines.into_iter().enumerate() {
 		let name = &opts.engines[i];
-		let mut engine = engine;
 		let bench_time = Duration::from_secs_f32(opts.time);
 
 		let start = Instant::now();
@@ -39,8 +34,8 @@ fn main() -> Result<()> {
 
 		while start.elapsed() < bench_time {
 			for board in &boards {
-				engine.do_move(board, White);
-				engine.do_move(board, Black);
+				engine.do_move(&mut rng, board, White);
+				engine.do_move(&mut rng, board, Black);
 				evals += 2;
 			}
 		}
