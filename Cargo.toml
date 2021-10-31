@@ -15,6 +15,10 @@ path = "bin/cli.rs"
 name = "cmp"
 path = "bin/cmp.rs"
 
+[[bin]]
+name = "bench"
+path = "bin/bench.rs"
+
 
 [dependencies]
 anyhow = "1.0"

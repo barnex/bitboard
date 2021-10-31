@@ -15,6 +15,11 @@ impl BitBoard {
 		Self { sets: pieces }
 	}
 
+	/// Board in starting position.
+	pub fn starting_position() -> Self {
+		starting_position::<Self>()
+	}
+
 	/// Piece at position.
 	/// Slow linear search only intended outputting the board state,
 	/// not for evaluation.
