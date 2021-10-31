@@ -4,6 +4,43 @@ use Color::*;
 use Square::*;
 
 #[test]
+fn test_iter() {
+	let b = BitBoard::from_str(
+		r"
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		",
+	)
+	.unwrap();
+
+	let have = BitBoard::iter(b.black()).collect::<Vec<_>>();
+	assert_eq!(have, vec![]);
+
+	let b = BitBoard::from_str(
+		r"
+		. . . . . . . p
+		. . . . . . . .
+		. . . . . . . .
+		. . . . . . . .
+		. . . . r . . .
+		. . . . . . . .
+		. . . . . . . .
+		p . . . . . . .
+		",
+	)
+	.unwrap();
+
+	let have = BitBoard::iter(b.black()).collect::<Vec<_>>();
+	assert_eq!(have, vec![pos(0, 0), pos(3, 4), pos(7, 7)]);
+}
+
+#[test]
 fn test_king_position() {
 	let b = BitBoard::from_str(
 		r"
@@ -21,6 +58,23 @@ fn test_king_position() {
 
 	assert_eq!(b.king_position(White), pos(0, 0));
 	assert_eq!(b.king_position(Black), pos(7, 7));
+
+	let b = BitBoard::from_str(
+		r"
+		. . . . . . . p
+		. . . . . . . .
+		. . . p . . . .
+		. . . . . . . .
+		. . k . . R . .
+		. . . . . . . .
+		. . . . . K . .
+		n . . . . . . .
+		",
+	)
+	.unwrap();
+
+	assert_eq!(b.king_position(White), pos(1, 5));
+	assert_eq!(b.king_position(Black), pos(3, 2));
 }
 
 #[test]

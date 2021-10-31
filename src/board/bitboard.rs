@@ -349,8 +349,15 @@ impl BitBoard {
 	//	sum
 	//}
 
+	#[inline]
 	pub fn piece_count(&self, piece: Square) -> u32 {
 		self.bits(piece).count_ones()
+	}
+
+	/// Iterate over non-empty positions
+	#[inline]
+	pub fn iter(bits: u64) -> impl Iterator<Item = Pos> {
+		(0..64).filter(move |i| bits & (1 << i) != 0).map(|i| Pos::from_index(i))
 	}
 }
 

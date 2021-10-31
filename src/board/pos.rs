@@ -65,6 +65,14 @@ impl Pos {
 	pub fn is_valid(self) -> bool {
 		(self.0 & 0x88) == 0
 	}
+
+	/// https://en.wikipedia.org/wiki/Taxicab_geometry.
+	#[inline]
+	pub fn l1_distance_to(self, rhs: Self) -> u8{
+		let delta_r = self.row() as i8 - rhs.col() as i8;
+		let delta_c = self.col() as i8 - rhs.col() as i8;
+		(delta_r.abs() + delta_c.abs()) as u8
+	}
 }
 
 impl fmt::Debug for Pos {

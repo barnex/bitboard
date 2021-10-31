@@ -187,6 +187,7 @@ fn parse_engine(name: &str, seed: u64) -> Result<Box<dyn Engine>> {
 	match name {
 		"random" => Ok(Box::new(Random::new(seed))),
 		"greedy" => Ok(Box::new(Greedy::new(seed))),
+		"greedy_k_dist" => Ok(Box::new(greedy_with_king_dist(seed))),
 		unknown => Err(format_err!("unknown engine: {}", unknown)),
 	}
 }

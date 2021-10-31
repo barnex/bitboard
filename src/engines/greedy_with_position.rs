@@ -1,5 +1,3 @@
-use std::str::EncodeUtf16;
-
 use super::internal::*;
 
 /// Greedily takes material with not lookahead or position value.
@@ -14,10 +12,10 @@ where
 /// Greedy, with additional position value for distance to the opponent's king.
 pub fn greedy_with_king_dist(seed: u64) -> impl Engine {
 	GreedyWith::new(seed, |board, player| {
-		//let king = board.king_position(player.opposite());
-		//let
-		// - dist_to_king;
-		1000 * material_value(board, player)
+		let king = board.king_position(player.opposite());
+
+		let total_dist = BitBoard::iter(board.all_pieces(player)).map(|pos| pos.l1_distance_to(king)).sum::<u8>();
+		1000 * material_value(board, player) - (total_dist as i32)
 	})
 }
 
