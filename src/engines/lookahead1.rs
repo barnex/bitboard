@@ -1,32 +1,26 @@
 use super::internal::*;
 
 /// Greedily takes material with not lookahead or position value.
-pub struct GreedyWith<F>
+pub struct Lookahead1<F>
 where
 	F: Fn(&BitBoard, Color) -> i32,
 {
 	rng: StdRng,
-	value: F,
+	leaf_value: F,
 }
 
-/// Greedy, with additional position value for distance to the opponent's king.
-pub fn greedy_with_king_dist(seed: u64) -> impl Engine {
-	GreedyWith::new(seed, |board, player| {
-		let king = board.king_position(player.opposite());
-
-		let total_dist = BitBoard::iter(board.all_pieces(player)).map(|pos| pos.l1_distance_to(king)).sum::<u8>();
-		1000 * material_value(board, player) - (total_dist as i32)
-	})
+pub fn l1_material(seed: u64) -> impl Engine {
+	Lookahead1::new(seed, material_value)
 }
 
-impl<F> GreedyWith<F>
+impl<F> Lookahead1<F>
 where
 	F: Fn(&BitBoard, Color) -> i32,
 {
-	pub fn new(seed: u64, value: F) -> Self {
+	pub fn new(seed: u64, leaf_value: F) -> Self {
 		Self {
 			rng: StdRng::seed_from_u64(seed),
-			value,
+			leaf_value,
 		}
 	}
 
@@ -37,7 +31,7 @@ where
 			.into_iter()
 			.map(|mv| (mv, board.with_move(mv)))
 			.filter(|(_, board)| !board.is_check(player))
-			.map(|(mv, board)| (mv, (self.value)(&board, player)))
+			.map(|(mv, board)| (mv, -(self.l1_value(&board, player.opposite()))))
 			.collect::<SmVec<_>>();
 
 		// sort in descending value
@@ -53,9 +47,20 @@ where
 		// randomly pick from all moves with best value
 		Some(equal_value[self.rng.gen_range(0..equal_value.len())].0)
 	}
+
+	fn l1_value(&self, board: &BitBoard, player: Color) -> i32 {
+		board
+			.all_moves(player)
+			.into_iter()
+			.map(|mv| board.with_move(mv))
+			.filter(|board| !board.is_check(player))
+			.map(|board| (self.leaf_value)(&board, player))
+			.max()
+			.unwrap_or(-INF)
+	}
 }
 
-impl<F> Engine for GreedyWith<F>
+impl<F> Engine for Lookahead1<F>
 where
 	F: Fn(&BitBoard, Color) -> i32,
 {

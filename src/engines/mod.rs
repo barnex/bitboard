@@ -9,5 +9,8 @@ pub use random::*;
 mod greedy;
 pub use greedy::*;
 
-mod greedy_with_position;
-pub use greedy_with_position::*;
+mod greedy_with;
+pub use greedy_with::*;
+
+mod lookahead1;
+pub use lookahead1::*;

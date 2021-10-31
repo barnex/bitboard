@@ -184,10 +184,11 @@ fn winner(board: &impl Board) -> Option<Color> {
 }
 
 fn parse_engine(name: &str, seed: u64) -> Result<Box<dyn Engine>> {
-	match name {
-		"random" => Ok(Box::new(Random::new(seed))),
-		"greedy" => Ok(Box::new(Greedy::new(seed))),
-		"greedy_k_dist" => Ok(Box::new(greedy_with_king_dist(seed))),
-		unknown => Err(format_err!("unknown engine: {}", unknown)),
-	}
+	Ok(match name {
+		"random" => Box::new(Random::new(seed)),
+		"greedy" => Box::new(Greedy::new(seed)),
+		"greedy_k_dist" => Box::new(greedy_with_king_dist(seed)),
+		"l1" => Box::new(l1_material(seed)),
+		unknown => return Err(format_err!("unknown engine: {}", unknown)),
+	})
 }
