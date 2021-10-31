@@ -16,16 +16,11 @@ pub struct Opts {
 	pub num_games: u32,
 
 	/// Verbosity level
-	#[structopt(short, long, default_value = "1")]
+	#[structopt(short, long, default_value = "0")]
 	pub verbosity: u32,
 
-	/// Player A
-	#[structopt(short = "a", long, default_value = "random")]
-	pub engine_a: String,
-
-	/// Player B
-	#[structopt(short = "b", long, default_value = "random")]
-	pub engine_b: String,
+	#[structopt()]
+	pub engines: Vec<String>,
 }
 
 impl Opts {
@@ -44,61 +39,77 @@ fn main() {
 fn main_result() -> Result<()> {
 	let opts = Opts::from_args();
 
-	let mut a = parse_engine(&opts.engine_a, opts.seed)?;
-	let mut b = parse_engine(&opts.engine_b, opts.seed + 1)?;
+	let mut a = parse_engine(&opts.engines[0], opts.seed)?;
+	let mut b = parse_engine(&opts.engines[1], opts.seed + 1)?;
 
 	let mut stats = play_match(&opts, &mut [a.as_mut(), b.as_mut()]);
-	stats.engine_names = [opts.engine_a.to_owned(), opts.engine_b.to_owned()];
+
+	stats.wins[White.index()].engine_name = opts.engines[0].clone();
+	stats.wins[Black.index()].engine_name = opts.engines[1].clone();
+	stats.wins[2].engine_name = "draw".into();
+
 	println!("{}", stats);
 
 	Ok(())
 }
 
-#[derive(Default, Debug)]
+#[derive(Default)]
 struct MatchStats {
-	engine_names: [String; 2],
-	wins: [u32; 2],
-	draws: u32,
-	total_games: u32,
-	total_plies: u32,
-	total_final_material: i32,
+	wins: [PlayerStats; 3], // white, black, draw
 }
 
 impl MatchStats {
-	fn add(&mut self, g: &GameStats) {
-		match g.winner {
-			Some(player) => self.wins[player.index()] += 1,
-			None => self.draws += 1,
-		}
-		self.total_games += 1;
-		self.total_plies += g.plies;
-		self.total_final_material += material_value(&g.board, White);
+	pub fn add(&mut self, game: &GameStats) {
+		let idx = match game.winner {
+			Some(player) => player.index(),
+			None => 2,
+		};
+		self.wins[idx].add_win(game);
 	}
+}
 
+#[derive(Default)]
+struct PlayerStats {
+	engine_name: String,
+	total_wins: u32,
+	total_plies: u32,
+	final_material: i32,
+}
+
+impl PlayerStats {
+	fn add_win(&mut self, game: &GameStats) {
+		self.total_wins += 1;
+		self.total_plies += game.plies;
+		self.final_material += material_value(&game.board, White);
+	}
 	fn avg_plies(&self) -> f32 {
-		(self.total_plies as f32) / (self.total_games as f32)
+		(self.total_plies as f32) / (self.total_wins as f32)
 	}
 
 	fn avg_material(&self) -> f32 {
-		(self.total_final_material as f32) / (self.total_games as f32)
+		(self.final_material as f32) / (self.total_wins as f32)
+	}
+}
+
+impl fmt::Display for PlayerStats {
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+		write!(
+			f,
+			"{:<16}: {:>4} games, {:>5.1} avg ply, {:>+5.1} avg material",
+			self.engine_name,
+			self.total_wins,
+			self.avg_plies(),
+			self.avg_material()
+		)?;
+		Ok(())
 	}
 }
 
 impl fmt::Display for MatchStats {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-		write!(
-			f,
-			"wins: A({}): {}, B({}): {}, draws: {}, avg plies: {:.1}, avg material: {:+.1}",
-			self.engine_names[0],
-			self.wins[0],
-			self.engine_names[1],
-			self.wins[1],
-			self.draws,
-			self.avg_plies(),
-			self.avg_material(),
-		)?;
-
-		Ok(())
+		Ok(for player_stats in &self.wins {
+			write!(f, "{}\n", player_stats)?;
+		})
 	}
 }
 

@@ -13,6 +13,10 @@ pub fn l1_material(seed: u64) -> impl Engine {
 	Lookahead1::new(seed, material_value)
 }
 
+pub fn l1_k_dist(seed: u64) -> impl Engine {
+	Lookahead1::new(seed, |b, p| 1000 * material_value(b, p) + king_distance(b, p))
+}
+
 impl<F> Lookahead1<F>
 where
 	F: Fn(&BitBoard, Color) -> i32,

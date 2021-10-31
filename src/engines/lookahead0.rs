@@ -1,7 +1,7 @@
 use super::internal::*;
 
-/// Greedily takes material with not lookahead or position value.
-pub struct GreedyWith<F>
+/// Search without lookahead.
+pub struct Lookahead0<F>
 where
 	F: Fn(&BitBoard, Color) -> i32,
 {
@@ -9,9 +9,8 @@ where
 	value: F,
 }
 
-/// Greedy, with additional position value for distance to the opponent's king.
 pub fn greedy_with_king_dist(seed: u64) -> impl Engine {
-	GreedyWith::new(seed, |board, player| {
+	Lookahead0::with(seed, |board, player| {
 		let king = board.king_position(player.opposite());
 		let total_dist = BitBoard::iter(board.all_pieces(player)) //
 			.map(|pos| pos.l1_distance_to(king))
@@ -20,11 +19,11 @@ pub fn greedy_with_king_dist(seed: u64) -> impl Engine {
 	})
 }
 
-impl<F> GreedyWith<F>
+impl<F> Lookahead0<F>
 where
 	F: Fn(&BitBoard, Color) -> i32,
 {
-	pub fn new(seed: u64, value: F) -> Self {
+	pub fn with(seed: u64, value: F) -> Self {
 		Self {
 			rng: StdRng::seed_from_u64(seed),
 			value,
@@ -56,7 +55,7 @@ where
 	}
 }
 
-impl<F> Engine for GreedyWith<F>
+impl<F> Engine for Lookahead0<F>
 where
 	F: Fn(&BitBoard, Color) -> i32,
 {
