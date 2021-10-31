@@ -13,7 +13,7 @@ impl Random {
 	}
 	pub fn do_move(&mut self, board: &BitBoard, player: Color) -> Option<Move> {
 		let moves = board
-			.all_moves(player)
+			.collect_moves(player)
 			.into_iter()
 			.filter(|&mv| !board.with_move(mv).is_check(player))
 			.collect::<SmVec<_>>();

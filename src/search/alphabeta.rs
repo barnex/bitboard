@@ -31,7 +31,7 @@ where
 	}
 
 	let mut mv_boards = board //
-		.all_moves(player)
+		.collect_moves(player)
 		.iter()
 		.map(|&mv| (mv, board.with_move(mv)))
 		.collect::<Vec<_>>();

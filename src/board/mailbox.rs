@@ -44,7 +44,11 @@ impl Mailbox {
 			for c in 0..8 {
 				let pos = pos(r, c);
 				if self[pos].is_color(player) {
-					moves.extend(self.dests_for(pos).iter().map(|&dst| Move::new(pos, dst)))
+					moves.extend(
+						self.dests_for(pos) //
+							.iter()
+							.map(|&dst| Move::new(self.at(pos), pos, dst)),
+					)
 				}
 			}
 		}
@@ -52,7 +56,10 @@ impl Mailbox {
 	}
 
 	pub fn moves_for(&self, pos: Pos) -> SmVec<Move> {
-		self.dests_for(pos).into_iter().map(|dst| Move::new(pos, dst)).collect()
+		self.dests_for(pos) //
+			.into_iter()
+			.map(|dst| Move::new(self.at(pos), pos, dst))
+			.collect()
 	}
 
 	pub fn dests_for(&self, pos: Pos) -> SmVec<Pos> {
@@ -210,7 +217,7 @@ impl Board for Mailbox {
 		self[pos]
 	}
 
-	fn all_moves(&self, player: Color) -> SmVec<Move> {
+	fn collect_moves(&self, player: Color) -> SmVec<Move> {
 		self.all_moves(player)
 	}
 

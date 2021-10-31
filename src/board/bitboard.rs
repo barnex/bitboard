@@ -57,7 +57,8 @@ impl BitBoard {
 	}
 
 	/// All moves for `player`.
-	fn all_moves(&self, player: Color) -> SmVec<Move> {
+	/// TODO: iter_moves?
+	fn collect_moves(&self, player: Color) -> SmVec<Move> {
 		let mut moves = SmVec::new();
 		match player {
 			White => self.all_w_moves(&mut moves),
@@ -134,7 +135,7 @@ impl BitBoard {
 				for j in 0..64 {
 					let to = Pos::from_index(j);
 					if bit_at(moves, to) {
-						buf.push(Move::with_piece(piece, from, to))
+						buf.push(Move::new(piece, from, to))
 					}
 				}
 			}
@@ -142,12 +143,12 @@ impl BitBoard {
 	}
 
 	fn unpack_pawn(piece: Square, bits: u64, delta: u8, moves: &mut SmVec<Move>) {
-		// TODO: use bitscan intrinsic.
+		// TODO: use count trailing zeros
 		for i in 0..64 {
 			let pos = Pos::from_index(i);
 			if bit_at(bits, pos) {
 				let from = pos + delta;
-				moves.push(Move::with_piece(piece, from, pos));
+				moves.push(Move::new(piece, from, pos));
 			}
 		}
 	}
@@ -478,8 +479,8 @@ impl Board for BitBoard {
 		self.set(pos, sq)
 	}
 
-	fn all_moves(&self, player: Color) -> SmVec<Move> {
-		self.all_moves(player)
+	fn collect_moves(&self, player: Color) -> SmVec<Move> {
+		self.collect_moves(player)
 	}
 
 	fn with_move(&self, mv: Move) -> Self {

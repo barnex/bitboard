@@ -24,7 +24,7 @@ where
 	}
 
 	let mut value = -INF;
-	for mv in board.all_moves(player) {
+	for mv in board.collect_moves(player) {
 		let board = board.with_move(mv);
 
 		// TODO: filter out bad moves at board level.

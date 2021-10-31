@@ -11,7 +11,7 @@ fn random_all_moves() {
 		}
 
 		for player in [White, Black] {
-			let have: Set<Move> = bb.all_moves(player).iter().copied().collect();
+			let have: Set<Move> = bb.collect_moves(player).iter().copied().collect();
 			let want: Set<Move> = board.all_moves(player).iter().copied().collect();
 
 			if have != want {

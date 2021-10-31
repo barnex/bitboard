@@ -870,7 +870,7 @@ fn white_black() {
 
 fn test_moves(player: Color, board: &str, want: &[&str]) {
 	let board = BitBoard::from_str(board).unwrap();
-	let have = board.all_moves(player).iter().copied().collect::<Set<_>>();
+	let have = board.collect_moves(player).iter().copied().collect::<Set<_>>();
 	let want = want.iter().map(|s| Move::from_str(s).expect("move: syntax error")).collect::<Set<_>>();
 	if have != want {
 		println!("have: {:?}", &have);

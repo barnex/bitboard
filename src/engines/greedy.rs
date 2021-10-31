@@ -15,7 +15,7 @@ impl Greedy {
 	pub fn do_move(&mut self, board: &BitBoard, player: Color) -> Option<Move> {
 		// move-value pairs
 		let mut move_value = board
-			.all_moves(player)
+			.collect_moves(player)
 			.into_iter()
 			.map(|mv| (mv, board.with_move(mv)))
 			.filter(|(_, board)| !board.is_check(player))

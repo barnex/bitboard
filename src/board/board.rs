@@ -4,7 +4,7 @@ pub trait Board {
 	fn new() -> Self;
 	fn at(&self, pos: Pos) -> Square;
 	fn set(&mut self, pos: Pos, sq: Square);
-	fn all_moves(&self, player: Color) -> SmVec<Move>;
+	fn collect_moves(&self, player: Color) -> SmVec<Move>;
 	fn with_move(&self, mv: Move) -> Self;
 
 	// TODO: optimize for bitboard
@@ -25,7 +25,7 @@ pub trait Board {
 
 	fn is_check(&self, player: Color) -> bool {
 		let attacter = player.opposite();
-		for mv in self.all_moves(attacter) {
+		for mv in self.collect_moves(attacter) {
 			if self.at(mv.to).is_king() {
 				return true;
 			}
@@ -39,7 +39,7 @@ pub trait Board {
 /// intended to determine the winner of a game,
 /// not to be used in a value computation.
 pub fn is_mate(board: &impl Board, player: Color) -> bool {
-	for mv in board.all_moves(player) {
+	for mv in board.collect_moves(player) {
 		if !board.with_move(mv).is_check(player) {
 			return false;
 		}

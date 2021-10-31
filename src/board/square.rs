@@ -3,7 +3,7 @@ use std::{convert::TryFrom, fmt::Write};
 use super::internal::*;
 
 #[repr(u8)]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash, PartialOrd, Ord)]
 pub enum Square {
 	Empty,
 
