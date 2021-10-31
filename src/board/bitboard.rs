@@ -62,14 +62,17 @@ impl BitBoard {
 	}
 
 	/// All moves for `player`.
-	/// TODO: iter_moves?
-	fn collect_moves(&self, player: Color) -> SmVec<Move> {
+	pub fn collect_moves(&self, player: Color) -> SmVec<Move> {
 		let mut moves = SmVec::new();
 		match player {
 			White => self.all_w_moves(&mut moves),
 			Black => self.all_b_moves(&mut moves),
 		}
 		moves
+	}
+
+	pub fn iter_moves(&self, player: Color) -> impl Iterator<Item = Move> {
+		self.collect_moves(player).into_iter()
 	}
 
 	/// All moves for white.

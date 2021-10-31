@@ -10,12 +10,12 @@ where
 	F: Fn(&BitBoard, Color) -> i32,
 {
 	fn l1_value(&self, board: &BitBoard, player: Color) -> i32 {
-		board
-			.collect_moves(player)
-			.into_iter()
+		let opp = player.opposite();
+		-board
+			.iter_moves(opp)
 			.map(|mv| board.with_move(mv))
-			.filter(|board| !board.is_check(player))
-			.map(|board| (self.0)(&board, player))
+			.filter(|board| !board.is_check(opp))
+			.map(|board| (self.0)(&board, opp))
 			.max()
 			.unwrap_or(-INF)
 	}
