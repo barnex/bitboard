@@ -1,3 +1,5 @@
 #! /bin/bash
+set -e
 
-cargo run --quiet --release --bin cmp -- $@
+RUSTFLAGS='-C force-frame-pointers=y -C target-cpu=native' cargo build --bin cmp --release
+./target/release/cmp $@

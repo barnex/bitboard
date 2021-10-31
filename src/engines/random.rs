@@ -16,4 +16,8 @@ impl Engine for Random {
 			_ => Some(moves[rng.gen_range(0..moves.len())]),
 		}
 	}
+
+	fn evaluate(&self, _board: &BitBoard, _player: Color) -> i32 {
+		0
+	}
 }

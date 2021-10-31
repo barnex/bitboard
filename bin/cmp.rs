@@ -39,26 +39,39 @@ fn main() {
 fn main_result() -> Result<()> {
 	let opts = Opts::from_args();
 
-	let mut a = parse_engine(&opts.engines[0])?;
-	let mut b = parse_engine(&opts.engines[1])?;
+	let a = parse_engine(&opts.engines[0])?;
+	let b = parse_engine(&opts.engines[1])?;
 
-	let mut stats = play_match(&opts, &mut [a.as_mut(), b.as_mut()]);
-
-	stats.wins[White.index()].engine_name = opts.engines[0].clone();
-	stats.wins[Black.index()].engine_name = opts.engines[1].clone();
-	stats.wins[2].engine_name = "draw".into();
+	let stats = play_match(&opts, &[a.as_ref(), b.as_ref()], [&opts.engines[0], &opts.engines[1]]);
 
 	println!("{}", stats);
 
 	Ok(())
 }
 
-#[derive(Default)]
 struct MatchStats {
 	wins: [PlayerStats; 3], // white, black, draw
 }
 
 impl MatchStats {
+	pub fn new(names: [&str; 2]) -> Self {
+		Self {
+			wins: [
+				PlayerStats {
+					engine_name: names[0].to_owned(),
+					..Default::default()
+				},
+				PlayerStats {
+					engine_name: names[1].to_owned(),
+					..Default::default()
+				},
+				PlayerStats {
+					engine_name: "draw".into(),
+					..Default::default()
+				},
+			],
+		}
+	}
 	pub fn add(&mut self, game: &GameStats) {
 		let idx = match game.winner {
 			Some(player) => player.index(),
@@ -95,7 +108,7 @@ impl fmt::Display for PlayerStats {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
 		write!(
 			f,
-			"{:<16}: {:>4} games, {:>5.1} avg ply, {:>+5.1} avg material",
+			"- {:<16}: {:>4} games, {:>5.1} avg ply, {:>+5.1} avg material",
 			self.engine_name,
 			self.total_wins,
 			self.avg_plies(),
@@ -119,12 +132,16 @@ struct GameStats {
 	board: BitBoard,
 }
 
-fn play_match(opts: &Opts, engines: &[&dyn Engine; 2]) -> MatchStats {
-	let mut match_stats = MatchStats::default();
+fn play_match(opts: &Opts, engines: &[&dyn Engine; 2], names: [&str; 2]) -> MatchStats {
+	let mut match_stats = MatchStats::new(names);
 	for i in 0..opts.num_games {
 		let seed = opts.seed * 10000 + i as u64;
 		let game_stats = play_game(opts, seed, engines);
 		match_stats.add(&game_stats);
+
+		if opts.verbosity == 0 {
+			println!("{}\x1b[4A", &match_stats);
+		}
 
 		if opts.v(1) {
 			println!(
@@ -163,6 +180,10 @@ fn play_game(opts: &Opts, seed: u64, engines: &[&dyn Engine; 2]) -> GameStats {
 		};
 
 		board = board.with_move(mv);
+
+		if opts.v(3) {
+			print_ansi(&board, &[mv.from, mv.to].into_iter().collect())
+		}
 
 		if let Some(winner) = winner(&board) {
 			return GameStats {

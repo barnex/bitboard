@@ -4,7 +4,7 @@ use Square::*;
 
 #[derive(Clone)]
 pub struct BitBoard {
-	sets: [u64; 13],
+	bitfields: [u64; 13],
 }
 
 impl BitBoard {
@@ -12,7 +12,7 @@ impl BitBoard {
 	fn new() -> Self {
 		let mut pieces = [0; 13];
 		pieces[Empty.index()] = !0;
-		Self { sets: pieces }
+		Self { bitfields: pieces }
 	}
 
 	/// Board in starting position.
@@ -26,7 +26,7 @@ impl BitBoard {
 	fn at(&self, pos: Pos) -> Square {
 		let mask = 1 << pos.index();
 		for sq in Square::ALL_SQUARES {
-			if self.sets[sq.index()] & mask != 0 {
+			if self.bitfields[sq.index()] & mask != 0 {
 				return sq;
 			}
 		}
@@ -36,7 +36,7 @@ impl BitBoard {
 	/// Bitset for all pieces of type `piece`.
 	#[inline]
 	pub fn bits(&self, piece: Square) -> u64 {
-		self.sets[piece.index()]
+		self.bitfields[piece.index()]
 	}
 
 	/// Set position to piece.
@@ -44,20 +44,34 @@ impl BitBoard {
 		debug_assert!(pos.is_valid());
 		let pos = pos.index() as u8;
 		self.clear(pos);
-		self.sets[piece.index()] |= 1 << pos;
+		self.bitfields[piece.index()] |= 1 << pos;
 	}
 
 	fn clear(&mut self, pos: u8) {
 		let mask = !(1 << pos);
 		for sq in Square::ALL_SQUARES {
-			self.sets[sq.index()] &= mask;
+			self.bitfields[sq.index()] &= mask;
 		}
 	}
 
-	fn with_move(&self, mv: Move) -> Self {
+	#[inline]
+	pub fn with_move_(&self, mv: Move) -> Self {
 		let mut b = self.clone();
-		b.set(mv.to, b.at(mv.from));
-		b.set(mv.from, Square::Empty);
+		debug_assert!(self.at(mv.from) == mv.piece);
+
+		// clear to and from in one go
+		let from = 1 << mv.from.index();
+		let to = 1 << mv.to.index();
+		let clear = !(from | to);
+
+		for sq in Square::ALL_SQUARES {
+			b.bitfields[sq.index()] &= clear;
+		}
+
+		// set `from` and `to` squares.
+		b.bitfields[Empty.index()] |= from;
+		b.bitfields[mv.piece.index()] |= to;
+
 		b
 	}
 
@@ -468,7 +482,7 @@ impl fmt::Debug for BitBoard {
 			str
 		}
 		for sq in Square::ALL_SQUARES {
-			write!(f, "{:?}:\n{}\n", sq, fmt_bits(self.sets[sq.index()]))?;
+			write!(f, "{:?}:\n{}\n", sq, fmt_bits(self.bitfields[sq.index()]))?;
 		}
 		Ok(())
 	}
@@ -492,7 +506,7 @@ impl Board for BitBoard {
 	}
 
 	fn with_move(&self, mv: Move) -> Self {
-		self.with_move(mv)
+		self.with_move_(mv)
 	}
 
 	fn has_king(&self, player: Color) -> bool {

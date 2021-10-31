@@ -9,18 +9,18 @@ pub struct Opts {
 	#[structopt(short, long, default_value = "1234567")]
 	pub seed: u64,
 
-	/// Player A
-	#[structopt(short = "e", long)]
-	pub engines: Vec<String>,
-
 	/// Approximate seconds to benchmark for.
 	#[structopt(short = "t", long, default_value = "5")]
 	pub time: f32,
+
+	/// Engines to benchmark
+	#[structopt()]
+	pub engines: Vec<String>,
 }
 
 fn main() -> Result<()> {
 	let opts = Opts::from_args();
-	let boards = random_boards(1024);
+	let boards = random_boards(512);
 	let mut rng = StdRng::seed_from_u64(opts.seed);
 
 	let engines = opts.engines.iter().map(|name| parse_engine(name)).collect::<Result<Vec<_>>>()?;

@@ -5,21 +5,21 @@ use super::internal::*;
 #[repr(u8)]
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash, PartialOrd, Ord)]
 pub enum Square {
-	Empty,
+	Empty = 0,
 
-	WPawn,
-	WRook,
-	WKnight,
-	WBisshop,
-	WQueen,
-	WKing,
+	WPawn = 1,
+	WRook = 2,
+	WKnight = 3,
+	WBisshop = 4,
+	WQueen = 5,
+	WKing = 6,
 
-	BPawn,
-	BRook,
-	BKnight,
-	BBisshop,
-	BQueen,
-	BKing,
+	BPawn = 7,
+	BRook = 8,
+	BKnight = 9,
+	BBisshop = 10,
+	BQueen = 11,
+	BKing = 12,
 }
 
 use Square::*;
@@ -54,21 +54,7 @@ impl Square {
 	}
 
 	pub const fn index(self) -> usize {
-		match self {
-			Empty => 0,
-			WPawn => 1,
-			WRook => 2,
-			WKnight => 3,
-			WBisshop => 4,
-			WQueen => 5,
-			WKing => 6,
-			BPawn => 7,
-			BRook => 8,
-			BKnight => 9,
-			BBisshop => 10,
-			BQueen => 11,
-			BKing => 12,
-		}
+		self as usize
 	}
 
 	pub fn is_color(self, color: Color) -> bool {
@@ -88,23 +74,10 @@ impl Square {
 
 	/// https://en.wikipedia.org/wiki/Chess_piece_relative_value.
 	pub fn value(self) -> i32 {
-		use Square::*;
-		match self {
-			WPawn => 1,
-			WKnight => 3,
-			WBisshop => 3,
-			WRook => 5,
-			WQueen => 9,
-			WKing => 100,
-			BPawn => -1,
-			BKnight => -3,
-			BBisshop => -3,
-			BRook => -5,
-			BQueen => -9,
-			BKing => -100,
-			_ => 0,
-		}
+		Self::VALUE[self.index()]
 	}
+
+	const VALUE: [i32; 13] = [0, 1, 5, 3, 3, 9, 0, -1, -5, -3, -3, -9, 0];
 }
 
 impl fmt::Display for Square {

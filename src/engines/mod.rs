@@ -9,11 +9,14 @@ pub use random::*;
 mod greedy;
 pub use greedy::*;
 
-mod lookahead0;
-pub use lookahead0::*;
-
 mod lookahead1;
 pub use lookahead1::*;
+
+mod lookahead2;
+pub use lookahead2::*;
+
+mod lookahead_n;
+pub use lookahead_n::*;
 
 mod value_functions;
 pub use value_functions::*;

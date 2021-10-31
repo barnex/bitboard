@@ -1,5 +1,6 @@
 pub use super::internal::*;
 
+// TODO: remove
 pub trait Board {
 	fn new() -> Self;
 	fn at(&self, pos: Pos) -> Square;

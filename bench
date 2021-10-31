@@ -1,3 +1,4 @@
 #! /bin/bash
 
-cargo run --quiet --release --bin bench -- $@
+RUSTFLAGS='-C force-frame-pointers=y -C target-cpu=native' cargo build --bin bench --release
+./target/release/bench -- $@
