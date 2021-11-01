@@ -1,7 +1,6 @@
 use super::internal::*;
 use std::ops::Index;
 use std::ops::IndexMut;
-use std::str::FromStr;
 use Color::*;
 use Square::*;
 
@@ -12,16 +11,45 @@ pub struct Mailbox {
 }
 
 impl Mailbox {
-	pub fn starting_position() -> Self {
-		starting_position::<Self>()
+	pub fn new() -> Self {
+		Self { board: [Empty; 64] }
 	}
 
-	#[must_use]
-	pub fn with_move(&self, mv: Move) -> Self {
-		debug_assert!(mv.is_valid());
-		let mut b = self.clone();
-		b.do_move(mv);
+	pub fn starting_position() -> Self {
+		use Square::*;
+		let mut b = Self::new();
+		b.set(pos(0, 0), WRook);
+		b.set(pos(0, 1), WKnight);
+		b.set(pos(0, 2), WBisshop);
+		b.set(pos(0, 3), WKing);
+		b.set(pos(0, 4), WQueen);
+		b.set(pos(0, 5), WBisshop);
+		b.set(pos(0, 6), WKnight);
+		b.set(pos(0, 7), WRook);
+
+		for c in 0..8 {
+			b.set(pos(1, c), WPawn);
+			b.set(pos(6, c), BPawn);
+		}
+
+		b.set(pos(7, 0), BRook);
+		b.set(pos(7, 1), BKnight);
+		b.set(pos(7, 2), BBisshop);
+		b.set(pos(7, 3), BKing);
+		b.set(pos(7, 4), BQueen);
+		b.set(pos(7, 5), BBisshop);
+		b.set(pos(7, 6), BKnight);
+		b.set(pos(7, 7), BRook);
+
 		b
+	}
+
+	pub fn at(&self, pos: Pos) -> Square {
+		self[pos]
+	}
+
+	pub fn set(&mut self, pos: Pos, sq: Square) {
+		self[pos] = sq
 	}
 
 	pub fn do_move(&mut self, mv: Move) {
@@ -37,8 +65,7 @@ impl Mailbox {
 			.filter(|(pos, _)| pos.is_valid())
 	}
 
-	/// TODO: take color, not mask
-	pub fn all_moves(&self, player: Color) -> SmVec<Move> {
+	pub fn collect_moves(&self, player: Color) -> SmVec<Move> {
 		let mut moves = SmVec::new();
 		for r in 0..8 {
 			for c in 0..8 {
@@ -53,13 +80,6 @@ impl Mailbox {
 			}
 		}
 		moves
-	}
-
-	pub fn moves_for(&self, pos: Pos) -> SmVec<Move> {
-		self.dests_for(pos) //
-			.into_iter()
-			.map(|dst| Move::new(self.at(pos), pos, dst))
-			.collect()
 	}
 
 	pub fn dests_for(&self, pos: Pos) -> SmVec<Pos> {
@@ -207,39 +227,6 @@ impl Mailbox {
 	];
 }
 
-impl Board for Mailbox {
-	/// Empty board.
-	fn new() -> Self {
-		Self { board: [Empty; 64] }
-	}
-
-	fn at(&self, pos: Pos) -> Square {
-		self[pos]
-	}
-
-	fn collect_moves(&self, player: Color) -> SmVec<Move> {
-		self.all_moves(player)
-	}
-
-	fn with_move(&self, mv: Move) -> Self {
-		self.with_move(mv)
-	}
-
-	fn set(&mut self, pos: Pos, sq: Square) {
-		self[pos] = sq
-	}
-
-	//fn material_value(&self) -> i32 {
-	//	let mut value = 0;
-	//	for r in 0..8 {
-	//		for c in 0..8 {
-	//			value += self.at(pos(r, c)).value()
-	//		}
-	//	}
-	//	value
-	//}
-}
-
 impl Index<Pos> for Mailbox {
 	type Output = Square;
 
@@ -253,14 +240,6 @@ impl IndexMut<Pos> for Mailbox {
 	#[inline]
 	fn index_mut(&mut self, pos: Pos) -> &mut Self::Output {
 		&mut self.board[pos.index()]
-	}
-}
-
-impl FromStr for Mailbox {
-	type Err = anyhow::Error;
-
-	fn from_str(s: &str) -> Result<Self> {
-		parse_board(s)
 	}
 }
 

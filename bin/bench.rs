@@ -21,7 +21,7 @@ pub struct Opts {
 fn main() -> Result<()> {
 	let opts = Opts::from_args();
 	let boards = random_boards(512);
-	let mut rng = StdRng::seed_from_u64(opts.seed);
+	//let mut rng = StdRng::seed_from_u64(opts.seed);
 
 	let engines = opts.engines.iter().map(|name| parse_engine(name)).collect::<Result<Vec<_>>>()?;
 
@@ -34,8 +34,8 @@ fn main() -> Result<()> {
 
 		while start.elapsed() < bench_time {
 			for board in &boards {
-				engine.do_move(&mut rng, board, White);
-				engine.do_move(&mut rng, board, Black);
+				engine.eval_moves(board, White);
+				engine.eval_moves(board, Black);
 				evals += 2;
 			}
 		}
@@ -52,13 +52,13 @@ fn main() -> Result<()> {
 	Ok(())
 }
 
-fn random_boards(n: usize) -> Vec<BitBoard> {
+fn random_boards(n: usize) -> Vec<Board> {
 	let seed = 12345;
 	let mut rng = rand::rngs::StdRng::seed_from_u64(seed);
 	let mut boards = Vec::with_capacity(n);
 
 	for _ in 0..n {
-		let mut board = BitBoard::starting_position();
+		let mut board = Board::starting_position();
 
 		// remove some random pieces (not kings)
 		for _ in 0..rng.gen_range(10..100) {

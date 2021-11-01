@@ -1,102 +1,98 @@
+use std::io;
+use std::io::prelude::*;
+use std::io::BufRead;
+use std::time::Instant;
+
 use bitboard::*;
-use std::time::{Duration, Instant};
 use structopt::*;
 
 #[derive(StructOpt)]
-pub struct Args {
+pub struct Opts {
 	/// Random seed
 	#[structopt(short, long, default_value = "1234567")]
 	pub seed: u64,
 
-	/// Maximum number of turns
-	#[structopt(short, long, default_value = "50")]
-	pub max_turns: u32,
+	/// Verbosity level
+	#[structopt(short, long, default_value = "0")]
+	pub verbosity: u32,
 
-	/// Lookahead depth for white
-	#[structopt(long, default_value = "2")]
-	pub w_depth: u32,
-
-	/// Lookahead depth for black
-	#[structopt(long, default_value = "2")]
-	pub b_depth: u32,
+	/// Search depth
+	#[structopt(short, long, default_value = "4")]
+	pub depth: u32,
 }
 
-fn main() {
-	let args = Args::from_args();
-	match play_game(&args) {
-		Some(winner) => println!("{} wins", winner),
-		None => println!("stalemate"),
+impl Opts {
+	// is the verbosity at least `level`?
+	fn v(&self, level: u32) -> bool {
+		self.verbosity >= level
 	}
 }
+fn main() {
+	let opts = Opts::from_args();
 
-fn play_game(args: &Args) -> Option<Color> {
-	let mut board: BitBoard = starting_position();
+	let mut board = Board::starting_position();
+
+	let mut rng = StdRng::seed_from_u64(opts.seed);
+
+	let engine = ParAlphaBeta::new(opts.depth, heuristic1);
 
 	print_ansi(&board, &Set::default());
-
-	let mut total_time = [Duration::ZERO, Duration::ZERO];
-
-	let mut player = White;
-	let mut rng = StdRng::seed_from_u64(args.seed);
-	for ply in 0..(2 * args.max_turns) {
-		println!("Ply {}", ply + 1);
-
-		let start = Instant::now();
-		board = match player {
-			White => take_turn(&mut rng, board, player, args),
-			Black => take_turn(&mut rng, board, player, args),
-		};
-		total_time[player.index()] += start.elapsed();
+	loop {
+		let mv = play_human(&board, White).expect("White resigns");
+		board = board.with_move(mv);
+		print_ansi(&board, &[mv.from, mv.to].into_iter().collect());
 
 		if let Some(winner) = winner(&board) {
-			return Some(winner);
-		}
-		if board.is_check(player) {
-			println!("{} checked their self", player);
-			return Some(player.opposite());
+			println!("{} wins", winner);
+			break;
 		}
 
-		player = player.opposite();
+		let start = Instant::now();
+		let mv = play_machine(&mut rng, &engine, &board, Black).expect("Black resigns");
+		let ms = start.elapsed().as_secs_f32() * 1e3;
+		println!("Black> {} ({:.1}ms)", annotate_move(&board, mv), ms);
+		board = board.with_move(mv);
+		print_ansi(&board, &[mv.from, mv.to].into_iter().collect());
 
-		println!(
-			"Wall time: White: {}ms, Black: {}ms",
-			total_time[White.index()].as_millis(),
-			total_time[Black.index()].as_millis()
-		);
+		if let Some(winner) = winner(&board) {
+			println!("{} wins", winner);
+			break;
+		}
 	}
-	None
 }
 
-fn take_turn(rng: &mut StdRng, board: BitBoard, player: Color, args: &Args) -> BitBoard {
-	let start = Instant::now();
+fn play_human(board: &Board, color: Color) -> Option<Move> {
+	loop {
+		print!("{}> ", color);
+		io::stdout().flush().expect("stdio error");
+		let allowed = board //
+			.iter_moves(color)
+			.collect::<Vec<_>>();
 
-	//let mv_value = evaluate_moves(&board, player, f);
-	let depth = match player {
-		White => args.w_depth,
-		Black => args.b_depth,
-	};
-	let (mv, value) = alphabeta_(&board, player, &basic_value, -2*INF, 2*INF, depth);
+		let mut line = String::new();
+		io::stdin().read_line(&mut line).expect("read from stdin");
+		let line = line.trim();
 
-	let elapsed = start.elapsed();
-	let mv = mv.expect("at least one valid move");
+		let have = allowed //
+			.iter()
+			.copied()
+			.filter(|mv| mv.to_string().contains(line))
+			.collect::<Vec<_>>();
 
-	println!(
-		"{:?} plays {} with value {} in {}ms",
-		player,
-		annotate_move(&board, mv),
-		value,
-		elapsed.as_millis()
-	);
-	let board = board.with_move(mv);
-	let mark = [mv.from, mv.to].iter().copied().collect();
-	print_ansi(&board, &mark);
-	println!();
-	board
+		match &have[..] {
+			&[] => println!("invalid move: {}, options: {:?}", &line, &allowed),
+			&[mv] => return Some(mv),
+			ambigous => println!("ambiguous move: {}, options: {:?}", &line, ambigous),
+		}
+	}
 }
 
+fn play_machine(rng: &mut StdRng, engine: &dyn Engine, board: &Board, color: Color) -> Option<Move> {
+	pick_best_with_tiebreak(rng, &engine.eval_moves(board, color))
+}
 /// Full chess notation of move `mv`. E.g.:
 ///   p b2c3 xn +
-pub fn annotate_move(board: &impl Board, mv: Move) -> String {
+pub fn annotate_move(board: &Board, mv: Move) -> String {
 	// piece...
 	let mut str = board.at(mv.from).to_string().to_ascii_uppercase();
 
@@ -121,20 +117,11 @@ pub fn annotate_move(board: &impl Board, mv: Move) -> String {
 	str
 }
 
-fn winner(board: &impl Board) -> Option<Color> {
+fn winner(board: &Board) -> Option<Color> {
 	for player in [White, Black] {
 		if is_mate(board, player) {
 			return Some(player.opposite());
 		}
 	}
 	None
-}
-
-fn print_options(board: &impl Board, player: Color, mv_value: &[(Move, i32)]) {
-	let options = mv_value
-		.iter()
-		.map(|(mv, value)| format!("{} ({})", annotate_move(board, *mv), value))
-		.collect::<Vec<_>>()
-		.join(", ");
-	println!("{:?} has options {}", player, options);
 }

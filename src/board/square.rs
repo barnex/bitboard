@@ -49,7 +49,15 @@ impl Square {
 		match self {
 			WPawn | WRook | WKnight | WBisshop | WQueen | WKing => Some(White),
 			BPawn | BRook | BKnight | BBisshop | BQueen | BKing => Some(Black),
-			_ => None,
+			Empty => None,
+		}
+	}
+
+	pub fn sign(self) -> i32 {
+		match self {
+			WPawn | WRook | WKnight | WBisshop | WQueen | WKing => 1,
+			BPawn | BRook | BKnight | BBisshop | BQueen | BKing => -1,
+			Empty => 0,
 		}
 	}
 

@@ -41,6 +41,7 @@ impl Pos {
 	}
 
 	/// Convert row-major index (in range 0..64) to a position.
+	#[inline]
 	pub fn from_index(index: usize) -> Self {
 		debug_assert!(index < 64);
 		let row = (index >> 3) as u8;
@@ -68,7 +69,7 @@ impl Pos {
 
 	/// https://en.wikipedia.org/wiki/Taxicab_geometry.
 	#[inline]
-	pub fn l1_distance_to(self, rhs: Self) -> u8{
+	pub fn l1_distance_to(self, rhs: Self) -> u8 {
 		let delta_r = self.row() as i8 - rhs.col() as i8;
 		let delta_c = self.col() as i8 - rhs.col() as i8;
 		(delta_r.abs() + delta_c.abs()) as u8

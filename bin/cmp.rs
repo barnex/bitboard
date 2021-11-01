@@ -12,7 +12,7 @@ pub struct Opts {
 	pub max_turns: u32,
 
 	/// Number of games to play per match
-	#[structopt(short, long, default_value = "100")]
+	#[structopt(short, long, default_value = "1000")]
 	pub num_games: u32,
 
 	/// Verbosity level
@@ -93,7 +93,7 @@ impl PlayerStats {
 	fn add_win(&mut self, game: &GameStats) {
 		self.total_wins += 1;
 		self.total_plies += game.plies;
-		self.final_material += material_value(&game.board, White);
+		self.final_material += material(&game.board, White);
 	}
 	fn avg_plies(&self) -> f32 {
 		(self.total_plies as f32) / (self.total_wins as f32)
@@ -108,7 +108,7 @@ impl fmt::Display for PlayerStats {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
 		write!(
 			f,
-			"- {:<16}: {:>4} games, {:>5.1} avg ply, {:>+5.1} avg material",
+			"- {:<18}: {:>4} games, {:>5.1} avg ply, {:>+5.1} avg material",
 			self.engine_name,
 			self.total_wins,
 			self.avg_plies(),
@@ -129,7 +129,7 @@ impl fmt::Display for MatchStats {
 struct GameStats {
 	winner: Option<Color>,
 	plies: u32,
-	board: BitBoard,
+	board: Board,
 }
 
 fn play_match(opts: &Opts, engines: &[&dyn Engine; 2], names: [&str; 2]) -> MatchStats {
@@ -149,7 +149,7 @@ fn play_match(opts: &Opts, engines: &[&dyn Engine; 2], names: [&str; 2]) -> Matc
 				i,
 				game_stats.plies,
 				game_stats.winner.map_or("nobody".to_owned(), |c| c.to_string()),
-				material_value(&game_stats.board, White)
+				material(&game_stats.board, White)
 			)
 		}
 		if opts.v(2) {
@@ -159,15 +159,16 @@ fn play_match(opts: &Opts, engines: &[&dyn Engine; 2], names: [&str; 2]) -> Matc
 	match_stats
 }
 
+// TODO: alternate engines between White and Black
 fn play_game(opts: &Opts, seed: u64, engines: &[&dyn Engine; 2]) -> GameStats {
-	let mut board: BitBoard = starting_position();
+	let mut board = Board::starting_position();
 
 	let mut rng = StdRng::seed_from_u64(seed);
 	let mut player = White;
 
 	let max_plies = 2 * opts.max_turns;
 	for ply in 0..=max_plies {
-		let mv = match engines[player.index()].do_move(&mut rng, &board, player) {
+		let mv = match pick_move(&mut rng, &engines[player.index()].eval_moves(&board, player)) {
 			None => {
 				// player has not valid moves or resigns.
 				return GameStats {
@@ -208,7 +209,11 @@ fn play_game(opts: &Opts, seed: u64, engines: &[&dyn Engine; 2]) -> GameStats {
 	}
 }
 
-fn winner(board: &impl Board) -> Option<Color> {
+fn pick_move(rng: &mut StdRng, options: &[(Move, i32)]) -> Option<Move> {
+	pick_randomized_within(rng, options, 3, 500 /*half a pawn*/)
+}
+
+fn winner(board: &Board) -> Option<Color> {
 	for player in [White, Black] {
 		if is_mate(board, player) {
 			return Some(player.opposite());

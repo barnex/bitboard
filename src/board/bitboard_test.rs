@@ -4,8 +4,15 @@ use Color::*;
 use Square::*;
 
 #[test]
+fn test_bitfield_iter() {
+	assert_eq!(iter_bitfield(0b_0).collect::<Vec<_>>(), vec![]);
+	assert_eq!(iter_bitfield(0b_1100001).collect::<Vec<_>>(), vec![0, 5, 6]);
+	assert_eq!(iter_bitfield(1 << 63).collect::<Vec<_>>(), vec![63]);
+}
+
+#[test]
 fn test_iter() {
-	let b = BitBoard::from_str(
+	let b = Board::from_str(
 		r"
 		. . . . . . . .
 		. . . . . . . .
@@ -19,10 +26,10 @@ fn test_iter() {
 	)
 	.unwrap();
 
-	let have = BitBoard::iter(b.black()).collect::<Vec<_>>();
+	let have = Board::iter(b.black()).collect::<Vec<_>>();
 	assert_eq!(have, vec![]);
 
-	let b = BitBoard::from_str(
+	let b = Board::from_str(
 		r"
 		. . . . . . . p
 		. . . . . . . .
@@ -36,13 +43,13 @@ fn test_iter() {
 	)
 	.unwrap();
 
-	let have = BitBoard::iter(b.black()).collect::<Vec<_>>();
+	let have = Board::iter(b.black()).collect::<Vec<_>>();
 	assert_eq!(have, vec![pos(0, 0), pos(3, 4), pos(7, 7)]);
 }
 
 #[test]
 fn test_king_position() {
-	let b = BitBoard::from_str(
+	let b = Board::from_str(
 		r"
 		. . . . . . . k
 		. . . . . . . .
@@ -59,7 +66,7 @@ fn test_king_position() {
 	assert_eq!(b.king_position(White), pos(0, 0));
 	assert_eq!(b.king_position(Black), pos(7, 7));
 
-	let b = BitBoard::from_str(
+	let b = Board::from_str(
 		r"
 		. . . . . . . p
 		. . . . . . . .
@@ -79,7 +86,7 @@ fn test_king_position() {
 
 #[test]
 fn test_check() {
-	let b1 = BitBoard::from_str(
+	let b1 = Board::from_str(
 		r"
 		. . . k . . . .
 		. . . . . . . .
@@ -100,9 +107,9 @@ fn test_check() {
 }
 
 #[test]
-fn reach() {
+fn vector() {
 	test_bits(
-		BitBoard::w_reach,
+		Board::w_attack_vector,
 		r"
 		. . . . . . . .
 		. . . . . . . .
@@ -125,7 +132,7 @@ fn reach() {
 		",
 	);
 	test_bits(
-		BitBoard::w_reach,
+		Board::w_attack_vector,
 		r"
 		. . . . . . . .
 		. . . . . P . .
@@ -229,7 +236,7 @@ fn all_moves() {
 #[test]
 fn king_moves() {
 	test_bits(
-		BitBoard::b_king_moves,
+		Board::b_king_moves,
 		r"
 		k . . . . . . .
 		. p . . . . . .
@@ -252,7 +259,7 @@ fn king_moves() {
 		",
 	);
 	test_bits(
-		BitBoard::b_king_moves,
+		Board::b_king_moves,
 		r"
 		. . . . . . . .
 		. . . . . . . .
@@ -275,7 +282,7 @@ fn king_moves() {
 		",
 	);
 	test_bits(
-		BitBoard::w_king_moves,
+		Board::w_king_moves,
 		r"
 		. . . . . . . .
 		. . . . . . . .
@@ -302,7 +309,7 @@ fn king_moves() {
 #[test]
 fn knight_moves() {
 	test_bits(
-		BitBoard::w_knight_moves,
+		Board::w_knight_moves,
 		r"
 		N . . . . . . .
 		. . . . . . . .
@@ -325,7 +332,7 @@ fn knight_moves() {
 		",
 	);
 	test_bits(
-		BitBoard::b_knight_moves,
+		Board::b_knight_moves,
 		r"
 		. . . . . . . .
 		. . . . . . . .
@@ -352,7 +359,7 @@ fn knight_moves() {
 #[test]
 fn bisshop_moves() {
 	test_bits(
-		BitBoard::b_bisshop_moves,
+		Board::b_bisshop_moves,
 		r"
 		. . . . . . . .
 		. b . . . . p .
@@ -379,7 +386,7 @@ fn bisshop_moves() {
 #[test]
 fn rook_moves() {
 	test_bits(
-		BitBoard::b_rook_moves,
+		Board::b_rook_moves,
 		r"
 		. . . . . . . .
 		. p . . r . . P
@@ -402,7 +409,7 @@ fn rook_moves() {
 		",
 	);
 	test_bits(
-		BitBoard::w_rook_moves,
+		Board::w_rook_moves,
 		r"
 		. . . . . . . .
 		. p . . r . . P
@@ -427,9 +434,9 @@ fn rook_moves() {
 }
 
 #[test]
-fn rook_reach() {
+fn rook_vector() {
 	test_bits(
-		|b| b.rook_reach(b.bits(BRook)),
+		|b| b.rook_vector(b.bits(BRook)),
 		r"
 		. . . . . . . .
 		. . . . . . . .
@@ -452,7 +459,7 @@ fn rook_reach() {
 		",
 	);
 	test_bits(
-		|b| b.rook_reach(b.bits(WRook)),
+		|b| b.rook_vector(b.bits(WRook)),
 		r"
 		. . . . . . R .
 		. . . . . . . .
@@ -551,7 +558,7 @@ fn all_b_pawn_moves() {
 #[test]
 fn b_pawn_move() {
 	test_bits(
-		BitBoard::b_pawn_move,
+		Board::b_pawn_move,
 		r"
 		. . . . . . . .
 		. . . p . . . .
@@ -578,7 +585,7 @@ fn b_pawn_move() {
 #[test]
 fn b_pawn_capture() {
 	test_bits(
-		BitBoard::b_pawn_capture,
+		Board::b_pawn_attack,
 		r"
 		. . . . . . . .
 		. . . p . . . .
@@ -605,7 +612,7 @@ fn b_pawn_capture() {
 #[test]
 fn b_pawn_capture_we() {
 	test_bits(
-		BitBoard::b_pawn_capture_sw,
+		Board::b_pawn_attack_sw,
 		r"
 		. . . . . . . .
 		. . . p . . . .
@@ -632,7 +639,7 @@ fn b_pawn_capture_we() {
 #[test]
 fn b_pawn_capture_se() {
 	test_bits(
-		BitBoard::b_pawn_capture_se,
+		Board::b_pawn_attack_se,
 		r"
 		. . . . . . . .
 		. . . p . . . .
@@ -659,7 +666,7 @@ fn b_pawn_capture_se() {
 #[test]
 fn b_pawn_push() {
 	test_bits(
-		BitBoard::b_pawn_push,
+		Board::b_pawn_push,
 		r"
 		. . . . . . . .
 		p . p . . . p p
@@ -686,7 +693,7 @@ fn b_pawn_push() {
 #[test]
 fn w_pawn_move() {
 	test_bits(
-		BitBoard::w_pawn_move,
+		Board::w_pawn_move,
 		r"
 		P . . . . . . P
 		. . . . . . . .
@@ -713,7 +720,7 @@ fn w_pawn_move() {
 #[test]
 fn w_pawn_capture() {
 	test_bits(
-		BitBoard::w_pawn_capture,
+		Board::w_pawn_attack,
 		r"
 		P . . . . . . P
 		. . . . . . . .
@@ -740,7 +747,7 @@ fn w_pawn_capture() {
 #[test]
 fn w_pawn_capture_nw() {
 	test_bits(
-		BitBoard::w_pawn_capture_nw,
+		Board::w_pawn_attack_nw,
 		r"
 		P . . . . . . P
 		. . . . . . . .
@@ -767,7 +774,7 @@ fn w_pawn_capture_nw() {
 #[test]
 fn w_pawn_capture_ne() {
 	test_bits(
-		BitBoard::w_pawn_capture_ne,
+		Board::w_pawn_attack_ne,
 		r"
 		P . . . . . . P
 		. . . . . . . .
@@ -794,7 +801,7 @@ fn w_pawn_capture_ne() {
 #[test]
 fn w_pawn_push() {
 	test_bits(
-		BitBoard::w_pawn_push,
+		Board::w_pawn_push,
 		r"
 		. . . . . . P .
 		. . . . P . . .
@@ -821,7 +828,7 @@ fn w_pawn_push() {
 #[test]
 fn white_black() {
 	test_bits(
-		BitBoard::white,
+		Board::white,
 		r"
 		r n b k q . . .
 		p . . . . . . .
@@ -844,7 +851,7 @@ fn white_black() {
 		",
 	);
 	test_bits(
-		BitBoard::black,
+		Board::black,
 		r"
 		r n b k q . . .
 		p . . . . . . .
@@ -869,7 +876,7 @@ fn white_black() {
 }
 
 fn test_moves(player: Color, board: &str, want: &[&str]) {
-	let board = BitBoard::from_str(board).unwrap();
+	let board = Board::from_str(board).unwrap();
 	let have = board.collect_moves(player).iter().copied().collect::<Set<_>>();
 	let want = want.iter().map(|s| Move::from_str(s).expect("move: syntax error")).collect::<Set<_>>();
 	if have != want {
@@ -886,8 +893,8 @@ fn test_moves(player: Color, board: &str, want: &[&str]) {
 	}
 }
 
-fn test_bits<F: Fn(&BitBoard) -> u64>(f: F, board: &str, want: &str) {
-	let board = BitBoard::from_str(board).unwrap();
+fn test_bits<F: Fn(&Board) -> u64>(f: F, board: &str, want: &str) {
+	let board = Board::from_str(board).unwrap();
 	let have = as_set(f(&board));
 	let want = parse_positions(want);
 	if have != want {
@@ -911,4 +918,63 @@ fn as_set(bits: u64) -> Set<Pos> {
 		}
 	}
 	set
+}
+
+#[test]
+fn from_str_err() {
+	let b = Board::from_str(
+		r"
+rnbqkbnr
+pppppppp
+........
+........
+........
+PPPPPPPP
+RNBQKBNR
+",
+	);
+	assert!(b.is_err())
+}
+
+#[test]
+fn from_str() {
+	let b = Board::from_str(
+		r"
+rnbqkbnr
+pppppppp
+........
+........
+........
+........
+PPPPPPPP
+RNBQKBNR
+",
+	)
+	.unwrap();
+
+	assert_eq!(b.at(pos(0, 7)), WRook);
+	assert_eq!(b.at(pos(1, 0)), WPawn);
+	assert_eq!(b.at(pos(7, 3)), BQueen);
+}
+
+/// Parse positions marked by `x`.
+/// (whitespace optional)
+///
+/// r n b q k b n r
+/// p p p p p p p p
+/// x . . . . . . .
+/// . x . . . . . x
+/// . . x . . . x .
+/// . . . x P x . .
+/// P P P P x P P P
+/// R N B Q K B N R
+///
+fn parse_positions(s: &str) -> Set<Pos> {
+	parse_charboard(s)
+		.unwrap()
+		.iter()
+		.enumerate()
+		.filter(|(_, &chr)| chr == 'x')
+		.map(|(i, _)| Pos::from_index(i))
+		.collect()
 }

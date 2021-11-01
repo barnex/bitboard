@@ -19,7 +19,7 @@ where
 	str + "  a b c d e f g h"
 }
 
-pub fn print_ansi(board: &impl Board, mark: &Set<Pos>) {
+pub fn print_ansi(board: &Board, mark: &Set<Pos>) {
 	let is_light = |p: Pos| (p.row() + p.col()) % 2 == 0;
 	let color_of = |p: Pos| match (is_light(p), mark.contains(&p)) {
 		(false, false) => DARK,
@@ -39,17 +39,7 @@ pub fn print_ansi(board: &impl Board, mark: &Set<Pos>) {
 
 			print!("{}", RESET);
 			if pos.col() == 0 {
-				print!(
-					"{}{}{}{}{}{}{}{}",
-					FG,
-					color_of(pos),
-					HALF_R,
-					BG,
-					color_of(pos),
-					FG,
-					BLACK,
-					piece
-				);
+				print!("{}{}{}{}{}{}{}{}", FG, color_of(pos), HALF_R, BG, color_of(pos), FG, BLACK, piece);
 			} else {
 				print!(
 					"{}{}{}{}{}{}{}{}{}{}",

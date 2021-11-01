@@ -1,0 +1,5 @@
+#! /bin/bash
+set -e
+
+RUSTFLAGS='-C force-frame-pointers=y -C target-cpu=native' cargo build --bin cli --release
+./target/release/cli $@
