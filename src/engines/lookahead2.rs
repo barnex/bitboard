@@ -6,7 +6,7 @@ pub struct Lookahead2<F>(pub F)
 where
 	F: Fn(&BitBoard, Color) -> i32;
 
-impl<F> Engine for Lookahead2<F>
+impl<F> Lookahead2<F>
 where
 	F: Fn(&BitBoard, Color) -> i32,
 {
@@ -20,5 +20,13 @@ where
 			.map(|board| (self.0)(&board, opp))
 			.max()
 			.unwrap_or(-INF)
+	}
+}
+impl<F> Engine for Lookahead2<F>
+where
+	F: Fn(&BitBoard, Color) -> i32,
+{
+	fn do_move(&self, rng: &mut StdRng, board: &BitBoard, player: Color) -> Option<Move> {
+		search_with_tiebreak(rng, board, player, |board, player| self.evaluate(board, player))
 	}
 }

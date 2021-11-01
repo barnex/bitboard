@@ -18,6 +18,9 @@ pub use lookahead2::*;
 mod lookahead_n;
 pub use lookahead_n::*;
 
+mod alphabeta;
+pub use alphabeta::*;
+
 mod value_functions;
 pub use value_functions::*;
 

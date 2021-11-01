@@ -4,10 +4,6 @@ use super::internal::*;
 pub struct Greedy();
 
 impl Engine for Greedy {
-	fn evaluate(&self, board: &BitBoard, player: Color) -> i32 {
-		material_value(board, player)
-	}
-
 	fn do_move(&self, rng: &mut StdRng, board: &BitBoard, player: Color) -> Option<Move> {
 		// move-value pairs
 		let mut move_value = board
