@@ -67,6 +67,7 @@ fn play_human(board: &Board, color: Color) -> Option<Move> {
 		io::stdout().flush().expect("stdio error");
 		let allowed = board //
 			.iter_moves(color)
+			.filter(|&mv| !board.with_move(mv).is_check(color))
 			.collect::<Vec<_>>();
 
 		let mut line = String::new();
